@@ -1,0 +1,31 @@
+{
+  "name": "tradrl-evidence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./errors": "./errors.ts",
+    "./citations": "./citations.ts",
+    "./chain": "./chain.ts",
+    "./projection": "./projection.ts",
+    "./query": "./query.ts"
+  },
+  "description": "Evidence/provenance projection (W028): the auditability spine — pure projections over a world's journal and its imported information artifacts (W027) + dataset descriptors (W020) that yield the EVIDENCE VIEW: per-event source citations (event id → artifact/dataset/record-digest identity), the deterministic content-addressed projection digest chain (same inputs ⇒ same chain, A9), and a typed query surface (lookups by event, by artifact, by dataset — unknown ids are typed errors, never silent). Never mints facts, never invents citations: an event with no declared source carries the honest no-declared-source marker.",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-world-sim": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "tradrl-data": "workspace:*",
+    "tradrl-information": "workspace:*",
+    "typescript": "^6.0.2"
+  }
+}
