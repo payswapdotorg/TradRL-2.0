@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T20:45:00Z",
+  "updated_at": "2026-10-07T20:36:10Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -512,8 +512,10 @@
         "packages/cognitive-substrate/",
         "contracts/agent/"
       ],
-      "status": "ready",
-      "branch": "work/w033"
+      "status": "merged",
+      "branch": "work/w033",
+      "merged_sha": "7447acc",
+      "pr": 27
     },
     {
       "id": "W034",
@@ -525,7 +527,7 @@
       "write_surface": [
         "packages/possession/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w034"
     },
     {

@@ -654,6 +654,19 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/cognitive-substrate:
+    dependencies:
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../tradrl-world-contracts
+      tradrl-world-sim:
+        specifier: workspace:*
+        version: link:../tradrl-world-sim
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/desktop:
     dependencies:
       '@arms/rum-electron':
