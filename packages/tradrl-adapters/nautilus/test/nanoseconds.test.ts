@@ -75,12 +75,14 @@ test("non-carrier numbers (NaN, Infinity) are rejected loudly — never silently
 });
 
 test("DISCLOSED: an odd int64 ns literal rounds at JS parse — the upstream number-form reality", () => {
-  // 1700448000000000001 cannot exist as a double; the literal ITSELF rounds
+  // 1700448000000000001 cannot exist as a double; the number itself rounds
   // to 1700448000000000000 at parse time (a 256-ulp rounding in the 1.7e18
   // region). The adapter cannot detect this — the disclosure says to export
   // ns columns as STRINGS for full fidelity. This test pins the documented
-  // behavior honestly instead of pretending the adapter catches it.
-  const rounded = epochMsFromNanos(1_700_448_000_000_000_001, "ts_event");
+  // behavior honestly instead of pretending the adapter catches it. (The
+  // literal is spelled via Number("...") — the precision loss is the very
+  // behavior under test, and a direct literal would trip the linter.)
+  const rounded = epochMsFromNanos(Number("1700448000000000001"), "ts_event");
   assert.ok(rounded.ok);
   assert.equal(rounded.ms, T0_MS);
 });
