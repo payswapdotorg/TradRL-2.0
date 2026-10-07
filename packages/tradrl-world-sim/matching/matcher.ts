@@ -391,16 +391,14 @@ export function emitCanceled(
   cancelReason: OrderCanceledPayload["cancelReason"],
 ): void {
   const order = ctx.order(orderId);
-  const remaining =
-    parseScaled(order.quantity) - parseScaled(order.filledQuantity) -
-    restingRemaining(ctx, orderId);
+  const remaining = parseScaled(order.quantity) - parseScaled(order.filledQuantity);
   const payload: OrderCanceledPayload = {
     type: "matching.order.canceled",
     orderId,
     instrumentId: order.instrumentId,
     accountId: order.accountId,
     cancelReason,
-    remainingQuantity: formatQuantity(remaining < 0n ? 0n : remaining),
+    remainingQuantity: formatQuantity(remaining),
   };
   ctx.emit("matching.order.canceled", payload, ctx.ackAvailableAt());
 }
@@ -427,15 +425,14 @@ export function emitOrderRejected(
 /** Emit `matching.order.replaced` (superseded by a successor order). */
 export function emitReplaced(ctx: MatchContext, orderId: OrderId, replacedByOrderId: OrderId): void {
   const order = ctx.order(orderId);
-  const remaining =
-    parseScaled(order.quantity) - parseScaled(order.filledQuantity) - restingRemaining(ctx, orderId);
+  const remaining = parseScaled(order.quantity) - parseScaled(order.filledQuantity);
   const payload: OrderReplacedPayload = {
     type: "matching.order.replaced",
     orderId,
     instrumentId: order.instrumentId,
     accountId: order.accountId,
     replacedByOrderId,
-    remainingQuantity: formatQuantity(remaining < 0n ? 0n : remaining),
+    remainingQuantity: formatQuantity(remaining),
   };
   ctx.emit("matching.order.replaced", payload, ctx.ackAvailableAt());
 }
@@ -480,16 +477,4 @@ export function emitBookDelta(ctx: MatchContext, before: BookState): void {
     operations,
   };
   ctx.emit("market.book.delta", payload, ctx.fillAvailableAt());
-}
-
-function restingRemaining(ctx: MatchContext, orderId: OrderId): Scaled {
-  const side = ctx.order(orderId).side;
-  const levels = side === "buy" ? ctx.book.bids : ctx.book.asks;
-  for (const level of levels) {
-    const entry = level.entries.find((candidate) => candidate.orderId === orderId);
-    if (entry !== undefined) {
-      return entry.remaining;
-    }
-  }
-  return 0n;
 }

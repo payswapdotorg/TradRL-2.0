@@ -25,10 +25,13 @@ import { formatScaled, mulDivHalfUp, parseScaled } from "../orderbook/index.js";
 /** Fee amounts are quantized to 8 fractional digits (canonical text). */
 export const FEE_DECIMALS = 8;
 
-// notional = price × quantity carries 24 fractional digits on the internal
-// scale (12 × 12); fee = notional × bps / 10^4, quantized straight to the
-// 8-digit fee scale in one rounding: price×qty×bps / (10^4 × 10^16).
+// notional = price × quantity lives on the 24-digit product scale
+// (priceScaled × qtyScaled); the fee quantizes straight to the 8-digit fee
+// scale in ONE half-up step: price×qty×bps / (10^4 × 10^16), then the exact
+// 8-scale integer is re-based (×10^4) for the 12-scale formatter — no
+// second rounding anywhere.
 const FEE_DIVISOR = 10n ** 20n;
+const FEE_QUANTUM = 10n ** 4n;
 
 /** Compute the fee for one fill (maker or taker) from the venue schedule. */
 export function fillFee(input: {
@@ -41,13 +44,14 @@ export function fillFee(input: {
 }): FillFee {
   const rateBps = input.liquidity === "maker" ? input.schedule.makerRateBps : input.schedule.takerRateBps;
   const notionalScaled = parseScaled(input.price) * parseScaled(input.quantity);
-  let amountScaled = mulDivHalfUp(notionalScaled, BigInt(Math.trunc(rateBps)), FEE_DIVISOR);
+  let amountScaled8 = mulDivHalfUp(notionalScaled, BigInt(Math.trunc(rateBps)), FEE_DIVISOR);
   if (input.isFirstFillOfOrder && input.schedule.fixedFee !== undefined) {
-    amountScaled += parseScaled(input.schedule.fixedFee);
+    // per-order fixed fee, charged once (first fill), quantized to 8 digits
+    amountScaled8 += mulDivHalfUp(parseScaled(input.schedule.fixedFee), 1n, FEE_QUANTUM);
   }
   return {
     currency: input.currency,
-    amount: formatScaled(amountScaled, FEE_DECIMALS) as Quantity,
+    amount: formatScaled(amountScaled8 * FEE_QUANTUM, FEE_DECIMALS) as Quantity,
     liquidity: input.liquidity,
     rateBps,
   };

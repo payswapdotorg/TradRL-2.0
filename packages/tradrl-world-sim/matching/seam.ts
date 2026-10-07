@@ -119,6 +119,37 @@ function findOrder(ctx: MatchContext, orderId: OrderId) {
   return order;
 }
 
+/**
+ * A13 runtime control the command contract cannot express (cancel/replace
+ * carry no account field): the target order must belong to the issuer's
+ * declared account — a participant may only modify their own orders.
+ */
+function assertOwnership(
+  base: MatchingCommandContext,
+  order: { readonly accountId: string; readonly orderId: OrderId },
+  issuedBy: string,
+): CommandRejection | undefined {
+  const participant = base.definition.participants.find(
+    (candidate) => candidate.participantId === issuedBy,
+  );
+  if (participant === undefined || participant.accountId !== order.accountId) {
+    return {
+      stage: "domain-rules",
+      code: "unauthorized",
+      message: `order ${String(order.orderId)} does not belong to ${String(issuedBy)}'s declared account`,
+    };
+  }
+  return undefined;
+}
+
+function notModifiable(orderId: OrderId, status: string): CommandRejection {
+  return {
+    stage: "domain-rules",
+    code: "order-not-modifiable",
+    message: `order ${String(orderId)} is ${status} and cannot be modified`,
+  };
+}
+
 function submitOrder(
   command: SubmitOrderCommand,
   base: MatchingCommandContext,
@@ -156,15 +187,12 @@ function cancelOrder(
   const ctx = contextFor(command, base, instrumentOf(base, findInstrumentId(base, command.orderId)));
   const before = ctx.book;
   const order = findOrder(ctx, command.orderId);
+  const ownership = assertOwnership(base, order, command.issuedBy);
+  if (ownership !== undefined) {
+    return { kind: "rejected", rejection: ownership };
+  }
   if (order.status === "filled" || order.status === "canceled" || order.status === "rejected" || order.status === "expired" || order.status === "replaced") {
-    return {
-      kind: "rejected",
-      rejection: {
-        stage: "domain-rules",
-        code: "order-not-modifiable",
-        message: `order ${String(command.orderId)} is ${order.status} and cannot be modified`,
-      },
-    };
+    return { kind: "rejected", rejection: notModifiable(command.orderId, order.status) };
   }
   emitCanceled(ctx, command.orderId, "user-request");
   emitBookDelta(ctx, before);
@@ -178,15 +206,12 @@ function replaceOrder(
   const ctx = contextFor(command, base, instrumentOf(base, findInstrumentId(base, command.orderId)));
   const before = ctx.book;
   const order = findOrder(ctx, command.orderId);
+  const ownership = assertOwnership(base, order, command.issuedBy);
+  if (ownership !== undefined) {
+    return { kind: "rejected", rejection: ownership };
+  }
   if (order.status === "filled" || order.status === "canceled" || order.status === "rejected" || order.status === "expired" || order.status === "replaced") {
-    return {
-      kind: "rejected",
-      rejection: {
-        stage: "domain-rules",
-        code: "order-not-modifiable",
-        message: `order ${String(command.orderId)} is ${order.status} and cannot be modified`,
-      },
-    };
+    return { kind: "rejected", rejection: notModifiable(command.orderId, order.status) };
   }
   const successor = successorInputOf(order, command);
   if ("reason" in successor) {
