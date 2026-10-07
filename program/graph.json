@@ -71,7 +71,7 @@
         "packages/tradrl-world-contracts/time/",
         "contracts/world/time/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w004"
     },
     {
@@ -86,7 +86,7 @@
         "packages/ui/src/app-shell/* integration seam",
         "contracts/ui/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w005"
     },
     {
