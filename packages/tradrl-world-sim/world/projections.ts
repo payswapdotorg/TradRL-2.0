@@ -63,7 +63,7 @@ import {
 } from "../account/index.js";
 import { isOpenPosition, projectPosition, projectPortfolio } from "../portfolio/index.js";
 import { projectRiskState } from "../risk/index.js";
-import { NotImplementedInSkeletonError, UnknownWorldEntityError } from "./errors.js";
+import { UnknownWorldEntityError } from "./errors.js";
 import { projectWorldMeta, type WorldDefinition } from "./definition.js";
 import type { SnapshotSummary, WorldState } from "./state.js";
 

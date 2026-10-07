@@ -52,7 +52,7 @@ test("host.describe reports adapter+engine identity and the envelope version", a
   assert.equal(info.journalCursor, 0);
 });
 
-test("dispatch reaches the engine ports: query ok, typed stubs as remote errors", async () => {
+test("dispatch reaches the engine ports: query ok, typed errors as remote errors", async () => {
   const { runtime, emitted } = harness();
   runtime.core.handleClientMessage({
     kind: "request",
@@ -62,9 +62,10 @@ test("dispatch reaches the engine ports: query ok, typed stubs as remote errors"
   runtime.core.handleClientMessage({
     kind: "request",
     requestId: 2,
-    // getQuote is delivered since W017 (a book projection); getPortfolio is
-    // the remaining typed stub this test exercises the remote-error path with
-    call: { port: "query", method: "getPortfolio", args: [] },
+    // getQuote is delivered since W017 (a book projection of the real book);
+    // the remote-error path is exercised with an unknown-entity query — a
+    // typed engine error crossing the adapter boundary, never a fabricated quote
+    call: { port: "query", method: "getQuote", args: ["instrument-unknown"] },
   });
   await new Promise((resolve) => setTimeout(resolve, 0));
   const metaResponse = emitted.find((m) => m.kind === "response" && m.requestId === 1);
@@ -78,8 +79,8 @@ test("dispatch reaches the engine ports: query ok, typed stubs as remote errors"
   assert.ok(
     quoteResponse?.kind === "response" &&
       quoteResponse.outcome.status === "error" &&
-      quoteResponse.outcome.error.name === "NotImplementedInSkeletonError",
-    "the W015 stub surfaces as a typed remote error — never a fabricated portfolio",
+      quoteResponse.outcome.error.name === "UnknownWorldEntityError",
+    "an unknown-entity query surfaces as a typed remote error — never a fabricated quote",
   );
 });
 
