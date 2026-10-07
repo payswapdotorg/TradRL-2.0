@@ -29,7 +29,6 @@
  */
 
 import type { WorldCommand, WorldId } from "tradrl-world-contracts";
-import type { TimestampMs } from "tradrl-world-contracts";
 import { readJsonFile } from "./jsonFile.js";
 import { CliError } from "./errors.js";
 
@@ -131,11 +130,11 @@ function validateClockOperation(raw: unknown, entryId: string): ScriptClockOpera
   }
 }
 
-function validateSubmission(raw: unknown, entryId: string): void {
+function validateSubmission(raw: unknown, entryId: string, problems: string[]): void {
   if (!isRecord(raw)) {
-    throw new ScriptInvalid(`entry '${entryId}': submit-order requires a 'submission' object`);
+    problems.push(`entry '${entryId}': submit-order requires a 'submission' object`);
+    return;
   }
-  const problems: string[] = [];
   if (!ORDER_KINDS.has(String(raw.kind))) problems.push("'submission.kind' must be market, limit, stop or stop-limit");
   if (!ORDER_SIDES.has(String(raw.side))) problems.push("'submission.side' must be buy or sell");
   if (!isNonBlankString(raw.quantity)) problems.push("'submission.quantity' must be a non-blank decimal string");
@@ -158,9 +157,6 @@ function validateSubmission(raw: unknown, entryId: string): void {
     if (constraints.reduceOnly !== undefined && typeof constraints.reduceOnly !== "boolean") {
       problems.push("'submission.constraints.reduceOnly' must be boolean when present");
     }
-  }
-  if (problems.length > 0) {
-    throw new ScriptInvalid(`entry '${entryId}': invalid submit-order submission`, problems);
   }
 }
 
@@ -207,6 +203,7 @@ export function validateCommandInput(
   if (kind === "submit-order") {
     if (!isNonBlankString(raw.accountId)) problems.push("submit-order requires 'accountId'");
     if (!isNonBlankString(raw.instrumentId)) problems.push("submit-order requires 'instrumentId'");
+    validateSubmission(raw.submission, entryId, problems);
   }
   if (kind === "cancel-order" || kind === "replace-order") {
     if (!isNonBlankString(raw.orderId)) problems.push(`${kind} requires 'orderId'`);

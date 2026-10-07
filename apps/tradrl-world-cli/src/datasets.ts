@@ -207,7 +207,7 @@ export async function loadDeclaredDatasets(
   definition: WorldDefinition,
 ): Promise<LoadedDatasets> {
   const evidence: DatasetImportEvidence[] = [];
-  let artifacts: InformationArtifact<NewsPayload>[] = [...(definition.informationArtifacts ?? [])];
+  const importedArtifacts: InformationArtifact<NewsPayload>[] = [];
   for (const declaration of declarations) {
     const path = resolve(baseDir, declaration.path);
     const parsed = await readDatasetFile(declaration.id, path);
@@ -251,12 +251,21 @@ export async function loadDeclaredDatasets(
     } catch (error) {
       throw violationLines(error, declaration.id);
     }
-    artifacts = [...artifacts, ...toDefinitionInformationArtifacts(outcome.artifacts)];
+    importedArtifacts.push(...toDefinitionInformationArtifacts(outcome.artifacts));
     evidence.push(informationEvidence(declaration.id, outcome));
   }
+  // The merged definition must stay CANONICALLY IDENTICAL to the authored
+  // one when nothing was imported into it: `informationArtifacts: []` would
+  // be a different value than `undefined` under the definition digest, and a
+  // historical-only import owns no artifacts at all. Attach the merged
+  // surface only when information artifacts actually exist.
+  const hasHandArtifacts = definition.informationArtifacts !== undefined && definition.informationArtifacts.length > 0;
   const mergedDefinition: WorldDefinition =
-    artifacts === definition.informationArtifacts
+    importedArtifacts.length === 0 && !hasHandArtifacts
       ? definition
-      : { ...definition, informationArtifacts: artifacts };
+      : {
+          ...definition,
+          informationArtifacts: [...(definition.informationArtifacts ?? []), ...importedArtifacts],
+        };
   return { mergedDefinition, evidence };
 }

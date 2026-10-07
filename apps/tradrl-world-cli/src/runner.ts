@@ -263,13 +263,13 @@ export function withDigest(
   core: ReportCore,
   command: "run" | "replay",
   invocation: RunReport["invocation"],
-  extraStable?: Record<string, unknown>,
+  extraStable: Record<string, unknown> = {},
 ): RunReport {
   return {
     command,
     ...core,
-    ...(extraStable ?? {}),
-    reportDigest: stableDigest({ command, ...core, ...(extraStable ?? {}) }),
+    ...extraStable,
+    reportDigest: stableDigest({ command, ...core, ...extraStable }),
     invocation,
   };
 }
