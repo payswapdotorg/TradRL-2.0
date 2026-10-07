@@ -27,7 +27,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix --fix-suggestions",
     "typecheck": "tsc -p .",
-    "test": "tsx --test clock/test/*.test.ts world/test/*.test.ts journal/test/*.test.ts orderbook/test/*.test.ts matching/test/*.test.ts snapshot/test/*.test.ts branch/test/*.test.ts generator/test/*.test.ts account/test/*.test.ts portfolio/test/*.test.ts risk/test/*.test.ts adapter/test/*.test.ts"
+    "test": "tsx --test clock/test/*.test.ts world/test/*.test.ts journal/test/*.test.ts orderbook/test/*.test.ts matching/test/*.test.ts snapshot/test/*.test.ts branch/test/*.test.ts generator/test/*.test.ts account/test/*.test.ts portfolio/test/*.test.ts risk/test/*.test.ts adapter/test/*.test.ts counterfactual/test/*.test.ts"
   },
   "devDependencies": {
     "typescript": "^6.0.2"

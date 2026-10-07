@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T22:07:30Z",
+  "updated_at": "2026-10-07T22:13:20Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -402,8 +402,10 @@
       "write_surface": [
         "packages/tradrl-world-sim/counterfactual/"
       ],
-      "status": "ready",
-      "branch": "work/w025"
+      "status": "merged",
+      "branch": "work/w025",
+      "merged_sha": "4bb664a",
+      "pr": 31
     },
     {
       "id": "W026",
