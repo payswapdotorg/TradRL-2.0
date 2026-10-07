@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T05:15:00Z",
+  "updated_at": "2026-10-07T05:30:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -25,7 +25,7 @@
         "spec",
         "docs",
         "scripts",
-        "CI."
+        "CI"
       ],
       "status": "merged",
       "branch": "arch/tradrl-2.0-foundation",
@@ -39,7 +39,7 @@
         "W001"
       ],
       "write_surface": [
-        "spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md."
+        "spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md"
       ],
       "status": "ready",
       "branch": "work/w002"
@@ -52,7 +52,7 @@
       ],
       "write_surface": [
         "packages/tradrl-world-contracts/",
-        "contracts/world/."
+        "contracts/world/"
       ],
       "status": "ready",
       "branch": "work/w003"
@@ -65,7 +65,7 @@
       ],
       "write_surface": [
         "packages/tradrl-world-contracts/time/",
-        "contracts/world/time/."
+        "contracts/world/time/"
       ],
       "status": "blocked",
       "branch": "work/w004"
@@ -80,7 +80,7 @@
       "write_surface": [
         "packages/ui/src/lib/workspaceSidePane*",
         "packages/ui/src/app-shell/* integration seam",
-        "contracts/ui/."
+        "contracts/ui/"
       ],
       "status": "blocked",
       "branch": "work/w005"
@@ -92,7 +92,7 @@
         "W005"
       ],
       "write_surface": [
-        "packages/ui/src/trading-world/."
+        "packages/ui/src/trading-world/"
       ],
       "status": "blocked",
       "branch": "work/w006"
@@ -105,7 +105,7 @@
         "W006"
       ],
       "write_surface": [
-        "packages/ui/src/trading-world/charts/."
+        "packages/ui/src/trading-world/charts/"
       ],
       "status": "blocked",
       "branch": "work/w007"
@@ -118,7 +118,7 @@
         "W006"
       ],
       "write_surface": [
-        "packages/ui/src/trading-world/market/."
+        "packages/ui/src/trading-world/market/"
       ],
       "status": "blocked",
       "branch": "work/w008"
@@ -131,7 +131,7 @@
         "W006"
       ],
       "write_surface": [
-        "packages/ui/src/trading-world/orderbook/."
+        "packages/ui/src/trading-world/orderbook/"
       ],
       "status": "blocked",
       "branch": "work/w009"
@@ -144,7 +144,7 @@
         "W006"
       ],
       "write_surface": [
-        "packages/ui/src/trading-world/orders/."
+        "packages/ui/src/trading-world/orders/"
       ],
       "status": "blocked",
       "branch": "work/w010"
@@ -157,7 +157,7 @@
         "W006"
       ],
       "write_surface": [
-        "packages/ui/src/trading-world/portfolio/."
+        "packages/ui/src/trading-world/portfolio/"
       ],
       "status": "blocked",
       "branch": "work/w011"
@@ -170,7 +170,7 @@
         "W006"
       ],
       "write_surface": [
-        "packages/ui/src/trading-world/simulation/."
+        "packages/ui/src/trading-world/simulation/"
       ],
       "status": "blocked",
       "branch": "work/w012"
@@ -185,7 +185,7 @@
       "write_surface": [
         "packages/tradrl-world-sim/clock",
         "world",
-        "journal."
+        "journal"
       ],
       "status": "blocked",
       "branch": "work/w013"
@@ -198,7 +198,7 @@
       ],
       "write_surface": [
         "packages/tradrl-world-sim/orderbook",
-        "matching."
+        "matching"
       ],
       "status": "blocked",
       "branch": "work/w014"
@@ -212,7 +212,7 @@
       "write_surface": [
         "packages/tradrl-world-sim/account",
         "portfolio",
-        "risk."
+        "risk"
       ],
       "status": "blocked",
       "branch": "work/w015"
@@ -226,7 +226,7 @@
       "write_surface": [
         "packages/tradrl-world-sim/journal",
         "snapshot",
-        "branch."
+        "branch"
       ],
       "status": "blocked",
       "branch": "work/w016"
@@ -239,7 +239,7 @@
         "W014"
       ],
       "write_surface": [
-        "packages/tradrl-world-sim/generator/."
+        "packages/tradrl-world-sim/generator/"
       ],
       "status": "blocked",
       "branch": "work/w017"
@@ -253,7 +253,7 @@
       ],
       "write_surface": [
         "packages/tradrl-world-sim/adapter/",
-        "packages/ui/src/trading-world/runtime/."
+        "packages/ui/src/trading-world/runtime/"
       ],
       "status": "blocked",
       "branch": "work/w018"
@@ -276,7 +276,7 @@
       ],
       "write_surface": [
         "tests/trading-world/",
-        "limited integration seams in packages/ui/src/trading-world/."
+        "limited integration seams in packages/ui/src/trading-world/"
       ],
       "status": "blocked",
       "branch": "work/w019"
@@ -290,7 +290,7 @@
       ],
       "write_surface": [
         "packages/tradrl-data/",
-        "contracts/data/."
+        "contracts/data/"
       ],
       "status": "blocked",
       "branch": "work/w020"
@@ -304,7 +304,7 @@
         "W002"
       ],
       "write_surface": [
-        "packages/tradrl-adapters/nautilus/."
+        "packages/tradrl-adapters/nautilus/"
       ],
       "status": "blocked",
       "branch": "work/w021"
@@ -316,7 +316,7 @@
         "W021"
       ],
       "write_surface": [
-        "packages/tradrl-evaluation/replay/."
+        "packages/tradrl-evaluation/replay/"
       ],
       "status": "blocked",
       "branch": "work/w022"
@@ -330,7 +330,7 @@
       ],
       "write_surface": [
         "packages/tradrl-market-participants/",
-        "contracts/participants/."
+        "contracts/participants/"
       ],
       "status": "blocked",
       "branch": "work/w023"
@@ -343,7 +343,7 @@
         "W002"
       ],
       "write_surface": [
-        "packages/tradrl-adapters/abides/."
+        "packages/tradrl-adapters/abides/"
       ],
       "status": "blocked",
       "branch": "work/w024"
@@ -356,7 +356,7 @@
         "W023"
       ],
       "write_surface": [
-        "packages/tradrl-world-sim/counterfactual/."
+        "packages/tradrl-world-sim/counterfactual/"
       ],
       "status": "blocked",
       "branch": "work/w025"
@@ -369,7 +369,7 @@
         "W020"
       ],
       "write_surface": [
-        "packages/tradrl-adapters/crypto/."
+        "packages/tradrl-adapters/crypto/"
       ],
       "status": "blocked",
       "branch": "work/w026"
@@ -382,7 +382,7 @@
         "W020"
       ],
       "write_surface": [
-        "packages/tradrl-information/."
+        "packages/tradrl-information/"
       ],
       "status": "blocked",
       "branch": "work/w027"
@@ -395,7 +395,7 @@
         "W027"
       ],
       "write_surface": [
-        "packages/tradrl-evidence/."
+        "packages/tradrl-evidence/"
       ],
       "status": "blocked",
       "branch": "work/w028"
@@ -408,7 +408,7 @@
         "W019"
       ],
       "write_surface": [
-        "packages/ui/src/trading-world/presets/."
+        "packages/ui/src/trading-world/presets/"
       ],
       "status": "blocked",
       "branch": "work/w029"
@@ -421,7 +421,7 @@
       ],
       "write_surface": [
         "packages/tradrl-world-sim/performance/",
-        "packages/ui/src/trading-world/performance/."
+        "packages/ui/src/trading-world/performance/"
       ],
       "status": "blocked",
       "branch": "work/w030"
@@ -434,7 +434,7 @@
         "W020"
       ],
       "write_surface": [
-        "apps/tradrl-world-cli/."
+        "apps/tradrl-world-cli/"
       ],
       "status": "blocked",
       "branch": "work/w031"
@@ -447,7 +447,7 @@
       ],
       "write_surface": [
         "packages/agent-body/",
-        "contracts/agent/."
+        "contracts/agent/"
       ],
       "status": "blocked",
       "branch": "work/w032"
@@ -460,7 +460,7 @@
       ],
       "write_surface": [
         "packages/cognitive-substrate/",
-        "contracts/agent/."
+        "contracts/agent/"
       ],
       "status": "blocked",
       "branch": "work/w033"
@@ -473,7 +473,7 @@
         "W033"
       ],
       "write_surface": [
-        "packages/possession/."
+        "packages/possession/"
       ],
       "status": "blocked",
       "branch": "work/w034"
@@ -487,7 +487,7 @@
         "W034"
       ],
       "write_surface": [
-        "packages/agent-world-protocol/."
+        "packages/agent-world-protocol/"
       ],
       "status": "blocked",
       "branch": "work/w035"
@@ -500,7 +500,7 @@
         "W035"
       ],
       "write_surface": [
-        "packages/learning-objectives/."
+        "packages/learning-objectives/"
       ],
       "status": "blocked",
       "branch": "work/w036"
@@ -514,7 +514,7 @@
       ],
       "write_surface": [
         "packages/trajectory/",
-        "packages/experiments/."
+        "packages/experiments/"
       ],
       "status": "blocked",
       "branch": "work/w037"
@@ -530,7 +530,7 @@
       ],
       "write_surface": [
         "packages/evaluation/",
-        "packages/verification/."
+        "packages/verification/"
       ],
       "status": "blocked",
       "branch": "work/w038"
@@ -545,7 +545,7 @@
       ],
       "write_surface": [
         "packages/organization/",
-        "services/organization-compiler/."
+        "services/organization-compiler/"
       ],
       "status": "blocked",
       "branch": "work/w039"
@@ -559,7 +559,7 @@
         "W039"
       ],
       "write_surface": [
-        "packages/capability-registry/."
+        "packages/capability-registry/"
       ],
       "status": "blocked",
       "branch": "work/w040"
@@ -575,7 +575,7 @@
       ],
       "write_surface": [
         "packages/skills/",
-        "services/body-forge/."
+        "services/body-forge/"
       ],
       "status": "blocked",
       "branch": "work/w041"
@@ -589,7 +589,7 @@
       ],
       "write_surface": [
         "services/model-selection/",
-        "benchmarks/model-capability/."
+        "benchmarks/model-capability/"
       ],
       "status": "blocked",
       "branch": "work/w042"
@@ -603,7 +603,7 @@
         "W042"
       ],
       "write_surface": [
-        "services/body-forge/commissioning/."
+        "services/body-forge/commissioning/"
       ],
       "status": "blocked",
       "branch": "work/w043"
@@ -617,7 +617,7 @@
         "W043"
       ],
       "write_surface": [
-        "services/world-agent-runtime/."
+        "services/world-agent-runtime/"
       ],
       "status": "blocked",
       "branch": "work/w044"
@@ -631,7 +631,7 @@
         "W044"
       ],
       "write_surface": [
-        "services/populations/."
+        "services/populations/"
       ],
       "status": "blocked",
       "branch": "work/w045"
@@ -645,7 +645,7 @@
       ],
       "write_surface": [
         "services/learning/curriculum/",
-        "services/learning/populations/."
+        "services/learning/populations/"
       ],
       "status": "blocked",
       "branch": "work/w046"
@@ -660,7 +660,7 @@
       ],
       "write_surface": [
         "packages/rl-protocol/",
-        "services/learning/rl/."
+        "services/learning/rl/"
       ],
       "status": "blocked",
       "branch": "work/w047"
@@ -673,7 +673,7 @@
         "W045"
       ],
       "write_surface": [
-        "services/learning/compute/."
+        "services/learning/compute/"
       ],
       "status": "blocked",
       "branch": "work/w048"
@@ -687,7 +687,7 @@
         "W002"
       ],
       "write_surface": [
-        "packages/tradrl-adapters/jax-lob/."
+        "packages/tradrl-adapters/jax-lob/"
       ],
       "status": "blocked",
       "branch": "work/w049"
@@ -703,7 +703,7 @@
       ],
       "write_surface": [
         "packages/tradrl-time-machine/",
-        "services/time-machine/."
+        "services/time-machine/"
       ],
       "status": "blocked",
       "branch": "work/w050"
@@ -717,7 +717,7 @@
         "W050"
       ],
       "write_surface": [
-        "packages/search-integrity/."
+        "packages/search-integrity/"
       ],
       "status": "blocked",
       "branch": "work/w051"
@@ -731,7 +731,7 @@
         "W051"
       ],
       "write_surface": [
-        "packages/evaluation-splits/."
+        "packages/evaluation-splits/"
       ],
       "status": "blocked",
       "branch": "work/w052"
@@ -745,7 +745,7 @@
         "W052"
       ],
       "write_surface": [
-        "services/outcome-learning/."
+        "services/outcome-learning/"
       ],
       "status": "blocked",
       "branch": "work/w053"
@@ -760,7 +760,7 @@
       ],
       "write_surface": [
         "services/firm-brain/",
-        "packages/memory/."
+        "packages/memory/"
       ],
       "status": "blocked",
       "branch": "work/w054"
@@ -776,7 +776,7 @@
         "W054"
       ],
       "write_surface": [
-        "services/autonomous-learning/."
+        "services/autonomous-learning/"
       ],
       "status": "blocked",
       "branch": "work/w055"
@@ -790,7 +790,7 @@
       ],
       "write_surface": [
         "packages/capability-provider/",
-        "contracts/capability/."
+        "contracts/capability/"
       ],
       "status": "blocked",
       "branch": "work/w056"
@@ -803,7 +803,7 @@
         "W002"
       ],
       "write_surface": [
-        "packages/tradrl-adapters/arena/."
+        "packages/tradrl-adapters/arena/"
       ],
       "status": "blocked",
       "branch": "work/w057"
@@ -818,7 +818,7 @@
       ],
       "write_surface": [
         "packages/marketplace/",
-        "packages/entitlements/."
+        "packages/entitlements/"
       ],
       "status": "blocked",
       "branch": "work/w058"
@@ -834,7 +834,7 @@
       ],
       "write_surface": [
         "services/api/",
-        "packages/sdk/."
+        "packages/sdk/"
       ],
       "status": "blocked",
       "branch": "work/w059"
@@ -849,7 +849,7 @@
       ],
       "write_surface": [
         "packages/security/",
-        "services/security/."
+        "services/security/"
       ],
       "status": "blocked",
       "branch": "work/w060"
@@ -864,7 +864,7 @@
       ],
       "write_surface": [
         "packages/observability/",
-        "services/operations/."
+        "services/operations/"
       ],
       "status": "blocked",
       "branch": "work/w061"
@@ -880,7 +880,7 @@
       "write_surface": [
         "deploy/",
         "ops/",
-        "tests/performance/."
+        "tests/performance/"
       ],
       "status": "blocked",
       "branch": "work/w062"
@@ -897,7 +897,7 @@
       ],
       "write_surface": [
         "research/benchmarks/",
-        "docs/benchmarks/."
+        "docs/benchmarks/"
       ],
       "status": "blocked",
       "branch": "work/w063"
@@ -918,7 +918,7 @@
       ],
       "write_surface": [
         "examples/reference-trading/",
-        "tests/e2e/."
+        "tests/e2e/"
       ],
       "status": "blocked",
       "branch": "work/w064"
@@ -934,7 +934,7 @@
       ],
       "write_surface": [
         "packages/tradrl-adapters/broker/",
-        "services/shadow/."
+        "services/shadow/"
       ],
       "status": "blocked",
       "branch": "work/w065"
@@ -946,7 +946,7 @@
         "W062"
       ],
       "write_surface": [
-        "product identity metadata and identity surfaces only."
+        "product identity metadata and identity surfaces only"
       ],
       "status": "blocked",
       "branch": "work/w066"
