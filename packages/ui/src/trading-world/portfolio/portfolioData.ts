@@ -73,8 +73,8 @@ export interface PositionRowModel {
   /** Signed quantity text as projected (positive long, negative short). */
   readonly quantityText: string;
   readonly entryText: string;
-  /** Mark text, or undefined when the projection carries no mark (honest). */
-  readonly markText: string | undefined;
+  /** Mark text; absent when the projection carries no mark (honest). */
+  readonly markText?: string;
   /** Signed unrealized P&L text (exact decimal, e.g. "-2.5"). */
   readonly unrealizedText: string;
   /** Lifetime realized P&L of this instrument ledger (signed text). */
@@ -199,7 +199,7 @@ function deriveMargin(
     }
     return {
       leverage,
-      leverageText: `${formatMoneyUnits(leverage)}×`,
+      leverageText: `${leverage.toString()}×`,
       marginUsedText: formatMoneyUnits(model.marginUsed),
       marginAvailableText: formatMoneyUnits(model.marginAvailable),
     };
