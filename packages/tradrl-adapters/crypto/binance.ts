@@ -21,7 +21,7 @@
  *   an invented timestamp.
  */
 
-import type { Quantity, TimestampMs } from "tradrl-world-contracts";
+import type { TimestampMs } from "tradrl-world-contracts";
 import type { HistoricalBarRecord, HistoricalTradeRecord } from "tradrl-world-contracts/data";
 import type {
   CryptoFeedDescriptor,

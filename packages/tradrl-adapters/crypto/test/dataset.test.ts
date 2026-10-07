@@ -30,7 +30,6 @@ import {
 
 const binance = binanceSpotProvider(BINANCE_SYMBOLS);
 const coinbase = coinbaseExchangeProvider(COINBASE_SYMBOLS);
-const klinesFeed = binance.feeds[0]!;
 
 function mappedKlines() {
   const mapping = mapCryptoFeed(binance, "binance.klines", BINANCE_KLINES.payload, {
