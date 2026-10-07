@@ -2,6 +2,7 @@ packages:
   - packages/*
   - packages/tradrl-adapters/*
   - apps/zcode-cli
+  - apps/tradrl-world-cli
   - apps/zcode-cli/packages/*
   - apps/zcode-cli/tools/*
 supportedArchitectures:

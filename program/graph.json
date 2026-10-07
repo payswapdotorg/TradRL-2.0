@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T15:45:00Z",
+  "updated_at": "2026-10-07T20:32:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -312,8 +312,10 @@
         "tests/trading-world/",
         "limited integration seams in packages/ui/src/trading-world/"
       ],
-      "status": "ready",
-      "branch": "work/w019"
+      "status": "merged",
+      "branch": "work/w019",
+      "merged_sha": "bd2b174",
+      "pr": 22
     },
     {
       "id": "W020",
@@ -342,7 +344,7 @@
       "write_surface": [
         "packages/tradrl-adapters/nautilus/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w021"
     },
     {
@@ -368,7 +370,7 @@
         "packages/tradrl-market-participants/",
         "contracts/participants/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w023"
     },
     {
@@ -437,8 +439,10 @@
       "write_surface": [
         "packages/tradrl-evidence/"
       ],
-      "status": "ready",
-      "branch": "work/w028"
+      "status": "merged",
+      "branch": "work/w028",
+      "merged_sha": "701c3e8",
+      "pr": 23
     },
     {
       "id": "W029",
@@ -450,7 +454,7 @@
       "write_surface": [
         "packages/ui/src/trading-world/presets/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w029"
     },
     {
@@ -463,7 +467,7 @@
         "packages/tradrl-world-sim/performance/",
         "packages/ui/src/trading-world/performance/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w030"
     },
     {
@@ -476,8 +480,10 @@
       "write_surface": [
         "apps/tradrl-world-cli/"
       ],
-      "status": "ready",
-      "branch": "work/w031"
+      "status": "merged",
+      "branch": "work/w031",
+      "merged_sha": "2fd8ece",
+      "pr": 24
     },
     {
       "id": "W032",
@@ -489,7 +495,7 @@
         "packages/agent-body/",
         "contracts/agent/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w032"
     },
     {

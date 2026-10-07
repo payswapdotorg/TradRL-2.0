@@ -91,6 +91,25 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  apps/tradrl-world-cli:
+    dependencies:
+      tradrl-data:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-data
+      tradrl-information:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-information
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-world-contracts
+      tradrl-world-sim:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-world-sim
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   apps/zcode-cli:
     dependencies:
       dotenv:
@@ -1047,6 +1066,25 @@ importers:
         specifier: workspace:*
         version: link:../tradrl-world-sim
     devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  packages/tradrl-evidence:
+    dependencies:
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../tradrl-world-contracts
+      tradrl-world-sim:
+        specifier: workspace:*
+        version: link:../tradrl-world-sim
+    devDependencies:
+      tradrl-data:
+        specifier: workspace:*
+        version: link:../tradrl-data
+      tradrl-information:
+        specifier: workspace:*
+        version: link:../tradrl-information
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
