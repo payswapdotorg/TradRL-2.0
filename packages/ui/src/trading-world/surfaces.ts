@@ -20,9 +20,20 @@
 
 import { createTradingWorldCoreToolRegistry } from "./registry/toolRegistry.js";
 import { withChartToolSurface, ChartToolSurface } from "./charts/index.js";
+import { withWatchlistToolSurface } from "./market/index.js";
+import { withOrderBookToolSurfaces } from "./orderbook/index.js";
+import { withOrdersToolSurfaces } from "./orders/index.js";
 
-/** TL wiring (W007 merge): the chart placeholder is now the real surface. */
-export const tradingWorldSurfaceRegistry = withChartToolSurface(
-  createTradingWorldCoreToolRegistry(),
-  ChartToolSurface,
+/**
+ * TL wiring (W007/W008/W009/W010 merges): the chart, watchlist, order-book +
+ * time-and-sales, and order-ticket/working-orders/fills placeholders are now
+ * the real surfaces. Each swap is the owning package's documented one-liner —
+ * this file is the single composition point (W006 law).
+ */
+export const tradingWorldSurfaceRegistry = withOrdersToolSurfaces(
+  withOrderBookToolSurfaces(
+    withWatchlistToolSurface(
+      withChartToolSurface(createTradingWorldCoreToolRegistry(), ChartToolSurface),
+    ),
+  ),
 );
