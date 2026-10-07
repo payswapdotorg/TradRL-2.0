@@ -27,6 +27,7 @@ import type {
   RiskLimits,
   ScenarioDefinition,
   Venue,
+  WorldId,
   WorldMeta,
   WorldMode,
   WorldScope,
@@ -51,7 +52,7 @@ export const SKELETON_KNOWN_LIMITATIONS: readonly string[] = [
   "W014/W015: the reduce-only venue seam is directional (no quantity) — a reduce-only order larger than the opposite position can still flip it",
   "W015: no FX conversion — position P&L in an instrument whose quote currency differs from the account base currency aggregates 1:1",
   "W015: stops are sized at their stop price at submission — a triggered stop executes as market (trigger-time exposure is uncontrolled)",
-  "W013 skeleton: no snapshot/branch engine — snapshot/branch commands are typed not-implemented-in-skeleton rejections (W016)",
+  "W016: snapshot payloads are engine-session artifacts — journal replay rebuilds them from journaled truth, but a bare journal does not carry a branch world's ancestor lineage (the branch record lives on the parent world's journal)",
   "W013 skeleton: no synthetic market generator — no market events are produced by clock advance (W017)",
 ];
 
@@ -280,6 +281,8 @@ export function assertValidWorldDefinition(definition: WorldDefinition): void {
 export function projectWorldMeta(
   definition: WorldDefinition,
   currentScenario: ScenarioDefinition | undefined,
+  /** W016: the parent world id, set for branch worlds (A8 lineage). */
+  parentWorldId?: WorldId,
 ): WorldMeta {
   return {
     worldId: definition.scope.worldId,
@@ -299,6 +302,7 @@ export function projectWorldMeta(
     // stream reproduce the identical journal digest (A9, proven by the
     // golden test). No nondeterministic sources are consulted.
     determinism: { kind: "deterministic" },
+    ...(parentWorldId === undefined ? {} : { parentWorldId }),
     ...(currentScenario === undefined && definition.regimeSchedule === undefined
       ? {}
       : {

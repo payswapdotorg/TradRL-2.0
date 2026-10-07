@@ -46,7 +46,7 @@ export const WORK_ORDER_OF_SURFACE: Readonly<Record<NotImplementedSurface, strin
 /** A referenced world entity that does not exist (query-port read). */
 export class UnknownWorldEntityError extends Error {
   constructor(
-    readonly kind: "instrument" | "account" | "participant",
+    readonly kind: "instrument" | "account" | "participant" | "snapshot",
     readonly id: string,
   ) {
     super(`unknown ${kind}: ${id}`);

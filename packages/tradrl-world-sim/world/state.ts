@@ -22,16 +22,24 @@ import type {
   ParticipantId,
   RegimeScheduleEntry,
   ScenarioDefinition,
+  SequenceNumber,
+  SnapshotId,
   TimestampMs,
   WorldId,
 } from "tradrl-world-contracts";
 import type { JournalRecord } from "../journal/eventJournal.js";
+import type { BranchLineageRecord } from "../branch/lineage.js";
 import { isMatchingStateEventType, initialMatchingState, reduceMatchingEvent } from "../matching/index.js";
 import type { MatchingState } from "../matching/index.js";
 import { initialFinancialState, reduceFinancialEvent, type FinancialState } from "../account/index.js";
 import { ENGINE_ID, ENGINE_VERSION, type WorldDefinition } from "./definition.js";
 import { EngineInvariantError } from "./errors.js";
-import { isAnnotationAddedPayload, isScenarioSetPayload } from "./events.js";
+import {
+  isAnnotationAddedPayload,
+  isBranchCreatedPayload,
+  isScenarioSetPayload,
+  isSnapshotCreatedPayload,
+} from "./events.js";
 
 /** One annotation on the world timeline (added via CommandPort.addAnnotation). */
 export interface WorldAnnotation {
@@ -43,6 +51,20 @@ export interface WorldAnnotation {
   readonly text: string;
   /** Domain time when the annotation event occurred. */
   readonly addedAt: TimestampMs;
+}
+
+/**
+ * Event-derived summary of one snapshot taken in this world (reduced from
+ * `world.snapshot.created`; W016). The full restorable payload lives in the
+ * engine's session snapshot store — this slice is what replay rebuilds.
+ */
+export interface SnapshotSummary {
+  readonly snapshotId: SnapshotId;
+  readonly journalCursor: SequenceNumber;
+  readonly digest: string;
+  readonly createdAt: TimestampMs;
+  readonly parentSnapshotId?: SnapshotId;
+  readonly label?: string;
 }
 
 /** The authoritative world state of the engine. */
@@ -59,6 +81,10 @@ export interface WorldState {
    * reduced from the same journaled events (fills and trade prints).
    */
   readonly financial: FinancialState;
+  /** Snapshots taken in this world — event-derived (W016, replay-safe). */
+  readonly snapshots: readonly SnapshotSummary[];
+  /** Branches created FROM this world — event-derived (W016, replay-safe). */
+  readonly branches: readonly BranchLineageRecord[];
 }
 
 /** The initial state derived from a world definition. */
@@ -71,6 +97,8 @@ export function initialWorldState(definition: WorldDefinition): WorldState {
     ackedCommandIds: new Set<CommandId>(),
     matching: initialMatchingState(definition),
     financial: initialFinancialState(definition),
+    snapshots: [],
+    branches: [],
   });
 }
 
@@ -125,6 +153,57 @@ export function reduceWorldEvent(state: WorldState, record: JournalRecord): Worl
       };
       return withAckedCommand(
         Object.freeze({ ...state, currentScenario: scenario }),
+        envelope.causationId as unknown as CommandId,
+      );
+    }
+    case "world.snapshot.created": {
+      // W016: the snapshot REGISTRY is event-derived (replay-safe); the full
+      // restorable payload is captured by the engine/fold from the very same
+      // event (snapshot/restore.ts — the state-so-far IS the snapshot state).
+      if (!isSnapshotCreatedPayload(payload)) {
+        throw new EngineInvariantError(
+          `event ${String(envelope.eventId)}: malformed world.snapshot.created payload`,
+        );
+      }
+      const summary: SnapshotSummary = {
+        snapshotId: payload.snapshotId,
+        journalCursor: payload.journalCursor,
+        digest: payload.digest,
+        createdAt: payload.createdAt,
+        ...(payload.parentSnapshotId === undefined ? {} : { parentSnapshotId: payload.parentSnapshotId }),
+        ...(payload.label === undefined ? {} : { label: payload.label }),
+      };
+      return withAckedCommand(
+        Object.freeze({ ...state, snapshots: [...state.snapshots, summary] }),
+        envelope.causationId as unknown as CommandId,
+      );
+    }
+    case "world.branch.created": {
+      // W016: the branch record is journaled on the PARENT world — its
+      // registry of children is event-derived (replay-safe) and every record
+      // carries the complete lineage facts (parent world id, snapshot digest,
+      // branch point sequence).
+      if (!isBranchCreatedPayload(payload)) {
+        throw new EngineInvariantError(
+          `event ${String(envelope.eventId)}: malformed world.branch.created payload`,
+        );
+      }
+      const branchRecord: BranchLineageRecord = {
+        worldId: payload.branchWorldId,
+        parentWorldId: payload.parentWorldId,
+        sourceSnapshotId: payload.sourceSnapshotId,
+        configuration: payload.configuration,
+        engine: payload.engine,
+        engineVersion: payload.engineVersion,
+        seed: payload.seed,
+        createdViaCommand: payload.createdViaCommand,
+        provenance: { producer: envelope.producer, recordedAt: record.recordedAt },
+        createdAt: payload.createdAt,
+        snapshotDigest: payload.snapshotDigest,
+        branchPointSequence: payload.branchPointSequence,
+      };
+      return withAckedCommand(
+        Object.freeze({ ...state, branches: [...state.branches, branchRecord] }),
         envelope.causationId as unknown as CommandId,
       );
     }

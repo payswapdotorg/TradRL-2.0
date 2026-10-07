@@ -14,7 +14,7 @@
  *   (W013).
  * - ./world/index.js — the world core, command lifecycle and headless
  *   engine exposing the four World Protocol ports (W013, with the W014
- *   order-command seam).
+ *   order-command seam and the W016 snapshot/branch command seams).
  * - ./orderbook/index.js — the authoritative per-instrument limit-order
  *   book (W014): price levels, FIFO queues, halt/reopen, W004 book deltas.
  * - ./matching/index.js — the matching engine (W014): order kinds × TIF ×
@@ -27,6 +27,11 @@
  *   the close-position seam.
  * - ./risk/index.js — the pre-trade risk gate (W015): declared limits,
  *   typed outcomes, breach history, the reduce-only position check.
+ * - ./snapshot/index.js — the snapshot engine (W016): content-addressed
+ *   restorable captures, snapshot command seam, restore fold.
+ * - ./branch/index.js — the branch engine (W016): lineage-complete branch
+ *   records, branch world definitions/genesis, branch command seam.
+ * - ./adapter/index.js — the W018 worker/process adapter.
  *
  * Zero runtime dependencies beyond `tradrl-world-contracts`.
  */
@@ -34,6 +39,8 @@
 export * from "./clock/index.js";
 export * from "./journal/index.js";
 export * from "./world/index.js";
+export * from "./snapshot/index.js";
+export * from "./branch/index.js";
 export * from "./adapter/index.js";
 export * from "./account/index.js";
 export * from "./portfolio/index.js";

@@ -21,13 +21,17 @@ export {
   ENGINE_EVENT_SCHEMA_VERSION,
   WORLD_CORE_PRODUCER,
   isAnnotationAddedPayload,
+  isBranchCreatedPayload,
   isEngineEvent,
   isScenarioSetPayload,
+  isSnapshotCreatedPayload,
   type AnnotationAddedPayload,
+  type BranchCreatedPayload,
   type EngineEvent,
   type EngineEventPayload,
   type EngineEventType,
   type ScenarioSetPayload,
+  type SnapshotCreatedPayload,
 } from "./events.js";
 export {
   CONTRACTS_DEPENDENCY_VERSION,
@@ -44,6 +48,7 @@ export {
   initialWorldState,
   nextAnnotationId,
   reduceWorldEvent,
+  type SnapshotSummary,
   type WorldAnnotation,
   type WorldState,
 } from "./state.js";
@@ -72,6 +77,7 @@ export {
 } from "./projections.js";
 export {
   createHeadlessWorldEngine,
+  type BranchGenesisOptions,
   type EngineRestore,
   type HeadlessWorldEngine,
   type HeadlessWorldEngineOptions,

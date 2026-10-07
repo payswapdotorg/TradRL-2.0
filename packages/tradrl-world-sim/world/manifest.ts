@@ -23,6 +23,7 @@ import type {
   WorldId,
 } from "tradrl-world-contracts";
 import type { SimulationTimeMs } from "tradrl-world-contracts/time";
+import type { BranchLineageRecord } from "../branch/lineage.js";
 import type { EventJournal } from "../journal/eventJournal.js";
 import type { Fnv1aHasher } from "./hashing.js";
 import {
@@ -37,6 +38,10 @@ import { stableDigest } from "./hashing.js";
 export interface ManifestInputs {
   readonly definition: WorldDefinition;
   readonly commandStreamHasher: Fnv1aHasher;
+  /** The world's ancestry chain (W016) — hashed into inputHashes.lineage. */
+  readonly lineage?: readonly BranchLineageRecord[];
+  /** Genesis snapshot digest (W016) — present only for branch worlds. */
+  readonly genesisSnapshotDigest?: string;
 }
 
 /**
@@ -44,9 +49,17 @@ export interface ManifestInputs {
  * canonical digest of the whole definition; `commandStreamHash` covers EVERY
  * command submitted through the CommandPort in order (acknowledged and
  * rejected alike — rejections are deterministic too); wall time never enters.
+ * W016: `inputHashes.lineage` records the branch lineage chain (A8 — the
+ * chain is immutable and part of the run's identity) and
+ * `inputHashes.genesisSnapshot` names the snapshot a BRANCH world was born
+ * from (a branch run is a function of its genesis snapshot, which its own
+ * journal cannot express). A snapshot-RESTORED engine deliberately does NOT
+ * record it — restore is exactly equivalent to full replay, so the manifests
+ * must be identical.
  */
 export function buildDeterminismManifest(inputs: ManifestInputs): DeterminismManifest {
   const { definition, commandStreamHasher } = inputs;
+  const lineage = inputs.lineage ?? [];
   return {
     worldDefinitionVersion: definition.worldDefinitionVersion,
     engine: ENGINE_ID,
@@ -54,6 +67,10 @@ export function buildDeterminismManifest(inputs: ManifestInputs): DeterminismMan
     seed: definition.seed,
     inputHashes: {
       worldDefinition: stableDigest(definition),
+      lineage: stableDigest(lineage),
+      ...(inputs.genesisSnapshotDigest === undefined
+        ? {}
+        : { genesisSnapshot: inputs.genesisSnapshotDigest }),
     },
     dependencyVersions: {
       [ENGINE_ID]: ENGINE_VERSION,
@@ -110,6 +127,8 @@ export function buildHeadlessReport(input: {
   readonly finalSimulationTime: SimulationTimeMs;
   readonly journal: EventJournal;
   readonly financial: HeadlessFinancialSummary;
+  /** The world's ancestry chain (W016) — reported as branchLineage. */
+  readonly lineage?: readonly BranchLineageRecord[];
 }): HeadlessRunReport {
   const digest = input.journal.digest();
   return {
@@ -123,6 +142,6 @@ export function buildHeadlessReport(input: {
     risk: input.financial.risk,
     eventCount: digest.eventCount,
     eventHash: digest.eventChecksum,
-    branchLineage: [],
+    branchLineage: (input.lineage ?? []) as readonly BranchRecord[],
   };
 }

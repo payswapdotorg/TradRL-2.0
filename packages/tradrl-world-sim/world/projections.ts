@@ -11,17 +11,16 @@
  * Spec: spec/ACCEPTANCE-WORLD-ALPHA.md L (evidence: causal events and
  * provenance for every applied command).
  *
- * W015 seam boundary (typed, honest):
+ * W014/W015/W016/W017 seam boundary (typed, honest):
  * - getOrderBook / getTrades / getOrders project the authoritative matching
  *   state (orders, books, trade tape) — W014's engine surface;
  * - getPositions / getPortfolio / getRisk project the authoritative
  *   financial state (positions, P&L, margin, breaches) — W015's engine
  *   surface, exact decimal text, never fabricated (WORLD-PROTOCOL.md "UI
  *   projection law");
- * - getSnapshot (QueryPort) / getQuote still throw
- *   NotImplementedInSkeletonError (W016 / W017);
- * - EvidencePort.getSnapshot returns undefined and getBranchLineage returns
- *   the true empty lineage (snapshots/branches are W016).
+ * - getSnapshot (QueryPort + EvidencePort) and getBranchLineage are REAL
+ *   (W016): the event-derived snapshot registry and the lineage chain;
+ * - getQuote still throws NotImplementedInSkeletonError (W017).
  */
 
 import type {
@@ -30,6 +29,7 @@ import type {
   EvidencePort,
   EventQuery,
   QueryPort,
+  SnapshotDescriptor,
   SnapshotId,
   TimelineSlice,
   WorldEventEnvelope,
@@ -50,6 +50,7 @@ import type { ClockState } from "tradrl-world-contracts/time";
 import { computeInformationBoundary } from "tradrl-world-contracts/time";
 import type { EventJournal } from "../journal/eventJournal.js";
 import type { ClockEventLookup } from "../clock/simulationClock.js";
+import type { BranchLineageRecord } from "../branch/lineage.js";
 import { bookSnapshot } from "../orderbook/index.js";
 import {
   financialLedgerOf,
@@ -60,7 +61,7 @@ import { isOpenPosition, projectPosition, projectPortfolio } from "../portfolio/
 import { projectRiskState } from "../risk/index.js";
 import { NotImplementedInSkeletonError, UnknownWorldEntityError } from "./errors.js";
 import { projectWorldMeta, type WorldDefinition } from "./definition.js";
-import type { WorldState } from "./state.js";
+import type { SnapshotSummary, WorldState } from "./state.js";
 
 /** A read-only slice of the engine the projections see. */
 export interface EngineReadModel {
@@ -68,6 +69,8 @@ export interface EngineReadModel {
   readonly state: WorldState;
   readonly clockState: ClockState;
   readonly journal: EventJournal;
+  /** The world's ancestry chain, engine-carried (W016; empty for roots). */
+  readonly lineage: readonly BranchLineageRecord[];
 }
 
 /** The A7 observation point for every port read: the clock position. */
@@ -101,15 +104,45 @@ function resolveAccountId(read: () => EngineReadModel, accountId?: AccountId): A
   return first.accountId;
 }
 
+/** Project the protocol-level descriptor of one snapshot summary. */
+function snapshotDescriptor(
+  worldId: WorldId,
+  summary: SnapshotSummary,
+): SnapshotDescriptor {
+  return {
+    snapshotId: summary.snapshotId,
+    worldId,
+    ...(summary.parentSnapshotId === undefined ? {} : { parentSnapshotId: summary.parentSnapshotId }),
+    createdAt: summary.createdAt,
+    journalCursor: summary.journalCursor,
+    digest: summary.digest,
+  };
+}
+
 /** Build the QueryPort over a live read model. */
 export function createQueryPort(read: () => EngineReadModel): QueryPort {
   return {
     async getWorldMeta() {
-      const { definition, state } = read();
-      return projectWorldMeta(definition, state.currentScenario);
+      const { definition, state, lineage } = read();
+      const parentWorldId = lineage[lineage.length - 1]?.parentWorldId;
+      return projectWorldMeta(definition, state.currentScenario, parentWorldId);
     },
-    async getSnapshot() {
-      throw new NotImplementedInSkeletonError("snapshot-branch", "QueryPort.getSnapshot");
+    async getSnapshot(snapshotId?) {
+      // W016: REAL — the event-derived snapshot registry projected to the
+      // protocol descriptor. Unknown ids (and a snapshot-less world) fail
+      // closed with the typed entity error.
+      const { definition, state } = read();
+      const summary =
+        snapshotId === undefined
+          ? state.snapshots[state.snapshots.length - 1]
+          : state.snapshots.find((candidate) => candidate.snapshotId === snapshotId);
+      if (summary === undefined) {
+        throw new UnknownWorldEntityError(
+          "snapshot",
+          snapshotId === undefined ? "latest (no snapshot taken yet)" : String(snapshotId),
+        );
+      }
+      return snapshotDescriptor(definition.scope.worldId, summary);
     },
     async getInstrument(instrumentId) {
       const instrument = read().definition.instruments.find(
@@ -295,13 +328,33 @@ export function createEvidencePort(
         recordedAt: record.recordedAt,
       };
     },
-    async getSnapshot(_snapshotId: SnapshotId) {
-      // No snapshot exists in the skeleton (W016); the optional return is
-      // the honest typed answer.
-      return undefined;
+    async getSnapshot(snapshotId: SnapshotId) {
+      // W016: the event-derived snapshot registry — a snapshot this world
+      // never took does not exist (undefined is the honest typed answer).
+      const { definition, state } = read();
+      const summary = state.snapshots.find((candidate) => candidate.snapshotId === snapshotId);
+      return summary === undefined
+        ? undefined
+        : snapshotDescriptor(definition.scope.worldId, summary);
     },
-    async getBranchLineage(_worldId?: WorldId) {
-      // No branches exist in the skeleton (W016); lineage is truly empty.
+    async getBranchLineage(worldId?: WorldId) {
+      // W016: the complete ancestry chain of the requested world as this
+      // engine knows it — the current world (or any ancestor in its chain)
+      // via the engine-carried lineage; a direct child via the event-derived
+      // branch registry (parent's lineage + the child's record). Worlds
+      // outside this engine's lineage tree have no known lineage here: the
+      // empty list is the honest answer (their record lives in THEIR
+      // parent's journal, not this one).
+      const { definition, state, lineage } = read();
+      const target = worldId ?? definition.scope.worldId;
+      const inChain = lineage.findIndex((record) => record.worldId === target);
+      if (inChain >= 0) {
+        return lineage.slice(0, inChain + 1);
+      }
+      const child = state.branches.find((record) => record.worldId === target);
+      if (child !== undefined) {
+        return [...lineage, child];
+      }
       return [];
     },
     async getInformationBoundary(asOf) {

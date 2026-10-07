@@ -91,7 +91,24 @@ test("command results are VALUES (acked or typed rejection), not wire errors", a
   runtime.core.handleClientMessage({
     kind: "request",
     requestId: 2,
-    call: { port: "command", method: "submitOrder", args: [submitOrderCommand()] },
+    // W014 made submit-order real (the old W013 stub rejection is gone); an
+    // off-tick-grid limit price is a REAL domain-rules rejection, which is
+    // exactly the value-not-wire-error case this test pins.
+    call: {
+      port: "command",
+      method: "submitOrder",
+      args: [
+        submitOrderCommand({
+          submission: {
+            kind: "limit",
+            side: "buy",
+            quantity: "1" as never,
+            limitPrice: "4800.30" as never,
+            constraints: { timeInForce: "GTC" },
+          },
+        }),
+      ],
+    },
   });
   // a structurally broken command: the typed validate-stage rejection value
   runtime.core.handleClientMessage({
