@@ -1,0 +1,30 @@
+{
+  "name": "cognitive-substrate",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./contracts": "./contracts.ts",
+    "./decide": "./decide.ts",
+    "./momentum": "./momentum.ts",
+    "./meanReversion": "./meanReversion.ts",
+    "./observedView": "./observedView.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Cognitive Substrate runtime (W033, the agent-body structure pattern): the typed contracts for an agent's MIND — the part that decides. A substrate is a PURE decision function over observed body views (the W032 A7-bounded BodyView + granted content — the only input type) producing a DecisionStream of proposed world commands, each carrying its rationale as data (rule + input signals, never private chain-of-thought) and a declared confidence citing the view's content digest (the W028 chain discipline). Stateless-per-view or a seeded state machine (same views + same seed ⇒ same decisions, A9); fail-closed (content beyond the view grant, future-dated content and unavailable artifacts are typed errors, never silently seen); no direct world access (the substrate proposes, the Body executes — never a port call). Ships the loud validators (observed view, descriptor, decision stream vs the body's embodiment) and two reference minds: a rule-following momentum substrate (declared-state) and a mean-reversion substrate (stateless-per-view), both seeded.",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-world-sim": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
