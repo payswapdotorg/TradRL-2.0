@@ -1,0 +1,11 @@
+{
+  "//": "W019 golden-suite tsconfig (test-side only, never built): mirrors the ui package's `@/` path alias so tsx --test can run the suite from the repository root while importing the real ui sources (which use `@/components/...` internally). The ui package's own tsconfig resolves the alias when tests run from packages/ui (the W005+ convention); this file gives the SAME resolution to tests/trading-world/. No product file references it.",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["es2025", "dom", "dom.iterable"],
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["../../packages/ui/src/*"]
+    }
+  }
+}
