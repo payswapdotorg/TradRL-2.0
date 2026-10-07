@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T12:05:00Z",
+  "updated_at": "2026-10-07T12:40:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -177,8 +177,10 @@
       "write_surface": [
         "packages/ui/src/trading-world/portfolio/"
       ],
-      "status": "ready",
-      "branch": "work/w011"
+      "status": "merged",
+      "branch": "work/w011",
+      "merged_sha": "314c60f",
+      "pr": 17
     },
     {
       "id": "W012",
