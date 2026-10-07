@@ -18,23 +18,40 @@ const required = [
   "spec/WORK-ORDER-TEMPLATE.md",
   "spec/PROJECT-STATE.md",
   "spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md",
+  "spec/ZCODE-INTEGRATION-MAP.md",
+  "program/README.md",
+  "program/DISPATCH-PLAN.md",
+  "program/graph.json",
   "docs/LLM-ARCHITECT-HANDOFF.md",
   "docs/ARCHITECT-QUICKSTART.md",
-  "program/graph.json",
 ];
 for (const path of required) {
-  if (!existsSync(resolve(root, path))) throw new Error(`missing source-of-truth file: ${path}`);
+  if (!existsSync(resolve(root, path))) {
+    throw new Error(`missing source-of-truth file: ${path}`);
+  }
 }
+
 const graph = JSON.parse(readFileSync(resolve(root, "program/graph.json"), "utf8"));
 if (graph.program !== "TradRL-2.0") throw new Error("wrong program id");
-if (graph.policies?.max_concurrent_work_orders !== 3) throw new Error("max concurrency must be 3");
+if (graph.policies?.max_concurrent_work_orders !== 3) {
+  throw new Error("max concurrency must be 3");
+}
+
 const items = graph.items ?? [];
 if (items.length !== 66) throw new Error(`expected 66 work items, got ${items.length}`);
+
 const ids = new Set(items.map((x) => x.id));
-for (const item of items) {
-  for (const dep of item.deps ?? []) if (!ids.has(dep)) throw new Error(`${item.id} depends on unknown ${dep}`);
-}
 const byId = new Map(items.map((x) => [x.id, x]));
+
+for (const item of items) {
+  for (const dep of item.deps ?? []) {
+    if (!ids.has(dep)) throw new Error(`${item.id} depends on unknown ${dep}`);
+  }
+  if (item.status === "merged" && !item.merged_sha) {
+    throw new Error(`${item.id} is merged without merged_sha`);
+  }
+}
+
 const visiting = new Set();
 const visited = new Set();
 function visit(id) {
@@ -46,11 +63,33 @@ function visit(id) {
   visited.add(id);
 }
 for (const item of items) visit(item.id);
+
 const active = items.filter((x) => ["in_progress", "in_review"].includes(x.status));
 if (active.length > 3) throw new Error(`too many active work items: ${active.length}`);
+
 const surfaceOwners = new Map();
-for (const item of active) for (const surface of item.write_surface ?? []) {
-  if (surfaceOwners.has(surface)) throw new Error(`active write-surface collision: ${surface}`);
-  surfaceOwners.set(surface, item.id);
+for (const item of active) {
+  for (const surface of item.write_surface ?? []) {
+    if (surfaceOwners.has(surface)) {
+      throw new Error(`active write-surface collision: ${surface} (${surfaceOwners.get(surface)} vs ${item.id})`);
+    }
+    surfaceOwners.set(surface, item.id);
+  }
 }
-console.log(`TradRL governance OK: ${items.length} work items, ${active.length} active/review, no dependency cycles.`);
+
+const ready = items.filter((item) => {
+  if (item.status !== "ready") return false;
+  return (item.deps ?? []).every((dep) => byId.get(dep)?.status === "merged");
+});
+
+const wronglyBlocked = items.filter((item) =>
+  item.status === "blocked" &&
+  (item.deps ?? []).every((dep) => byId.get(dep)?.status === "merged")
+);
+if (wronglyBlocked.length) {
+  throw new Error(`blocked items have all dependencies merged: ${wronglyBlocked.map((x) => x.id).join(", ")}`);
+}
+
+console.log(
+  `TradRL governance OK: ${items.length} work items; ${ready.length} ready; ${active.length} active/review; no dependency cycles/collisions.`,
+);
