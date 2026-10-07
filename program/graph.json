@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T13:15:00Z",
+  "updated_at": "2026-10-07T13:55:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -326,8 +326,10 @@
         "packages/tradrl-data/",
         "contracts/data/"
       ],
-      "status": "ready",
-      "branch": "work/w020"
+      "status": "merged",
+      "branch": "work/w020",
+      "merged_sha": "f0cab59",
+      "pr": 19
     },
     {
       "id": "W021",
