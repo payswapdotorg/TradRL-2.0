@@ -21,6 +21,7 @@ import {
   closeGitSidePane,
   closeCodeViewerSidePane,
   openWhiteboardSidePane,
+  openTradingWorldSidePane,
   openModelTrajectorySidePane,
   openTerminalSidePane,
   openSubagentSessionSidePane,
@@ -774,6 +775,24 @@ export function useAppPanels(options: {
     workspaceAbsPath,
     workspaceIdentity,
   ]);
+
+  // TL wiring (W005 follow-up, shared surface): open the Trading World pane.
+  // World identity is opaque to the shell — "alpha" is the default World Alpha
+  // instance; layoutProfileId "default" is the trader cockpit profile (W006+).
+  const handleOpenTradingWorld = useCallback(() => {
+    revealSidePaneForCurrentOwner();
+    commitOpenedSidePaneState((current) => {
+      const next = openTradingWorldSidePane(current, {
+        workspaceKey: activeWorkspaceKey,
+        worldId: "alpha",
+        layoutProfileId: "default",
+      });
+      logger.info(
+        `[App] open side pane mode=trading-world workspace=${workspaceAbsPath} world=alpha tabs=${next.tabs.length}`,
+      );
+      return next;
+    });
+  }, [activeWorkspaceKey, commitOpenedSidePaneState, revealSidePaneForCurrentOwner, workspaceAbsPath]);
 
   const handleOpenDeveloperTools = useCallback(() => {
     revealSidePaneForCurrentOwner();
@@ -1586,6 +1605,7 @@ export function useAppPanels(options: {
     handleOpenGit,
     handleOpenTreemapping,
     handleOpenWhiteboard,
+    handleOpenTradingWorld,
     handleOpenDeveloperTools,
     handleOpenTerminalTab,
     handleOpenModelTrajectory,

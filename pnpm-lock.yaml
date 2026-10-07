@@ -1025,6 +1025,12 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/tradrl-world-contracts:
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/ui:
     dependencies:
       '@aiden0z/pptx-renderer':
@@ -16172,11 +16178,11 @@ snapshots:
 
   lodash.merge@4.6.2: {}
 
+  lodash.pickby@4.6.0: {}
+
   lodash.uniqby@4.7.0: {}
 
   lodash@4.18.1: {}
-
-  lodash.pickby@4.6.0: {}
 
   log-symbols@4.1.0:
     dependencies:

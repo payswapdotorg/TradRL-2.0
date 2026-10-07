@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T06:25:00Z",
+  "updated_at": "2026-10-07T07:30:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -71,8 +71,10 @@
         "packages/tradrl-world-contracts/time/",
         "contracts/world/time/"
       ],
-      "status": "ready",
-      "branch": "work/w004"
+      "status": "merged",
+      "branch": "work/w004",
+      "merged_sha": "1e0ba9a",
+      "pr": 4
     },
     {
       "id": "W005",
@@ -86,8 +88,10 @@
         "packages/ui/src/app-shell/* integration seam",
         "contracts/ui/"
       ],
-      "status": "ready",
-      "branch": "work/w005"
+      "status": "merged",
+      "branch": "work/w005",
+      "merged_sha": "a0163b3",
+      "pr": 5
     },
     {
       "id": "W006",
@@ -98,7 +102,7 @@
       "write_surface": [
         "packages/ui/src/trading-world/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w006"
     },
     {
@@ -191,7 +195,7 @@
         "world",
         "journal"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w013"
     },
     {
