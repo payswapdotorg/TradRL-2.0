@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T05:30:00Z",
+  "updated_at": "2026-10-07T06:25:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -41,8 +41,10 @@
       "write_surface": [
         "spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md"
       ],
-      "status": "ready",
-      "branch": "work/w002"
+      "status": "merged",
+      "branch": "work/w002",
+      "merged_sha": "ae5b26c",
+      "pr": 2
     },
     {
       "id": "W003",
@@ -54,8 +56,10 @@
         "packages/tradrl-world-contracts/",
         "contracts/world/"
       ],
-      "status": "ready",
-      "branch": "work/w003"
+      "status": "merged",
+      "branch": "work/w003",
+      "merged_sha": "58ee342",
+      "pr": 3
     },
     {
       "id": "W004",
