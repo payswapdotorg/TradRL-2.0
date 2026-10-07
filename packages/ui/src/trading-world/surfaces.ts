@@ -3,17 +3,7 @@
  *
  * THE single place where W007–W012 tool surfaces are registered over the
  * built-in placeholders. Each owning work order lands its surface package
- * (e.g. `./charts/`) and swaps its placeholder with ONE call here:
- *
- * ```ts
- * import { ChartToolSurface } from "./charts/index.js";
- *
- * export const tradingWorldSurfaceRegistry = createTradingWorldCoreToolRegistry()
- *   .withSurfaceOverride("chart", ChartToolSurface);
- * ```
- *
- * Until then this is the core registry with every W007–W012 tool registered
- * as a clearly-labeled placeholder (`registry/toolRegistry.ts`). The shell
+ * (e.g. `./charts/`) and swaps its placeholder with ONE call here. The shell
  * (`components/TradingWorldShell.tsx`) consumes exactly this registry by
  * default, so surface swaps need no shell edits.
  */
@@ -24,18 +14,23 @@ import { withWatchlistToolSurface } from "./market/index.js";
 import { withOrderBookToolSurfaces } from "./orderbook/index.js";
 import { withOrdersToolSurfaces } from "./orders/index.js";
 import { withPortfolioToolSurfaces } from "./portfolio/index.js";
+import { withSimulationClockToolSurface } from "./simulation/index.js";
 
 /**
- * TL wiring (W007/W008/W009/W010/W011 merges): the chart, watchlist, order-book +
- * time-and-sales, order-ticket/working-orders/fills, and portfolio/positions/risk
- * placeholders are now the real surfaces. Each swap is the owning package's documented one-liner —
- * this file is the single composition point (W006 law).
+ * TL wiring (W007/W008/W009/W010/W011/W012 merges): the chart, watchlist,
+ * order-book + time-and-sales, order-ticket/working-orders/fills,
+ * portfolio/positions/risk, and simulation-clock/timeline placeholders are all
+ * now the real surfaces — every W006 tool slot is live. Each swap is the
+ * owning package's documented one-liner; this file is the single composition
+ * point (W006 law).
  */
-export const tradingWorldSurfaceRegistry = withPortfolioToolSurfaces(
-  withOrdersToolSurfaces(
-    withOrderBookToolSurfaces(
-      withWatchlistToolSurface(
-        withChartToolSurface(createTradingWorldCoreToolRegistry(), ChartToolSurface),
+export const tradingWorldSurfaceRegistry = withSimulationClockToolSurface(
+  withPortfolioToolSurfaces(
+    withOrdersToolSurfaces(
+      withOrderBookToolSurfaces(
+        withWatchlistToolSurface(
+          withChartToolSurface(createTradingWorldCoreToolRegistry(), ChartToolSurface),
+        ),
       ),
     ),
   ),
