@@ -27,10 +27,10 @@
  *    time axis, crosshair subscription for price inspection, price scale
  *    with derived precision.
  *
- * When the TL lands the dependency, the `@ts-expect-error` +
- * `@vite-ignore` directives below become unused and MUST be removed (the
- * compiler enforces the first: a resolving import makes the suppression a
- * hard error) so the bundler statically wires the package.
+ * When the TL lands the dependency, the indirection constant below is
+ * deleted and the call collapses to a plain `await import("lightweight-charts")`
+ * so the bundler statically wires the package and the compiler checks the
+ * real module types.
  */
 
 import type {
@@ -115,6 +115,19 @@ function isLightweightChartsModule(mod: unknown): mod is LightweightChartsModule
 }
 
 /**
+ * Indirect module specifier for the register-verified chart library. Held in
+ * a constant (NOT an inline literal) because bundlers/dev-servers try to
+ * resolve literal bare specifiers inside dynamic imports — vite 8's import
+ * analysis does so even under `@vite-ignore`, failing the module at
+ * TRANSFORM time (HTTP 500, before any runtime catch) while the package is
+ * not a declared dependency. An indirect specifier is left to the runtime,
+ * where the not-yet-declared dependency rejects and the loader's catch
+ * produces the honest fallback. Deleted together with the indirection when
+ * the TL lands the dependency (see the load function below).
+ */
+const CHART_LIBRARY_SPECIFIER = "lightweight-charts";
+
+/**
  * The default renderer loader: resolve `lightweight-charts` if present,
  * honestly report unavailability otherwise. Exported for the seam default
  * (chartRenderer.ts) and for harnesses that obtain the module through a
@@ -124,15 +137,10 @@ function isLightweightChartsModule(mod: unknown): mod is LightweightChartsModule
 export async function loadLightweightChartsRenderer(): Promise<ChartRendererLoadResult> {
   let mod: unknown;
   try {
-    // Literal specifier + @vite-ignore: keeps the bundler from resolving the
-    // not-yet-declared dependency today (raw dynamic import → rejection in
-    // browsers/Node → honest fallback) while making the future dependency
-    // switch a one-directive change. @ts-expect-error: the package is not a
-    // dependency yet — when the TL adds it this suppression becomes an
-    // unused-directive compile error and must be deleted (a build-time
-    // reminder of the dependency action item).
-    // @ts-expect-error lightweight-charts is not a dependency yet — see module header
-    mod = await import(/* @vite-ignore */ "lightweight-charts");
+    // @vite-ignore keeps the (non-analyzable) dynamic import warning-free;
+    // the constant indirection is what defers resolution to the runtime —
+    // see CHART_LIBRARY_SPECIFIER above for the full rationale.
+    mod = await import(/* @vite-ignore */ CHART_LIBRARY_SPECIFIER);
   } catch (error) {
     return {
       status: "chart-library-unavailable",
