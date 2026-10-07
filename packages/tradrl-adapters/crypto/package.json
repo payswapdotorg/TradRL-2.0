@@ -1,0 +1,32 @@
+{
+  "name": "tradrl-adapters-crypto",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./errors": "./errors.ts",
+    "./timestamps": "./timestamps.ts",
+    "./symbols": "./symbols.ts",
+    "./providers": "./providers.ts",
+    "./binance": "./binance.ts",
+    "./coinbase": "./coinbase.ts",
+    "./dataset": "./dataset.ts",
+    "./mapping": "./mapping.ts"
+  },
+  "description": "Crypto provider adapter baseline (W026): provider descriptors for real crypto exchanges (Binance Spot, Coinbase Exchange) with declared symbol mappings, polling/fidelity declarations and per-feed record mappers turning exchange-native public REST record shapes into W020 HistoricalRecord sets + dataset descriptors. Fixture-based — NO live network IO (the live fetch layer is a later work order). Deterministic pure transforms only (A9).",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-data": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
