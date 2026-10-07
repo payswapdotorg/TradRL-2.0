@@ -81,6 +81,9 @@ export function branchGenesisState(input: {
     ackedCommandIds: inherited.ackedCommandIds,
     matching: rescopeMatching(inherited.matching, input.branchWorldId),
     financial: rescopeFinancial(inherited.financial, input.branchWorldId),
+    // W017: the generator slice (regime in force) has no world stamps —
+    // the branch inherits the regime truth of the parent's snapshot cursor.
+    market: inherited.market,
     snapshots: [],
     branches: [],
   } as WorldState);
