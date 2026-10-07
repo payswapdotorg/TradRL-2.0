@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    // Source-exported import surface (the tradrl-data / tradrl-adapters-nautilus
+    // pattern): package.json "exports" point at TypeScript sources, nothing is
+    // emitted as a build artifact. Tests are included so the verification
+    // laws are type-checked too. `rootDir` is deliberately NOT set: the
+    // program pulls in the consumed `tradrl-world-contracts`, `tradrl-data`,
+    // `tradrl-world-sim`, `tradrl-adapters-nautilus` and `tradrl-world-cli`
+    // sources through the package specifiers, which live outside this
+    // package directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}
