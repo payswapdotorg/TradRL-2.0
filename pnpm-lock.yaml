@@ -1141,6 +1141,19 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/tradrl-market-participants:
+    dependencies:
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../tradrl-world-contracts
+    devDependencies:
+      tradrl-world-sim:
+        specifier: workspace:*
+        version: link:../tradrl-world-sim
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/tradrl-world-contracts:
     devDependencies:
       typescript:

@@ -14,7 +14,7 @@
     "./decimal": "./src/decimal.ts",
     "./rng": "./src/rng.ts"
   },
-  "description": "Reactive participant protocol runtime (W023): the deterministic event loop (settled view -> pure decide -> commands through the same CommandPort humans use, FIFO with the engine's own sequencing) plus the reference agents (momentum + mean-reversion) — seeded, threshold-declared, tested against the REAL generated alpha world through the W018 provider. Protocol types: tradrl-world-contracts/src/participantProtocol.ts (the exports entry is a TL registration).",
+  "description": "Reactive participant protocol runtime (W023): the deterministic event loop (settled view -> pure decide -> commands through the same CommandPort humans use, FIFO with the engine's own sequencing) plus the reference agents (momentum + mean-reversion) \u2014 seeded, threshold-declared, tested against the REAL generated alpha world through the W018 provider. Protocol types: tradrl-world-contracts/src/participantProtocol.ts (the exports entry is a TL registration).",
   "dependencies": {
     "tradrl-world-contracts": "workspace:*"
   },
@@ -25,6 +25,7 @@
     "test": "tsx --test test/*.test.ts"
   },
   "devDependencies": {
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "tradrl-world-sim": "workspace:*"
   }
 }

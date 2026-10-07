@@ -20,6 +20,7 @@
     "./information-data": "./src/information-data.ts",
     "./agentBody": "./src/agentBody.ts",
     "./cognitiveSubstrate": "./src/cognitiveSubstrate.ts",
+    "./participantProtocol": "./src/participantProtocol.ts",
     "./market": "./src/market.ts",
     "./data": "./src/data.ts",
     "./world": "./src/world.ts",
