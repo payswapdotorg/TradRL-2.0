@@ -62,9 +62,8 @@ import { EngineInvariantError } from "./errors.js";
 import { runCommandLifecycle } from "./lifecycle.js";
 import {
   buildDeterminismManifest,
+  buildHeadlessFinancialSummary,
   buildHeadlessReport,
-  type HeadlessFinancialSummary,
-  type HeadlessPnlSummary,
   type HeadlessRunReport,
 } from "./manifest.js";
 import { canonicalString, createFnv1aHasher } from "./hashing.js";
@@ -75,14 +74,7 @@ import {
   type EngineReadModel,
 } from "./projections.js";
 import { initialWorldState, reduceWorldEvent, type WorldState } from "./state.js";
-import {
-  financialLedgerOf,
-  financialsOf,
-  projectBalances,
-} from "../account/index.js";
-import { formatSignedMoney, isOpenPosition, projectPosition } from "../portfolio/index.js";
-import { createReduceOnlyCheck, projectRiskState } from "../risk/index.js";
-import type { Money, Position, RiskState } from "tradrl-world-contracts";
+import { createReduceOnlyCheck } from "../risk/index.js";
 
 /**
  * Restore parameters: rebuild an engine from history.
@@ -471,47 +463,6 @@ export function createHeadlessWorldEngine(
     evidence: evidencePort,
   };
 
-  /**
-   * The SIMULATION.md financial summary (balances, positions, P&L, risk) —
-   * deterministic account order (the definition), exact decimal text.
-   */
-  function financialSummary(): HeadlessFinancialSummary {
-    const asOf = clock.state().simulationTime as TimestampMs;
-    const balances: Money[] = [];
-    const positions: Position[] = [];
-    const pnl: HeadlessPnlSummary[] = [];
-    const risk: RiskState[] = [];
-    for (const account of definition.accounts) {
-      const accountId = String(account.accountId);
-      const ledger = financialLedgerOf(state.financial, accountId);
-      balances.push(...projectBalances(ledger));
-      const own = state.financial.portfolio.positions.filter(
-        (record) => String(record.accountId) === accountId,
-      );
-      positions.push(...own.filter(isOpenPosition).map(projectPosition));
-      const financials = financialsOf(state.financial, accountId);
-      const money = (scaled: bigint): Money => ({
-        amount: formatSignedMoney(scaled) as Money["amount"],
-        currency: financials.baseCurrency as Money["currency"],
-      });
-      pnl.push({
-        accountId: account.accountId,
-        realized: money(financials.realizedPnl),
-        unrealized: money(financials.unrealizedPnl),
-        total: money(financials.realizedPnl + financials.unrealizedPnl),
-      });
-      risk.push(
-        projectRiskState({
-          worldId: definition.scope.worldId,
-          accountId: account.accountId,
-          asOf,
-          risk: state.financial.risk,
-        }),
-      );
-    }
-    return { balances, positions, pnl, risk };
-  }
-
   return {
     worldId: definition.scope.worldId,
     protocol,
@@ -536,7 +487,13 @@ export function createHeadlessWorldEngine(
         seed: definition.seed,
         finalSimulationTime: clock.state().simulationTime,
         journal,
-        financial: financialSummary(),
+        // The W015 financial summary (moved to manifest.ts with W016's
+        // snapshot/branch wiring — the 400-line max-lines law).
+        financial: buildHeadlessFinancialSummary({
+          definition,
+          financial: state.financial,
+          asOf: clock.state().simulationTime as TimestampMs,
+        }),
         lineage,
       }),
     getSnapshotPayload: (snapshotId) => snapshotPayloads.get(snapshotId),

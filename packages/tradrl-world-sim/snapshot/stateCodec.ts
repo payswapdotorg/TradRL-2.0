@@ -16,6 +16,7 @@
  */
 
 import type { CommandId, ScenarioDefinition } from "tradrl-world-contracts";
+import type { FinancialState } from "../account/index.js";
 import type { MatchingState } from "../matching/index.js";
 import type { WorldAnnotation, WorldState } from "../world/state.js";
 
@@ -30,6 +31,12 @@ export interface WorldStatePayload {
   readonly currentScenario?: ScenarioDefinition;
   readonly ackedCommandIds: readonly CommandId[];
   readonly matching: MatchingState;
+  /**
+   * The W015 financial slice (ledgers, positions, P&L, risk) — plain data
+   * (Records/arrays/bigints), so a restored engine continues from the exact
+   * account truth the live engine had at the snapshot's cursor.
+   */
+  readonly financial: FinancialState;
 }
 
 /** Serialize the live authoritative state into its snapshot form. */
@@ -39,6 +46,7 @@ export function serializeWorldState(state: WorldState): WorldStatePayload {
     ...(state.currentScenario === undefined ? {} : { currentScenario: state.currentScenario }),
     ackedCommandIds: [...state.ackedCommandIds],
     matching: state.matching,
+    financial: state.financial,
   };
 }
 
@@ -53,6 +61,7 @@ export function hydrateWorldState(payload: WorldStatePayload): WorldState {
     ...(payload.currentScenario === undefined ? {} : { currentScenario: payload.currentScenario }),
     ackedCommandIds: new Set<CommandId>(payload.ackedCommandIds),
     matching: payload.matching,
+    financial: payload.financial,
     // W016 slices: a snapshot's state never carries snapshot/branch registry
     // entries — those are event-derived and arrive with the journal tail.
     snapshots: [],

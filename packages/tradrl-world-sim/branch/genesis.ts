@@ -25,6 +25,7 @@
  */
 
 import type { BranchConfiguration, WorldId } from "tradrl-world-contracts";
+import type { FinancialState } from "../account/index.js";
 import type { MatchingState } from "../matching/index.js";
 import type { WorldState } from "../world/state.js";
 import { hydrateWorldState } from "../snapshot/stateCodec.js";
@@ -38,6 +39,22 @@ function rescopeMatching(matching: MatchingState, worldId: WorldId): MatchingSta
     fills: matching.fills.map((fill) => ({ ...fill, worldId })),
     trades: matching.trades.map((trade) => ({ ...trade, worldId })),
     // books and armedStops carry no world stamps (instrument/order keyed).
+  };
+}
+
+/**
+ * Rescope the inherited financial slice (W015): position records are
+ * world-stamped (like every inherited entity), while the ledgers and the
+ * risk runtime are account-keyed and inherit verbatim — the branch starts
+ * from the parent's exact account truth (balances, realized P&L, breach
+ * history, peak equity).
+ */
+function rescopeFinancial(financial: FinancialState, worldId: WorldId): FinancialState {
+  return {
+    ...financial,
+    portfolio: {
+      positions: financial.portfolio.positions.map((record) => ({ ...record, worldId })),
+    },
   };
 }
 
@@ -63,6 +80,7 @@ export function branchGenesisState(input: {
       : { currentScenario: override ?? inherited.currentScenario }),
     ackedCommandIds: inherited.ackedCommandIds,
     matching: rescopeMatching(inherited.matching, input.branchWorldId),
+    financial: rescopeFinancial(inherited.financial, input.branchWorldId),
     snapshots: [],
     branches: [],
   } as WorldState);
