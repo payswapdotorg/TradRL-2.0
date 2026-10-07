@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T08:20:00Z",
+  "updated_at": "2026-10-07T09:00:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -117,8 +117,10 @@
       "write_surface": [
         "packages/ui/src/trading-world/charts/"
       ],
-      "status": "ready",
-      "branch": "work/w007"
+      "status": "merged",
+      "branch": "work/w007",
+      "merged_sha": "ce97e6c",
+      "pr": 10
     },
     {
       "id": "W008",
@@ -212,8 +214,10 @@
         "packages/tradrl-world-sim/orderbook",
         "matching"
       ],
-      "status": "ready",
-      "branch": "work/w014"
+      "status": "merged",
+      "branch": "work/w014",
+      "merged_sha": "d3c4d7e",
+      "pr": 9
     },
     {
       "id": "W015",
@@ -253,7 +257,7 @@
       "write_surface": [
         "packages/tradrl-world-sim/generator/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w017"
     },
     {
@@ -267,8 +271,10 @@
         "packages/tradrl-world-sim/adapter/",
         "packages/ui/src/trading-world/runtime/"
       ],
-      "status": "ready",
-      "branch": "work/w018"
+      "status": "merged",
+      "branch": "work/w018",
+      "merged_sha": "759a329",
+      "pr": 8
     },
     {
       "id": "W019",
