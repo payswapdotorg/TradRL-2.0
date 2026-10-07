@@ -93,6 +93,7 @@ interface LightweightChartApiLike {
 /** The series api pieces the adapter touches. */
 interface SeriesApiLike {
   setData: (data: readonly Record<string, unknown>[]) => void;
+  priceScale: () => { applyOptions: (options: Record<string, unknown>) => void };
 }
 
 /** Structural validation of the dynamically imported module. */
@@ -128,8 +129,9 @@ export async function loadLightweightChartsRenderer(): Promise<ChartRendererLoad
     // browsers/Node → honest fallback) while making the future dependency
     // switch a one-directive change. @ts-expect-error: the package is not a
     // dependency yet — when the TL adds it this suppression becomes an
-    // unused-directive compile error and must be deleted.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- see block comment
+    // unused-directive compile error and must be deleted (a build-time
+    // reminder of the dependency action item).
+    // @ts-expect-error lightweight-charts is not a dependency yet — see module header
     mod = await import(/* @vite-ignore */ "lightweight-charts");
   } catch (error) {
     return {

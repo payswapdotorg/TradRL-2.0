@@ -40,7 +40,9 @@ import {
 
 test("the default adapter honestly reports unavailability while the package is absent", async () => {
   const result = await loadLightweightChartsRenderer();
-  assert.equal(result.status, "chart-library-unavailable");
+  if (result.status !== "chart-library-unavailable") {
+    assert.fail(`expected chart-library-unavailable, got ${result.status}`);
+  }
   assert.match(result.reason, /lightweight-charts is not installed/);
   assert.match(result.reason, new RegExp(LIGHTWEIGHT_CHARTS_REGISTERED_VERSION));
   assert.match(result.reason, /TL action item/);
@@ -58,7 +60,11 @@ test("loader override seam injects and restores (no registry-file edits needed)"
   assert.notEqual(getChartRendererLoader(), custom);
   setChartRendererLoader(custom);
   assert.equal(getChartRendererLoader(), custom);
-  assert.match((await getChartRendererLoader()()).reason, /injected-loader-reason/);
+  const injected = await getChartRendererLoader()();
+  if (injected.status !== "chart-library-unavailable") {
+    assert.fail(`expected the injected unavailable result, got ${injected.status}`);
+  }
+  assert.match(injected.reason, /injected-loader-reason/);
   setChartRendererLoader(undefined);
   assert.equal(getChartRendererLoader(), loadLightweightChartsRenderer);
 });

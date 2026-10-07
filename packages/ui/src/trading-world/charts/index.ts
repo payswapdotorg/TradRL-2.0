@@ -39,8 +39,8 @@ export {
 export type {
   ChartDataState,
   ChartRendererState,
-  ChartToolSurfaceConfig,
-} from "./ChartToolSurface.js";
+} from "./ChartSurfaceStates.js";
+export type { ChartToolSurfaceConfig } from "./ChartToolSurface.js";
 
 export {
   buildChartSeriesProjection,

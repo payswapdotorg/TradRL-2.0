@@ -20,6 +20,17 @@
  *   chart x-axis is world time (`occurredAt`), never host/wall time.
  */
 
+/**
+ * Structural mirror of the W003 `InstrumentId` opaque brand
+ * (`string & { readonly __brand: "InstrumentId" }` — packages/tradrl-world-
+ * contracts/src/ids.ts). The chart treats instrument identity as an opaque
+ * query key; the mirror keeps the port call sites type-checked against the
+ * real branded signature (a contracts brand change breaks this file at
+ * compile time) without packages/ui importing the contracts package
+ * (W006 `.d.ts` shim rationale).
+ */
+export type ChartInstrumentId = string & { readonly __brand: "InstrumentId" };
+
 /** Typed error for projection input that violates the canonical contracts. */
 export class ChartProjectionDataError extends Error {
   constructor(detail: string) {
