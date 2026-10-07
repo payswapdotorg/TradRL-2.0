@@ -20,3 +20,5 @@ export * from "./execution.js";
 export * from "./account.js";
 export * from "./portfolio.js";
 export * from "./risk.js";
+export * from "./participant.js";
+export * from "./information.js";
