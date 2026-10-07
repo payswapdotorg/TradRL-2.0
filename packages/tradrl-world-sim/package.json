@@ -1,0 +1,20 @@
+{
+  "name": "tradrl-world-sim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "description": "Headless deterministic World engine skeleton (W013): simulation clock, world core + command lifecycle, append-only event journal.",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test clock/test/*.test.ts world/test/*.test.ts journal/test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
