@@ -1,0 +1,958 @@
+{
+  "schema_version": 1,
+  "program": "TradRL-2.0",
+  "updated_at": "2026-10-07T00:00:00Z",
+  "policies": {
+    "max_concurrent_work_orders": 3,
+    "merge_method": "squash",
+    "branch_prefix": "work/",
+    "allowed_statuses": [
+      "blocked",
+      "ready",
+      "in_progress",
+      "in_review",
+      "merged"
+    ]
+  },
+  "items": [
+    {
+      "id": "W001",
+      "title": "Repository TradRL governance/source-of-truth setup",
+      "deps": [],
+      "write_surface": [
+        "root docs",
+        "program",
+        "spec",
+        "docs",
+        "scripts",
+        "CI."
+      ],
+      "status": "in_review",
+      "branch": "work/w001"
+    },
+    {
+      "id": "W002",
+      "title": "Third-party technology/license gate",
+      "deps": [
+        "W001"
+      ],
+      "write_surface": [
+        "spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md."
+      ],
+      "status": "blocked",
+      "branch": "work/w002"
+    },
+    {
+      "id": "W003",
+      "title": "Canonical trading/world domain contracts",
+      "deps": [
+        "W001"
+      ],
+      "write_surface": [
+        "packages/tradrl-world-contracts/",
+        "contracts/world/."
+      ],
+      "status": "blocked",
+      "branch": "work/w003"
+    },
+    {
+      "id": "W004",
+      "title": "Market event/time/information contracts",
+      "deps": [
+        "W003"
+      ],
+      "write_surface": [
+        "packages/tradrl-world-contracts/time/",
+        "contracts/world/time/."
+      ],
+      "status": "blocked",
+      "branch": "work/w004"
+    },
+    {
+      "id": "W005",
+      "title": "Trading World side-pane lifecycle contract",
+      "deps": [
+        "W001",
+        "W003"
+      ],
+      "write_surface": [
+        "packages/ui/src/lib/workspaceSidePane*",
+        "packages/ui/src/app-shell/* integration seam",
+        "contracts/ui/."
+      ],
+      "status": "blocked",
+      "branch": "work/w005"
+    },
+    {
+      "id": "W006",
+      "title": "Trading World shell/tool registry",
+      "deps": [
+        "W005"
+      ],
+      "write_surface": [
+        "packages/ui/src/trading-world/."
+      ],
+      "status": "blocked",
+      "branch": "work/w006"
+    },
+    {
+      "id": "W007",
+      "title": "Chart surface",
+      "deps": [
+        "W003",
+        "W006"
+      ],
+      "write_surface": [
+        "packages/ui/src/trading-world/charts/."
+      ],
+      "status": "blocked",
+      "branch": "work/w007"
+    },
+    {
+      "id": "W008",
+      "title": "Watchlist/market overview",
+      "deps": [
+        "W003",
+        "W006"
+      ],
+      "write_surface": [
+        "packages/ui/src/trading-world/market/."
+      ],
+      "status": "blocked",
+      "branch": "work/w008"
+    },
+    {
+      "id": "W009",
+      "title": "DOM/order-book + Time & Sales",
+      "deps": [
+        "W003",
+        "W006"
+      ],
+      "write_surface": [
+        "packages/ui/src/trading-world/orderbook/."
+      ],
+      "status": "blocked",
+      "branch": "work/w009"
+    },
+    {
+      "id": "W010",
+      "title": "Order ticket/order lifecycle UI",
+      "deps": [
+        "W003",
+        "W006"
+      ],
+      "write_surface": [
+        "packages/ui/src/trading-world/orders/."
+      ],
+      "status": "blocked",
+      "branch": "work/w010"
+    },
+    {
+      "id": "W011",
+      "title": "Portfolio/positions/risk UI",
+      "deps": [
+        "W003",
+        "W006"
+      ],
+      "write_surface": [
+        "packages/ui/src/trading-world/portfolio/."
+      ],
+      "status": "blocked",
+      "branch": "work/w011"
+    },
+    {
+      "id": "W012",
+      "title": "Simulation clock/timeline UI",
+      "deps": [
+        "W004",
+        "W006"
+      ],
+      "write_surface": [
+        "packages/ui/src/trading-world/simulation/."
+      ],
+      "status": "blocked",
+      "branch": "work/w012"
+    },
+    {
+      "id": "W013",
+      "title": "Headless deterministic World engine skeleton",
+      "deps": [
+        "W003",
+        "W004"
+      ],
+      "write_surface": [
+        "packages/tradrl-world-sim/clock",
+        "world",
+        "journal."
+      ],
+      "status": "blocked",
+      "branch": "work/w013"
+    },
+    {
+      "id": "W014",
+      "title": "Order book + matching engine",
+      "deps": [
+        "W013"
+      ],
+      "write_surface": [
+        "packages/tradrl-world-sim/orderbook",
+        "matching."
+      ],
+      "status": "blocked",
+      "branch": "work/w014"
+    },
+    {
+      "id": "W015",
+      "title": "Account/portfolio/risk engine",
+      "deps": [
+        "W013"
+      ],
+      "write_surface": [
+        "packages/tradrl-world-sim/account",
+        "portfolio",
+        "risk."
+      ],
+      "status": "blocked",
+      "branch": "work/w015"
+    },
+    {
+      "id": "W016",
+      "title": "Journal/snapshot/branch engine",
+      "deps": [
+        "W013"
+      ],
+      "write_surface": [
+        "packages/tradrl-world-sim/journal",
+        "snapshot",
+        "branch."
+      ],
+      "status": "blocked",
+      "branch": "work/w016"
+    },
+    {
+      "id": "W017",
+      "title": "Deterministic synthetic market generator",
+      "deps": [
+        "W013",
+        "W014"
+      ],
+      "write_surface": [
+        "packages/tradrl-world-sim/generator/."
+      ],
+      "status": "blocked",
+      "branch": "work/w017"
+    },
+    {
+      "id": "W018",
+      "title": "World Worker adapter + UI transport",
+      "deps": [
+        "W006",
+        "W013"
+      ],
+      "write_surface": [
+        "packages/tradrl-world-sim/adapter/",
+        "packages/ui/src/trading-world/runtime/."
+      ],
+      "status": "blocked",
+      "branch": "work/w018"
+    },
+    {
+      "id": "W019",
+      "title": "World Alpha golden integration suite",
+      "deps": [
+        "W007",
+        "W008",
+        "W009",
+        "W010",
+        "W011",
+        "W012",
+        "W014",
+        "W015",
+        "W016",
+        "W017",
+        "W018"
+      ],
+      "write_surface": [
+        "tests/trading-world/",
+        "limited integration seams in packages/ui/src/trading-world/."
+      ],
+      "status": "blocked",
+      "branch": "work/w019"
+    },
+    {
+      "id": "W020",
+      "title": "Historical dataset/event import",
+      "deps": [
+        "W004",
+        "W016"
+      ],
+      "write_surface": [
+        "packages/tradrl-data/",
+        "contracts/data/."
+      ],
+      "status": "blocked",
+      "branch": "work/w020"
+    },
+    {
+      "id": "W021",
+      "title": "Nautilus high-fidelity replay adapter",
+      "deps": [
+        "W020",
+        "W019",
+        "W002"
+      ],
+      "write_surface": [
+        "packages/tradrl-adapters/nautilus/."
+      ],
+      "status": "blocked",
+      "branch": "work/w021"
+    },
+    {
+      "id": "W022",
+      "title": "Replay fidelity verification",
+      "deps": [
+        "W021"
+      ],
+      "write_surface": [
+        "packages/tradrl-evaluation/replay/."
+      ],
+      "status": "blocked",
+      "branch": "work/w022"
+    },
+    {
+      "id": "W023",
+      "title": "Reactive participant protocol",
+      "deps": [
+        "W004",
+        "W019"
+      ],
+      "write_surface": [
+        "packages/tradrl-market-participants/",
+        "contracts/participants/."
+      ],
+      "status": "blocked",
+      "branch": "work/w023"
+    },
+    {
+      "id": "W024",
+      "title": "ABIDES reactive-market adapter",
+      "deps": [
+        "W023",
+        "W002"
+      ],
+      "write_surface": [
+        "packages/tradrl-adapters/abides/."
+      ],
+      "status": "blocked",
+      "branch": "work/w024"
+    },
+    {
+      "id": "W025",
+      "title": "Counterfactual world framework",
+      "deps": [
+        "W016",
+        "W023"
+      ],
+      "write_surface": [
+        "packages/tradrl-world-sim/counterfactual/."
+      ],
+      "status": "blocked",
+      "branch": "work/w025"
+    },
+    {
+      "id": "W026",
+      "title": "Crypto provider adapter baseline",
+      "deps": [
+        "W002",
+        "W020"
+      ],
+      "write_surface": [
+        "packages/tradrl-adapters/crypto/."
+      ],
+      "status": "blocked",
+      "branch": "work/w026"
+    },
+    {
+      "id": "W027",
+      "title": "Research/news/event information world",
+      "deps": [
+        "W004",
+        "W020"
+      ],
+      "write_surface": [
+        "packages/tradrl-information/."
+      ],
+      "status": "blocked",
+      "branch": "work/w027"
+    },
+    {
+      "id": "W028",
+      "title": "Evidence/provenance projection",
+      "deps": [
+        "W016",
+        "W027"
+      ],
+      "write_surface": [
+        "packages/tradrl-evidence/."
+      ],
+      "status": "blocked",
+      "branch": "work/w028"
+    },
+    {
+      "id": "W029",
+      "title": "Layout presets/workspace profiles",
+      "deps": [
+        "W006",
+        "W019"
+      ],
+      "write_surface": [
+        "packages/ui/src/trading-world/presets/."
+      ],
+      "status": "blocked",
+      "branch": "work/w029"
+    },
+    {
+      "id": "W030",
+      "title": "Streaming performance/projection coalescing",
+      "deps": [
+        "W019"
+      ],
+      "write_surface": [
+        "packages/tradrl-world-sim/performance/",
+        "packages/ui/src/trading-world/performance/."
+      ],
+      "status": "blocked",
+      "branch": "work/w030"
+    },
+    {
+      "id": "W031",
+      "title": "Headless World CLI/replay runner",
+      "deps": [
+        "W016",
+        "W020"
+      ],
+      "write_surface": [
+        "apps/tradrl-world-cli/."
+      ],
+      "status": "blocked",
+      "branch": "work/w031"
+    },
+    {
+      "id": "W032",
+      "title": "Agent Body contracts",
+      "deps": [
+        "W019"
+      ],
+      "write_surface": [
+        "packages/agent-body/",
+        "contracts/agent/."
+      ],
+      "status": "blocked",
+      "branch": "work/w032"
+    },
+    {
+      "id": "W033",
+      "title": "Cognitive Substrate contract",
+      "deps": [
+        "W032"
+      ],
+      "write_surface": [
+        "packages/cognitive-substrate/",
+        "contracts/agent/."
+      ],
+      "status": "blocked",
+      "branch": "work/w033"
+    },
+    {
+      "id": "W034",
+      "title": "Possession/compatibility/lineage",
+      "deps": [
+        "W032",
+        "W033"
+      ],
+      "write_surface": [
+        "packages/possession/."
+      ],
+      "status": "blocked",
+      "branch": "work/w034"
+    },
+    {
+      "id": "W035",
+      "title": "Observation/action protocol",
+      "deps": [
+        "W019",
+        "W032",
+        "W034"
+      ],
+      "write_surface": [
+        "packages/agent-world-protocol/."
+      ],
+      "status": "blocked",
+      "branch": "work/w035"
+    },
+    {
+      "id": "W036",
+      "title": "Reward/constraint evaluation contract",
+      "deps": [
+        "W019",
+        "W035"
+      ],
+      "write_surface": [
+        "packages/learning-objectives/."
+      ],
+      "status": "blocked",
+      "branch": "work/w036"
+    },
+    {
+      "id": "W037",
+      "title": "Trajectory/experiment protocol",
+      "deps": [
+        "W035",
+        "W036"
+      ],
+      "write_surface": [
+        "packages/trajectory/",
+        "packages/experiments/."
+      ],
+      "status": "blocked",
+      "branch": "work/w037"
+    },
+    {
+      "id": "W038",
+      "title": "Evaluation/verification",
+      "deps": [
+        "W022",
+        "W035",
+        "W036",
+        "W037"
+      ],
+      "write_surface": [
+        "packages/evaluation/",
+        "packages/verification/."
+      ],
+      "status": "blocked",
+      "branch": "work/w038"
+    },
+    {
+      "id": "W039",
+      "title": "Organization model/compiler",
+      "deps": [
+        "W034",
+        "W036",
+        "W038"
+      ],
+      "write_surface": [
+        "packages/organization/",
+        "services/organization-compiler/."
+      ],
+      "status": "blocked",
+      "branch": "work/w039"
+    },
+    {
+      "id": "W040",
+      "title": "Capability registry",
+      "deps": [
+        "W033",
+        "W038",
+        "W039"
+      ],
+      "write_surface": [
+        "packages/capability-registry/."
+      ],
+      "status": "blocked",
+      "branch": "work/w040"
+    },
+    {
+      "id": "W041",
+      "title": "Skill extraction/Body Forge",
+      "deps": [
+        "W034",
+        "W037",
+        "W039",
+        "W040"
+      ],
+      "write_surface": [
+        "packages/skills/",
+        "services/body-forge/."
+      ],
+      "status": "blocked",
+      "branch": "work/w041"
+    },
+    {
+      "id": "W042",
+      "title": "Empirical substrate/model selection",
+      "deps": [
+        "W040",
+        "W041"
+      ],
+      "write_surface": [
+        "services/model-selection/",
+        "benchmarks/model-capability/."
+      ],
+      "status": "blocked",
+      "branch": "work/w042"
+    },
+    {
+      "id": "W043",
+      "title": "Autonomous Body commissioning",
+      "deps": [
+        "W039",
+        "W041",
+        "W042"
+      ],
+      "write_surface": [
+        "services/body-forge/commissioning/."
+      ],
+      "status": "blocked",
+      "branch": "work/w043"
+    },
+    {
+      "id": "W044",
+      "title": "Agent/organization binding to World",
+      "deps": [
+        "W035",
+        "W039",
+        "W043"
+      ],
+      "write_surface": [
+        "services/world-agent-runtime/."
+      ],
+      "status": "blocked",
+      "branch": "work/w044"
+    },
+    {
+      "id": "W045",
+      "title": "Multi-agent populations",
+      "deps": [
+        "W023",
+        "W039",
+        "W044"
+      ],
+      "write_surface": [
+        "services/populations/."
+      ],
+      "status": "blocked",
+      "branch": "work/w045"
+    },
+    {
+      "id": "W046",
+      "title": "Curriculum/self-play/adversarial populations",
+      "deps": [
+        "W038",
+        "W045"
+      ],
+      "write_surface": [
+        "services/learning/curriculum/",
+        "services/learning/populations/."
+      ],
+      "status": "blocked",
+      "branch": "work/w046"
+    },
+    {
+      "id": "W047",
+      "title": "RL interface/trainer bridge",
+      "deps": [
+        "W037",
+        "W038",
+        "W044"
+      ],
+      "write_surface": [
+        "packages/rl-protocol/",
+        "services/learning/rl/."
+      ],
+      "status": "blocked",
+      "branch": "work/w047"
+    },
+    {
+      "id": "W048",
+      "title": "Distributed episode generation",
+      "deps": [
+        "W047",
+        "W045"
+      ],
+      "write_surface": [
+        "services/learning/compute/."
+      ],
+      "status": "blocked",
+      "branch": "work/w048"
+    },
+    {
+      "id": "W049",
+      "title": "JAX-LOB training adapter",
+      "deps": [
+        "W047",
+        "W048",
+        "W002"
+      ],
+      "write_surface": [
+        "packages/tradrl-adapters/jax-lob/."
+      ],
+      "status": "blocked",
+      "branch": "work/w049"
+    },
+    {
+      "id": "W050",
+      "title": "Time Machine + point-in-time knowledge firewall",
+      "deps": [
+        "W004",
+        "W022",
+        "W027",
+        "W047"
+      ],
+      "write_surface": [
+        "packages/tradrl-time-machine/",
+        "services/time-machine/."
+      ],
+      "status": "blocked",
+      "branch": "work/w050"
+    },
+    {
+      "id": "W051",
+      "title": "Backtest-overfitting/search integrity",
+      "deps": [
+        "W038",
+        "W047",
+        "W050"
+      ],
+      "write_surface": [
+        "packages/search-integrity/."
+      ],
+      "status": "blocked",
+      "branch": "work/w051"
+    },
+    {
+      "id": "W052",
+      "title": "Walk-forward/regime/asset/venue holdouts",
+      "deps": [
+        "W038",
+        "W050",
+        "W051"
+      ],
+      "write_surface": [
+        "packages/evaluation-splits/."
+      ],
+      "status": "blocked",
+      "branch": "work/w052"
+    },
+    {
+      "id": "W053",
+      "title": "Outcome/post-mortem learning",
+      "deps": [
+        "W038",
+        "W051",
+        "W052"
+      ],
+      "write_surface": [
+        "services/outcome-learning/."
+      ],
+      "status": "blocked",
+      "branch": "work/w053"
+    },
+    {
+      "id": "W054",
+      "title": "Firm Brain",
+      "deps": [
+        "W028",
+        "W038",
+        "W053"
+      ],
+      "write_surface": [
+        "services/firm-brain/",
+        "packages/memory/."
+      ],
+      "status": "blocked",
+      "branch": "work/w054"
+    },
+    {
+      "id": "W055",
+      "title": "Continuous autonomous improvement",
+      "deps": [
+        "W041",
+        "W046",
+        "W051",
+        "W053",
+        "W054"
+      ],
+      "write_surface": [
+        "services/autonomous-learning/."
+      ],
+      "status": "blocked",
+      "branch": "work/w055"
+    },
+    {
+      "id": "W056",
+      "title": "Provider-neutral capability-provider interface",
+      "deps": [
+        "W040",
+        "W041"
+      ],
+      "write_surface": [
+        "packages/capability-provider/",
+        "contracts/capability/."
+      ],
+      "status": "blocked",
+      "branch": "work/w056"
+    },
+    {
+      "id": "W057",
+      "title": "Arena capability-provider adapter",
+      "deps": [
+        "W056",
+        "W002"
+      ],
+      "write_surface": [
+        "packages/tradrl-adapters/arena/."
+      ],
+      "status": "blocked",
+      "branch": "work/w057"
+    },
+    {
+      "id": "W058",
+      "title": "Commercial capability marketplace/entitlements",
+      "deps": [
+        "W056",
+        "W057",
+        "W054"
+      ],
+      "write_surface": [
+        "packages/marketplace/",
+        "packages/entitlements/."
+      ],
+      "status": "blocked",
+      "branch": "work/w058"
+    },
+    {
+      "id": "W059",
+      "title": "Public/private API + SDK",
+      "deps": [
+        "W019",
+        "W028",
+        "W039",
+        "W050"
+      ],
+      "write_surface": [
+        "services/api/",
+        "packages/sdk/."
+      ],
+      "status": "blocked",
+      "branch": "work/w059"
+    },
+    {
+      "id": "W060",
+      "title": "Security/tenancy/secrets/isolation",
+      "deps": [
+        "W059",
+        "W054",
+        "W058"
+      ],
+      "write_surface": [
+        "packages/security/",
+        "services/security/."
+      ],
+      "status": "blocked",
+      "branch": "work/w060"
+    },
+    {
+      "id": "W061",
+      "title": "Observability/audit/operations",
+      "deps": [
+        "W019",
+        "W028",
+        "W059"
+      ],
+      "write_surface": [
+        "packages/observability/",
+        "services/operations/."
+      ],
+      "status": "blocked",
+      "branch": "work/w061"
+    },
+    {
+      "id": "W062",
+      "title": "Production deployment/reliability/performance",
+      "deps": [
+        "W059",
+        "W060",
+        "W061"
+      ],
+      "write_surface": [
+        "deploy/",
+        "ops/",
+        "tests/performance/."
+      ],
+      "status": "blocked",
+      "branch": "work/w062"
+    },
+    {
+      "id": "W063",
+      "title": "Benchmark/evidence publication",
+      "deps": [
+        "W022",
+        "W038",
+        "W051",
+        "W052",
+        "W061"
+      ],
+      "write_surface": [
+        "research/benchmarks/",
+        "docs/benchmarks/."
+      ],
+      "status": "blocked",
+      "branch": "work/w063"
+    },
+    {
+      "id": "W064",
+      "title": "Reference end-to-end trading journey",
+      "deps": [
+        "W043",
+        "W044",
+        "W047",
+        "W050",
+        "W054",
+        "W057",
+        "W059",
+        "W060",
+        "W061"
+      ],
+      "write_surface": [
+        "examples/reference-trading/",
+        "tests/e2e/."
+      ],
+      "status": "blocked",
+      "branch": "work/w064"
+    },
+    {
+      "id": "W065",
+      "title": "Live-mirror/shadow execution adapter",
+      "deps": [
+        "W050",
+        "W059",
+        "W060",
+        "W061"
+      ],
+      "write_surface": [
+        "packages/tradrl-adapters/broker/",
+        "services/shadow/."
+      ],
+      "status": "blocked",
+      "branch": "work/w065"
+    },
+    {
+      "id": "W066",
+      "title": "Product identity/branding migration from ZCode",
+      "deps": [
+        "W062"
+      ],
+      "write_surface": [
+        "product identity metadata and identity surfaces only."
+      ],
+      "status": "blocked",
+      "branch": "work/w066"
+    }
+  ],
+  "notes": [
+    "Repo is sole source of truth.",
+    "One Work Order = one worker = one branch = one PR.",
+    "Bootstrap work corresponds to W001 and is awaiting merge of the architecture foundation branch."
+  ]
+}
