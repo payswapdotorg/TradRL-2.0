@@ -198,16 +198,16 @@ test("the cockpit shell mounts the real chart surface in the Main Chart slot via
   assert.ok(markup.includes("Simulation Clock surface placeholder"));
 });
 
-test("the shell's default registry (W006 composition point) still shows the chart placeholder", () => {
+test("the shell's default registry (W006 composition point) mounts the real chart surface", () => {
   clearSharedCockpitLayoutStores();
   const tab = buildTab("/ws/w007-default");
   getSharedCockpitLayoutStore(
     cockpitLayoutStorageKey("/ws/w007-default", "default"),
     createDefaultTradingWorldCockpitLayout(),
   );
-  // Until the TL applies the one-line surfaces.ts swap (W007 PR action
-  // item), the product composition point keeps the placeholder — the swap
-  // itself is not W007's to land (frozen write surface).
+  // TL wiring (W007 merge follow-up): surfaces.ts now applies
+  // withChartToolSurface — the Main Chart slot renders the real surface,
+  // not the placeholder.
   const markup = ReactDOMServer.renderToStaticMarkup(
     createElement(TradingWorldShell, {
       tab,
@@ -215,6 +215,6 @@ test("the shell's default registry (W006 composition point) still shows the char
       focused: true,
     }),
   );
-  assert.ok(markup.includes("Chart surface placeholder"));
-  assert.ok(!markup.includes('data-trading-world-chart-surface=""'));
+  assert.ok(markup.includes('data-trading-world-chart-surface=""'));
+  assert.ok(!markup.includes("Chart surface placeholder"));
 });

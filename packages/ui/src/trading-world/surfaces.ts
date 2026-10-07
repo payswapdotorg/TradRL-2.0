@@ -19,5 +19,10 @@
  */
 
 import { createTradingWorldCoreToolRegistry } from "./registry/toolRegistry.js";
+import { withChartToolSurface, ChartToolSurface } from "./charts/index.js";
 
-export const tradingWorldSurfaceRegistry = createTradingWorldCoreToolRegistry();
+/** TL wiring (W007 merge): the chart placeholder is now the real surface. */
+export const tradingWorldSurfaceRegistry = withChartToolSurface(
+  createTradingWorldCoreToolRegistry(),
+  ChartToolSurface,
+);

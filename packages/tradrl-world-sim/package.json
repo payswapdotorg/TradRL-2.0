@@ -4,6 +4,15 @@
   "private": true,
   "type": "module",
   "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./clock": "./clock/index.ts",
+    "./journal": "./journal/index.ts",
+    "./world": "./world/index.ts",
+    "./orderbook": "./orderbook/index.ts",
+    "./matching": "./matching/index.ts",
+    "./adapter": "./adapter/index.ts"
+  },
   "description": "Headless deterministic World engine (W013 core, W014 orderbook + matching): simulation clock, world core + command lifecycle, append-only event journal, price-time-priority order book and matching engine.",
   "dependencies": {
     "tradrl-world-contracts": "workspace:*"
@@ -11,7 +20,7 @@
   "scripts": {
     "lint": "oxlint",
     "lint:fix": "oxlint --fix --fix-suggestions",
-    "typecheck": "tsc -p .",
+    "typecheck": "tsc -p ."
   },
   "devDependencies": {
     "typescript": "^6.0.2"

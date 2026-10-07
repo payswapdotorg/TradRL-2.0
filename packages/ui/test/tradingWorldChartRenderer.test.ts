@@ -38,14 +38,15 @@ import {
   loadLightweightChartsRenderer,
 } from "../src/trading-world/charts/lightweightChartsAdapter.js";
 
-test("the default adapter honestly reports unavailability while the package is absent", async () => {
+test("the default adapter resolves the real library now that the TL wiring landed it", async () => {
+  // TL wiring (W007 merge follow-up): lightweight-charts@5.2.1 is a real
+  // dependency of @zcode/ui — the adapter must find it, validate its API
+  // shape, and expose the disclosed library label.
   const result = await loadLightweightChartsRenderer();
-  if (result.status !== "chart-library-unavailable") {
-    assert.fail(`expected chart-library-unavailable, got ${result.status}`);
+  if (result.status !== "available") {
+    assert.fail(`expected available, got ${result.status} (${(result as { reason?: string }).reason ?? "no reason"})`);
   }
-  assert.match(result.reason, /lightweight-charts is not installed/);
-  assert.match(result.reason, new RegExp(LIGHTWEIGHT_CHARTS_REGISTERED_VERSION));
-  assert.match(result.reason, /TL action item/);
+  assert.match(result.libraryLabel, /Lightweight Charts/);
 });
 
 test("the register-pinned version constant is exposed for disclosure", () => {

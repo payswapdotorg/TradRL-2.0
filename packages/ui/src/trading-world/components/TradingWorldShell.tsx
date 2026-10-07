@@ -53,6 +53,8 @@ import {
   type TradingWorldToolRegistry,
 } from "../registry/toolRegistry.js";
 import { tradingWorldSurfaceRegistry } from "../surfaces.js";
+import { useEngineWorldClient } from "../runtime/useEngineWorldClient.js";
+import { createAlphaEngineTransport } from "../runtime/engineAttachment.js";
 import {
   createSimulatedNoopWorldClient,
   TradingWorldClientContext,
@@ -106,7 +108,14 @@ export function TradingWorldShell({
   // Uncontrolled resizable groups re-seed their ratios only on remount;
   // "reset layout" bumps this epoch to re-mount them from the profile base.
   const [layoutEpoch, setLayoutEpoch] = useState(0);
-  const worldClient = useMemo(() => createSimulatedNoopWorldClient(tab.worldId), [tab.worldId]);
+  // TL wiring (W018 follow-up): the REAL engine-backed client replaces the
+  // fail-closed noop — same provider seam, same projection law (A6). The
+  // in-process transport runs the deterministic engine; books start empty
+  // (W017 pending) and the UI renders that honestly.
+  const worldClient = useEngineWorldClient({
+    worldId: tab.worldId,
+    attachTransport: () => createAlphaEngineTransport(tab.worldId),
+  });
 
   const updateLayout = (next: TradingWorldCockpitLayout) => store.setState(next);
   const openTool = (toolId: TradingWorldToolId) =>
