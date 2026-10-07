@@ -36,7 +36,6 @@ import {
   sim,
   T0,
   MINUTE,
-  w028WorldDefinition,
   WORLD,
 } from "./fixtures.js";
 
