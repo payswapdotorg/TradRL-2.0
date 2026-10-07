@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T11:15:00Z",
+  "updated_at": "2026-10-07T12:05:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -132,8 +132,10 @@
       "write_surface": [
         "packages/ui/src/trading-world/market/"
       ],
-      "status": "ready",
-      "branch": "work/w008"
+      "status": "merged",
+      "branch": "work/w008",
+      "merged_sha": "74a4b9c",
+      "pr": 14
     },
     {
       "id": "W009",
@@ -145,8 +147,10 @@
       "write_surface": [
         "packages/ui/src/trading-world/orderbook/"
       ],
-      "status": "ready",
-      "branch": "work/w009"
+      "status": "merged",
+      "branch": "work/w009",
+      "merged_sha": "18c36a9",
+      "pr": 15
     },
     {
       "id": "W010",
@@ -158,8 +162,10 @@
       "write_surface": [
         "packages/ui/src/trading-world/orders/"
       ],
-      "status": "ready",
-      "branch": "work/w010"
+      "status": "merged",
+      "branch": "work/w010",
+      "merged_sha": "ea2c4d7",
+      "pr": 16
     },
     {
       "id": "W011",
