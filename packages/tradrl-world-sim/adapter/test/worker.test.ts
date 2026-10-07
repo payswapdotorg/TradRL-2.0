@@ -60,10 +60,12 @@ test("a command over the thread boundary acks and publishes with engine sequence
 test("typed stubs and clock rejections cross the thread as serialized errors", async () => {
   const { worker, client } = await spawnReadyClient();
   await assert.rejects(
-    client.call("query", "getQuote", ["instrument-es-fut"]),
+    // getQuote is delivered since W017 (a book projection); getPortfolio is
+    // the remaining typed stub this test exercises the serialized-error path with
+    client.call("query", "getPortfolio", []),
     (error: unknown) =>
       (error as { remoteName?: string }).remoteName === "NotImplementedInSkeletonError" &&
-      (error as { data?: { surface?: string } }).data?.surface === "market-generator",
+      (error as { data?: { surface?: string } }).data?.surface === "account-portfolio-risk",
   );
   await client.call("clock", "step", [5_000]);
   await assert.rejects(

@@ -14,13 +14,14 @@
  * W014/W015/W016/W017 seam boundary (typed, honest):
  * - getOrderBook / getTrades / getOrders project the authoritative matching
  *   state (orders, books, trade tape) — W014's engine surface;
+ * - getQuote projects the top-of-book quote from the authoritative book
+ *   (W017: the generator fills the books, so a quote exists to project);
  * - getPositions / getPortfolio / getRisk project the authoritative
  *   financial state (positions, P&L, margin, breaches) — W015's engine
  *   surface, exact decimal text, never fabricated (WORLD-PROTOCOL.md "UI
  *   projection law");
  * - getSnapshot (QueryPort + EvidencePort) and getBranchLineage are REAL
- *   (W016): the event-derived snapshot registry and the lineage chain;
- * - getQuote still throws NotImplementedInSkeletonError (W017).
+ *   (W016): the event-derived snapshot registry and the lineage chain.
  */
 
 import type {
@@ -41,7 +42,10 @@ import type {
   OrderBookSnapshot,
   Portfolio,
   Position,
+  Quantity,
+  Quote,
   RiskState,
+  TimestampMs,
   Trade,
 } from "tradrl-world-contracts";
 import type { SimulationTimeMs } from "tradrl-world-contracts/time";
@@ -51,7 +55,7 @@ import { computeInformationBoundary } from "tradrl-world-contracts/time";
 import type { EventJournal } from "../journal/eventJournal.js";
 import type { ClockEventLookup } from "../clock/simulationClock.js";
 import type { BranchLineageRecord } from "../branch/lineage.js";
-import { bookSnapshot } from "../orderbook/index.js";
+import { bestLevel, bookSnapshot, formatScaled } from "../orderbook/index.js";
 import {
   financialLedgerOf,
   computeAccountFinancials,
@@ -153,8 +157,35 @@ export function createQueryPort(read: () => EngineReadModel): QueryPort {
       }
       return instrument;
     },
-    async getQuote() {
-      throw new NotImplementedInSkeletonError("market-generator", "QueryPort.getQuote");
+    async getQuote(instrumentId): Promise<Quote> {
+      // W017: the quote is a projection of the authoritative book — the
+      // generator fills the books with real resting liquidity, so the
+      // top-of-book (bid/ask sizes + last trade) exists to project. Same
+      // observability discipline as getOrderBook: the A7 firewall on the
+      // underlying market events is served by getTimeline/getEvents.
+      const model = read();
+      const book = model.state.matching.books[String(instrumentId)];
+      if (book === undefined) {
+        throw new UnknownWorldEntityError("instrument", String(instrumentId));
+      }
+      const bestBid = bestLevel(book, "buy");
+      const bestAsk = bestLevel(book, "sell");
+      const levelSize = (level: { readonly entries: readonly { readonly remaining: bigint }[] }) => {
+        let total = 0n;
+        for (const entry of level.entries) total += entry.remaining;
+        return formatScaled(total, 12) as Quantity;
+      };
+      return {
+        instrumentId,
+        ...(bestBid === undefined
+          ? {}
+          : { bid: bestBid.price, bidSize: levelSize(bestBid) }),
+        ...(bestAsk === undefined
+          ? {}
+          : { ask: bestAsk.price, askSize: levelSize(bestAsk) }),
+        ...(book.lastTradePrice === undefined ? {} : { last: book.lastTradePrice }),
+        asOf: model.clockState.simulationTime as TimestampMs,
+      };
     },
     async getOrderBook(instrumentId, depth?): Promise<OrderBookSnapshot> {
       // W014: the DOM projection over the authoritative matching book state

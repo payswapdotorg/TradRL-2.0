@@ -1,9 +1,10 @@
 # tradrl-world-sim (W013 — headless deterministic World engine skeleton)
 
 The deterministic world-engine **skeleton**: the clock, world core and journal
-modules — the headless runtime foundation for W014 (orderbook/matching),
-W015 (account/portfolio/risk), W016 (journal/snapshot/branch — journal basics
-live here), W017 (generator) and W018 (worker adapter).
+modules — the headless runtime foundation with W014 (orderbook/matching),
+W017 (synthetic market generator) and W018 (worker adapter) wired in;
+W015 (account/portfolio/risk) and W016 (journal/snapshot/branch — journal
+basics live here) are the remaining surfaces.
 
 - Spec: `spec/SIMULATION.md` (determinism, event ordering, runtime topology,
   seed/version discipline), `spec/WORLD-PROTOCOL.md` (command lifecycle,
@@ -22,10 +23,11 @@ live here), W017 (generator) and W018 (worker adapter).
 | `clock/` | `simulationClock.ts` — `createSimulationClock`, `asClockPort` | SIMULATION "Runtime topology", WORLD-PROTOCOL "ClockPort"/"Time", LOCK A7/A8, ACCEPTANCE E |
 | `journal/` | `eventJournal.ts` (append-only store, sequencing, laws, queries, digest, restore, frozen records), `replay.ts` (deterministic fold) | WORLD-PROTOCOL "Event envelope", LOCK A6/A8/A9, DOMAIN-MODEL "Ownership: Journal → authoritative history" |
 | `world/` | `definition.ts`, `state.ts` (event reducer), `lifecycle.ts`, `engine.ts`, `projections.ts`, `manifest.ts`, `events.ts`, `hashing.ts`, `errors.ts` | WORLD-PROTOCOL "Command lifecycle" + "Ports", LOCK A5/A6/A13/A14, ACCEPTANCE E/L/K/I |
-| `orderbook/` | `book.ts` (price levels, FIFO queues, halts), `decimal.ts` (exact scaled decimals) | SIMULATION "Matching", WORLD-PROTOCOL "UI projection law" |
-| `matching/` | matcher, policies, fees, fills, the typed lifecycle seam (`seam.ts`) | SIMULATION "Matching", LOCK A6/A9 |
+| `orderbook/` | `decimal.ts` (12-decimal fixed-point kernel), `book.ts` (price-time-priority book, halt/reopen, W004 deltas) | SIMULATION "Matching", LOCK A9, W004 book-delta contract |
+| `matching/` | `state.ts`, `events.ts`, `policy.ts`, `matcher.ts`, `submission.ts`, `reducer.ts`, `marketFacts.ts`, `seam.ts` | SIMULATION "Matching", ACCEPTANCE C/L, LOCK A6/A9 |
 | `snapshot/` | `capture.ts` (content-addressed restorable captures), `restore.ts` (snapshot fold + payload rebuild), `stateCodec.ts`, `seam.ts` (`create-snapshot`) | WORLD-PROTOCOL "Snapshots", LOCK A8/A9, ACCEPTANCE G, DOMAIN-MODEL "Ownership: Snapshot → branch origin" |
 | `branch/` | `lineage.ts` (lineage-complete records), `definition.ts` (branch world rescoping), `genesis.ts` (branch genesis state), `seam.ts` (`branch-world`), `world.ts` (the `branchWorld` wrapper) | WORLD-PROTOCOL "Branches", LOCK A8, ARCHITECTURE §8/§9, ACCEPTANCE E/G |
+| `generator/` | `rng.ts`, `regime.ts`, `quotes.ts`, `participants.ts`, `state.ts`, `events.ts`, `engine.ts` — `createGeneratedWorldEngine` | SIMULATION "Synthetic regimes" + "Participants", ACCEPTANCE B, LOCK A6/A7/A9 |
 | `adapter/` | typed RPC envelope, in-process + worker transports, host/session | SIMULATION "Runtime topology" (W018) |
 
 ## Command lifecycle wiring (WORLD-PROTOCOL.md)
@@ -127,20 +129,21 @@ engine-session artifacts — journal replay rebuilds them, but a bare journal
 replay does not carry a branch world's ANCESTOR lineage (the record lives on
 the parent's journal; lineage is carried at branch genesis/restore).
 
-## Stub boundary (honest, typed, work-order-named)
+## Engine surface status (honest, work-order-named)
 
 | Surface | Behavior today | Owner |
 | --- | --- | --- |
-| `close-position` | `not-implemented-in-skeleton` (domain-rules stage) | W015 |
-| `getQuote` | typed error | W017 |
-| `getPortfolio`, `getRisk` | typed error | W015 |
-| `getPositions` | honest empty list (positions arrive with W015) | W015 |
-| `create-snapshot`, `branch-world`, `getSnapshot`, `getBranchLineage` | REAL (W016) | — |
-| order commands, `getOrderBook`, `getTrades`, `getOrders` | REAL (W014) | — |
+| order commands (`submit-order` / `cancel-order` / `replace-order` / `close-position`) | REAL — the W014 matching seam with the W015 pre-trade gates (account acceptance, risk) and the reduce-only close | W014 + W015 (delivered) |
+| `getOrderBook`, `getTrades`, `getOrders` | matching-state projections | W014 (delivered) |
+| `getPositions`, `getPortfolio`, `getRisk` | financial-state projections (values, exact decimal text, never fabricated) | W015 (delivered) |
+| `create-snapshot`, `branch-world`, `getSnapshot` (QueryPort + EvidencePort), `getBranchLineage` | REAL — content-addressed snapshots, lineage-complete branching | W016 (delivered) |
+| `getQuote` | top-of-book projection of the authoritative book | W017 (delivered) |
+| Synthetic market generator | `generator/` — `createGeneratedWorldEngine` (clock-driven) | W017 (delivered) |
+| Web Worker adapter | `adapter/` (in-process + worker topologies) | W018 (delivered) |
 
 Financial fields of the headless report (balances/positions/P&L/risk) are
-deliberately absent until W015 — never faked (SIMULATION.md "Headless
-report").
+the W015 engine surface — exact decimal text, never fabricated
+(SIMULATION.md "Headless report").
 
 ## Gates
 

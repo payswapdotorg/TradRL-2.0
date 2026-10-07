@@ -13,12 +13,13 @@
     "./matching": "./matching/index.ts",
     "./snapshot": "./snapshot/index.ts",
     "./branch": "./branch/index.ts",
+    "./generator": "./generator/index.ts",
     "./adapter": "./adapter/index.ts",
     "./account": "./account/index.ts",
     "./portfolio": "./portfolio/index.ts",
     "./risk": "./risk/index.ts"
   },
-  "description": "Headless deterministic World engine (W013 core, W014 orderbook + matching, W015 account/portfolio/risk, W016 snapshot/branch): simulation clock, world core + command lifecycle, append-only event journal, price-time-priority order book and matching engine, authoritative account ledger, position/P&L layer and pre-trade risk gates, content-addressed snapshots with exactly-equivalent restore, and lineage-complete branching.",
+  "description": "Headless deterministic World engine (W013 core, W014 orderbook + matching, W015 account/portfolio/risk, W016 snapshot/branch, W017 synthetic market generator): simulation clock, world core + command lifecycle, append-only event journal, price-time-priority order book and matching engine, authoritative account ledger, position/P&L layer and pre-trade risk gates, content-addressed snapshots with exactly-equivalent restore, lineage-complete branching, and the clock-driven seeded regime generator that fills the books with honest simulated liquidity.",
   "dependencies": {
     "tradrl-world-contracts": "workspace:*"
   },
@@ -26,7 +27,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix --fix-suggestions",
     "typecheck": "tsc -p .",
-    "test": "tsx --test clock/test/*.test.ts world/test/*.test.ts journal/test/*.test.ts orderbook/test/*.test.ts matching/test/*.test.ts snapshot/test/*.test.ts branch/test/*.test.ts account/test/*.test.ts portfolio/test/*.test.ts risk/test/*.test.ts adapter/test/*.test.ts"
+    "test": "tsx --test clock/test/*.test.ts world/test/*.test.ts journal/test/*.test.ts orderbook/test/*.test.ts matching/test/*.test.ts snapshot/test/*.test.ts branch/test/*.test.ts generator/test/*.test.ts account/test/*.test.ts portfolio/test/*.test.ts risk/test/*.test.ts adapter/test/*.test.ts"
   },
   "devDependencies": {
     "typescript": "^6.0.2"

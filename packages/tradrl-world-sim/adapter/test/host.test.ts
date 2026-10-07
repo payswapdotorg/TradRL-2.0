@@ -62,7 +62,9 @@ test("dispatch reaches the engine ports: query ok, typed stubs as remote errors"
   runtime.core.handleClientMessage({
     kind: "request",
     requestId: 2,
-    call: { port: "query", method: "getQuote", args: ["instrument-es-fut"] },
+    // getQuote is delivered since W017 (a book projection); getPortfolio is
+    // the remaining typed stub this test exercises the remote-error path with
+    call: { port: "query", method: "getPortfolio", args: [] },
   });
   await new Promise((resolve) => setTimeout(resolve, 0));
   const metaResponse = emitted.find((m) => m.kind === "response" && m.requestId === 1);
@@ -77,7 +79,7 @@ test("dispatch reaches the engine ports: query ok, typed stubs as remote errors"
     quoteResponse?.kind === "response" &&
       quoteResponse.outcome.status === "error" &&
       quoteResponse.outcome.error.name === "NotImplementedInSkeletonError",
-    "the W017 stub surfaces as a typed remote error — never a fabricated quote",
+    "the W015 stub surfaces as a typed remote error — never a fabricated portfolio",
   );
 });
 
@@ -94,8 +96,8 @@ test("command results are VALUES (acked or typed rejection), not wire errors", a
     // W014/W015 made submit-order real — the default helper's on-grid price
     // passes the pre-trade stage and the venue, so the ack itself is the
     // value-not-wire-error case (the typed validate rejection below is the
-    // other). W016's pre-W015 repair of this test used an off-grid price as
-    // its rejection-value case; main's W015 repair carries the stronger
+    // other). W016's and W017's pre-W015 repairs of this test used rejection
+    // cases of the same kind; main's W015 repair carries the stronger
     // three-part form, which is what survives here.
     call: { port: "command", method: "submitOrder", args: [submitOrderCommand()] },
   });
