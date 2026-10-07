@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Source-exported app (the tradrl-world-sim package pattern): "exports"
+    // point at TypeScript sources and nothing is emitted as a build artifact;
+    // the bin bootstraps the CLI through the repo's tsx runner.
+    // `rootDir` is deliberately NOT set: the program pulls in the consumed
+    // `tradrl-world-*` sources through the package specifiers, which live
+    // outside this app directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

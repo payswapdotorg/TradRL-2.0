@@ -1,0 +1,29 @@
+{
+  "name": "tradrl-world-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "description": "Headless World CLI/replay runner (W031): runs a World from a definition file (JSON) with an optional scripted command/clock stream, prints the deterministic run report (headless report + journal digest + determinism manifest), and REPLAYS a journal file (records) to rebuild the world state and continue — the W016 restore path. Pure node: no UI, no servers.",
+  "bin": {
+    "tradrl-world": "./bin/tradrl-world.mjs"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-world-sim": "workspace:*",
+    "tradrl-data": "workspace:*",
+    "tradrl-information": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
