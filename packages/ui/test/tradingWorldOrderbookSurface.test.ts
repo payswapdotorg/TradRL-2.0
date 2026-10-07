@@ -233,16 +233,16 @@ test("the cockpit shell mounts the real ladder surface in the Order Book dock vi
   assert.ok(markup.includes("Simulation Clock surface placeholder"));
 });
 
-test("the shell's default registry (W006 composition point) still ships the W009 placeholders (TL action item)", () => {
+test("the shell's default registry (W006 composition point) ships the real W009 surfaces (TL wiring landed)", () => {
   clearSharedCockpitLayoutStores();
   const tab = buildTab("/ws/w009-default");
   getSharedCockpitLayoutStore(
     cockpitLayoutStorageKey("/ws/w009-default", "default"),
     createDefaultTradingWorldCockpitLayout(),
   );
-  // surfaces.ts is W006's frozen file: the W009 swap is a TL action item in
-  // the PR (the W007 precedent). Until the TL wires it, the default registry
-  // still shows the placeholders — asserted here so the swap is auditable.
+  // TL wiring landed (e1e1024): the composition point now ships the REAL
+  // W009 surfaces. Asserted here so the placeholder cannot silently return
+  // (the swap is auditable in both directions).
   const markup = ReactDOMServer.renderToStaticMarkup(
     createElement(TradingWorldShell, {
       tab,
@@ -250,7 +250,7 @@ test("the shell's default registry (W006 composition point) still ships the W009
       focused: true,
     }),
   );
-  assert.ok(markup.includes("Order Book / DOM surface placeholder"));
-  assert.ok(markup.includes("Time &amp; Sales surface placeholder"));
-  assert.ok(!markup.includes('data-trading-world-dom-surface=""'));
+  assert.ok(!markup.includes("Order Book / DOM surface placeholder"));
+  assert.ok(!markup.includes("Time &amp; Sales surface placeholder"));
+  assert.ok(markup.includes('data-trading-world-dom-surface=""'));
 });
