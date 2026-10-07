@@ -93,13 +93,26 @@ test("command results are VALUES (acked or typed rejection), not wire errors", a
     requestId: 2,
     call: { port: "command", method: "submitOrder", args: [submitOrderCommand()] },
   });
+  // a structurally broken command: the typed validate-stage rejection value
+  runtime.core.handleClientMessage({
+    kind: "request",
+    requestId: 3,
+    call: { port: "command", method: "addAnnotation", args: [addAnnotationCommand({ text: " " })] },
+  });
   await new Promise((resolve) => setTimeout(resolve, 0));
   const acked = emitted.find((m) => m.kind === "response" && m.requestId === 1);
-  const rejected = emitted.find((m) => m.kind === "response" && m.requestId === 2);
+  const submitted = emitted.find((m) => m.kind === "response" && m.requestId === 2);
+  const rejected = emitted.find((m) => m.kind === "response" && m.requestId === 3);
   assert.ok(
     acked?.kind === "response" &&
       acked.outcome.status === "ok" &&
       (acked.outcome.value as { status: string }).status === "acked",
+  );
+  assert.ok(
+    submitted?.kind === "response" &&
+      submitted.outcome.status === "ok" &&
+      (submitted.outcome.value as { status: string }).status === "acked",
+    "a submit-order ack is a VALUE on the wire (W014/W015: the order really routes through the seams)",
   );
   assert.ok(
     rejected?.kind === "response" &&

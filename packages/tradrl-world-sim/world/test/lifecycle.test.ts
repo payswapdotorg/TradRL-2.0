@@ -388,12 +388,12 @@ test("lifecycle: cancel of a terminal order is order-not-modifiable at domain ru
   assert.equal(rejection?.code, "order-not-modifiable");
 });
 
-test("stub boundary: close-position rejects not-implemented-in-skeleton naming W015/W014", () => {
+test("W015: close-position on a flat account is the typed no-open-position rejection", () => {
   const outcome = runCommandLifecycle(closePositionCommand(), ctx());
   const rejection = rejectionOf(outcome);
   assert.equal(rejection?.stage, "domain-rules");
-  assert.equal(rejection?.code, "not-implemented-in-skeleton");
-  assert.match(rejection?.message ?? "", /W015/);
+  assert.equal(rejection?.code, "no-open-position");
+  assert.match(rejection?.message ?? "", /no open position/);
 });
 
 test("stub boundary: create-snapshot and branch-world reject naming W016", () => {

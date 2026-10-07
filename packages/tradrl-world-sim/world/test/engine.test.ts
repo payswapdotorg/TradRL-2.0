@@ -264,7 +264,7 @@ test("QueryPort: instruments resolve; unknown ids are typed errors", async () =>
   );
 });
 
-test("QueryPort: orders project the registry; positions are honestly empty", async () => {
+test("QueryPort: orders project the registry; positions stay empty until fills", async () => {
   const e = engine();
   assert.deepEqual(await e.query.getOrders(), []);
   assert.deepEqual(await e.query.getOrders({ instrumentId: INSTRUMENT }), []);
@@ -277,6 +277,7 @@ test("QueryPort: orders project the registry; positions are honestly empty", asy
     [],
     "status filters apply",
   );
+  // an accepted but unfilled order creates no position (W015 truth)
   assert.deepEqual(await e.query.getPositions(), []);
 });
 
@@ -306,12 +307,10 @@ test("QueryPort: book and trades project the matching state; DOM shape holds", a
   assert.deepEqual(await e.query.getTrades(INSTRUMENT), []);
 });
 
-test("QueryPort: domain projections still not implemented are typed rejections", async () => {
+test("QueryPort: still-unimplemented domain projections are typed rejections", async () => {
   const e = engine();
   const expectations: [Promise<unknown>, string, string][] = [
     [e.query.getQuote(INSTRUMENT), "market-generator", "QueryPort.getQuote"],
-    [e.query.getPortfolio(), "account-portfolio-risk", "QueryPort.getPortfolio"],
-    [e.query.getRisk(), "account-portfolio-risk", "QueryPort.getRisk"],
     [e.query.getSnapshot(), "snapshot-branch", "QueryPort.getSnapshot"],
   ];
   for (const [promise, surface, operation] of expectations) {
@@ -576,18 +575,29 @@ test("the determinism manifest covers definition, engine, deps and the command s
   );
 });
 
-test("headlessReport reports the SIMULATION.md skeleton subset", async () => {
+test("headlessReport reports the SIMULATION.md fields (W015 financial surface)", async () => {
   const e = engine();
   await e.clock.step(42_000);
   await e.command.addAnnotation(addAnnotationCommand());
   await e.command.setScenario(setScenarioCommand());
   const report = e.headlessReport();
   const digest = e.journal.digest();
+  const usd = (amount: string) => ({ amount: amount as never, currency: "USD" as never });
   assert.deepEqual(report, {
     worldId: WORLD,
     mode: "reactive-replay",
     seed: "w013-test-seed",
     finalSimulationTime: START + 42_000,
+    balances: [usd("100000"), usd("100000")],
+    positions: [],
+    pnl: [
+      { accountId: "account-trader", realized: usd("0"), unrealized: usd("0"), total: usd("0") },
+      { accountId: "account-other", realized: usd("0"), unrealized: usd("0"), total: usd("0") },
+    ],
+    risk: [
+      { accountId: "account-trader", worldId: WORLD, limits: {}, breaches: [], asOf: START + 42_000 },
+      { accountId: "account-other", worldId: WORLD, limits: {}, breaches: [], asOf: START + 42_000 },
+    ],
     eventCount: digest.eventCount,
     eventHash: digest.eventChecksum,
     branchLineage: [],
