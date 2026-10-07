@@ -45,11 +45,11 @@ export {
   nextFillId,
   nextOrderId,
   nextTradeId,
-  reduceMatchingEvent,
   type ArmedStop,
   type MatchingState,
   type TradeRecord,
 } from "./state.js";
+export { reduceMatchingEvent } from "./reducer.js";
 export {
   MatchContext,
   executeTakerPlan,

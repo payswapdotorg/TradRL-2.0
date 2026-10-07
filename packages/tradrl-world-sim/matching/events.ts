@@ -42,7 +42,6 @@ import type {
   ProducerId,
   Quantity,
   TimestampMs,
-  TradeId,
 } from "tradrl-world-contracts";
 import type { WorldEventEnvelope } from "tradrl-world-contracts";
 import type { BookDeltaPayload, TradePrintPayload } from "tradrl-world-contracts/time";

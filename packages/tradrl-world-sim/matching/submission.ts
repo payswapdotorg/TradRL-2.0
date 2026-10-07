@@ -37,7 +37,6 @@ import type {
   Price,
   Quantity,
 } from "tradrl-world-contracts";
-import { isTerminalOrderStatus } from "tradrl-world-contracts";
 import { isMultipleOf, parseScaled, quantityScaled } from "../orderbook/index.js";
 import type { Scaled } from "../orderbook/index.js";
 import {

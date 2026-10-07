@@ -45,11 +45,8 @@ import type { PendingEventDraft } from "../journal/eventJournal.js";
 import { eventIdFor } from "../journal/eventJournal.js";
 import {
   aggressiveLevels,
-  formatScaled,
   formatQuantity,
-  isMultipleOf,
   parseScaled,
-  quantityScaled,
   type Scaled,
 } from "../orderbook/index.js";
 import type { BookState } from "../orderbook/index.js";
@@ -70,7 +67,8 @@ import {
   type OrderTriggeredPayload,
 } from "./events.js";
 import type { MatchingState } from "./state.js";
-import { nextFillId, nextOrderId, nextTradeId, reduceMatchingEvent } from "./state.js";
+import { nextFillId, nextOrderId, nextTradeId } from "./state.js";
+import { reduceMatchingEvent } from "./reducer.js";
 import type { VenuePolicy } from "./policy.js";
 import { acknowledgementAvailableAt, fillAvailableAt } from "./policy.js";
 

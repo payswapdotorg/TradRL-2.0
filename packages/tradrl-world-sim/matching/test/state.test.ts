@@ -266,7 +266,6 @@ test("market.halted / market.reopened transition the book (instrument and venue 
 });
 
 test("trade prints update the tape and the last-trade price (stop reference)", () => {
-  const definition = matchingDefinition();
   const run = drive([
     submitOrder({
       commandId: "cmd-1" as never,
