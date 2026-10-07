@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T09:00:00Z",
+  "updated_at": "2026-10-07T11:15:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -230,8 +230,10 @@
         "portfolio",
         "risk"
       ],
-      "status": "ready",
-      "branch": "work/w015"
+      "status": "merged",
+      "branch": "work/w015",
+      "merged_sha": "b5695ef",
+      "pr": 13
     },
     {
       "id": "W016",
@@ -244,8 +246,10 @@
         "snapshot",
         "branch"
       ],
-      "status": "ready",
-      "branch": "work/w016"
+      "status": "merged",
+      "branch": "work/w016",
+      "merged_sha": "c7676f0",
+      "pr": 11
     },
     {
       "id": "W017",
@@ -257,8 +261,10 @@
       "write_surface": [
         "packages/tradrl-world-sim/generator/"
       ],
-      "status": "ready",
-      "branch": "work/w017"
+      "status": "merged",
+      "branch": "work/w017",
+      "merged_sha": "137fb56",
+      "pr": 12
     },
     {
       "id": "W018",
@@ -310,7 +316,7 @@
         "packages/tradrl-data/",
         "contracts/data/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w020"
     },
     {
