@@ -1,0 +1,37 @@
+{
+  "name": "tradrl-evaluation-replay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./findings": "./findings.ts",
+    "./cases": "./cases.ts",
+    "./claims": "./claims.ts",
+    "./fixtures": "./fixtures.ts",
+    "./nsChecks": "./nsChecks.ts",
+    "./dtypeChecks": "./dtypeChecks.ts",
+    "./tickChecks": "./tickChecks.ts",
+    "./honestyChecks": "./honestyChecks.ts",
+    "./e2eReplay": "./e2eReplay.ts",
+    "./report": "./report.ts"
+  },
+  "description": "Replay fidelity verification (W022): the falsifiable evaluation harness over the W021 NautilusTrader adapter's DECLARED fidelity conventions — typed claim→verdict findings (PASS|FAIL|PARTIAL, deterministic, journalable) produced by adversarial fixtures that prove the adapter's loud typed errors actually fire with the exact conventions named; end-to-end replay verification (dataset → W020 loadHistoricalDataset → the W031 CLI run/replay path via in-process main(argv) → A9 reportDigest/eventChecksum twin stability + the W016 restore equivalence); and a deterministic content-addressed findings report (the W028 digest family). Verifies, never trusts: a claim that cannot fail is worthless.",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-data": "workspace:*",
+    "tradrl-world-sim": "workspace:*",
+    "tradrl-adapters-nautilus": "workspace:*",
+    "tradrl-world-cli": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
