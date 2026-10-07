@@ -28,6 +28,7 @@ import type {
 import type { JournalRecord } from "../journal/eventJournal.js";
 import { isMatchingStateEventType, initialMatchingState, reduceMatchingEvent } from "../matching/index.js";
 import type { MatchingState } from "../matching/index.js";
+import { initialFinancialState, reduceFinancialEvent, type FinancialState } from "../account/index.js";
 import { ENGINE_ID, ENGINE_VERSION, type WorldDefinition } from "./definition.js";
 import { EngineInvariantError } from "./errors.js";
 import { isAnnotationAddedPayload, isScenarioSetPayload } from "./events.js";
@@ -53,6 +54,11 @@ export interface WorldState {
   readonly ackedCommandIds: ReadonlySet<CommandId>;
   /** The W014 matching slice: orders, fills, trades, books, armed stops. */
   readonly matching: MatchingState;
+  /**
+   * The W015 financial slice: account ledgers, positions, P&L, risk state —
+   * reduced from the same journaled events (fills and trade prints).
+   */
+  readonly financial: FinancialState;
 }
 
 /** The initial state derived from a world definition. */
@@ -64,6 +70,7 @@ export function initialWorldState(definition: WorldDefinition): WorldState {
       : { currentScenario: { entries: definition.regimeSchedule } as ScenarioDefinition }),
     ackedCommandIds: new Set<CommandId>(),
     matching: initialMatchingState(definition),
+    financial: initialFinancialState(definition),
   });
 }
 
@@ -123,8 +130,18 @@ export function reduceWorldEvent(state: WorldState, record: JournalRecord): Worl
     }
     default: {
       if (isMatchingStateEventType(envelope.eventType)) {
+        // The W015 seam: the same event also advances the financial slices
+        // (fills move positions/cash/risk, trade prints re-mark) — the
+        // financial reducer sees the POST-event matching slice (it resolves
+        // fill order sides from the registry).
+        const matching = reduceMatchingEvent(state.matching, envelope);
+        const financial = reduceFinancialEvent(state.financial, envelope, matching);
         return withAckedCommand(
-          Object.freeze({ ...state, matching: reduceMatchingEvent(state.matching, envelope) }),
+          Object.freeze(
+            financial === state.financial
+              ? { ...state, matching }
+              : { ...state, matching, financial },
+          ),
           envelope.causationId as unknown as CommandId,
         );
       }

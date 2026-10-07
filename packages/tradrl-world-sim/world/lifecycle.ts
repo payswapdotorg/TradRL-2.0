@@ -8,33 +8,36 @@
  * authorization/venue gates are runtime controls, never prompt text),
  * A15 + spec/ACCEPTANCE-WORLD-ALPHA.md K (typed denials).
  *
- * W014 SEAM (the honest boundary after W013+ W014):
- * - Implemented for real: add-annotation, set-scenario (world-core facts)
- *   and submit-order / cancel-order / replace-order through the typed
- *   matching seam (matching/seam.ts) — order kinds × TIF × policies are the
- *   matcher's domain (matching/submission.ts documents the matrix).
- * - Typed not-implemented-in-skeleton rejections at the domain-rules stage:
- *   close-position (W014 matching + W015 portfolio/risk), create-snapshot /
- *   branch-world (W016 snapshot/branch engine).
+ * W015 SEAM (the financial stage, additive on the W013/W014 stages):
+ * - submit-order / replace-order pass the W015 pre-trade checks AFTER
+ *   validate/authorize and BEFORE the venue: the account acceptance check
+ *   (margin/buying power, canShort) then the risk gate (declared limits,
+ *   typed RiskCheckOutcome evidence). Structural problems pass through to
+ *   the venue's own prechecks (the documented domain-check order).
+ * - close-position applies as a reducing IOC market order through the W014
+ *   matching seam (positions reduce via real fills — never a balance edit).
+ * - Implemented since W013/W014: add-annotation, set-scenario and the
+ *   order commands through the typed matching seam.
+ * - Typed not-implemented-in-skeleton rejections remain for
+ *   create-snapshot / branch-world (W016 snapshot/branch engine).
  */
 
 import type {
   AuthorizeCommandResult,
   CommandRejection,
-  CommandValidationErrorCode,
-  OrderKind,
   ParticipantId,
   SequenceNumber,
-  TimeInForce,
-  ValidateCommandResult,
   WorldCommand,
 } from "tradrl-world-contracts";
 import type { CausationId, CorrelationId, TimestampMs } from "tradrl-world-contracts";
 import type { SimulationTimeMs } from "tradrl-world-contracts/time";
 import type { PendingEventDraft } from "../journal/eventJournal.js";
-import { applyMatchingCommand } from "../matching/index.js";
 import type { ReduceOnlyPositionCheck } from "../matching/index.js";
-import type { CancelOrderCommand, ReplaceOrderCommand, SubmitOrderCommand } from "tradrl-world-contracts";
+import type { CancelOrderCommand, ClosePositionCommand, ReplaceOrderCommand, SubmitOrderCommand } from "tradrl-world-contracts";
+import { applyOrderCommand } from "./orderCommands.js";
+import { validateCommand } from "./validate.js";
+export { validateCommand } from "./validate.js";
+export type { ValidateCommandResult } from "tradrl-world-contracts";
 import {
   ENGINE_EVENT_SCHEMA_VERSION,
   WORLD_CORE_PRODUCER,
@@ -67,195 +70,6 @@ export interface LifecycleContext {
 export type LifecycleOutcome =
   | { readonly kind: "applied"; readonly drafts: readonly PendingEventDraft[] }
   | { readonly kind: "rejected"; readonly rejection: CommandRejection };
-
-const ORDER_KINDS: readonly OrderKind[] = ["market", "limit", "stop", "stop-limit"];
-const TIME_IN_FORCE: readonly TimeInForce[] = ["GTC", "IOC", "FOK"];
-
-function error(code: CommandValidationErrorCode, message: string, field?: string) {
-  return { code, message, ...(field === undefined ? {} : { field }) };
-}
-
-function isPositiveDecimalString(value: unknown): boolean {
-  return (
-    typeof value === "string" &&
-    value.length > 0 &&
-    Number.isFinite(Number(value)) &&
-    Number(value) > 0
-  );
-}
-
-/** The `validate` stage: structural + reference checks (W003's error codes). */
-export function validateCommand(
-  command: WorldCommand,
-  ctx: LifecycleContext,
-): ValidateCommandResult {
-  const errors: { code: CommandValidationErrorCode; message: string; field?: string }[] = [];
-  const definition = ctx.definition;
-
-  if (typeof command.commandId !== "string" || command.commandId.length === 0) {
-    errors.push(error("malformed-command", "commandId must be a non-empty string", "commandId"));
-  }
-  if (typeof command.issuedBy !== "string" || command.issuedBy.length === 0) {
-    errors.push(error("malformed-command", "issuedBy must be a non-empty string", "issuedBy"));
-  }
-  if (!Number.isFinite(command.issuedAt)) {
-    errors.push(error("malformed-command", "issuedAt must be a finite timestamp", "issuedAt"));
-  }
-  if (errors.length > 0) {
-    return { ok: false, errors };
-  }
-  if (command.worldId !== definition.scope.worldId) {
-    return {
-      ok: false,
-      errors: [error("unknown-world", `command targets ${String(command.worldId)}`)],
-    };
-  }
-
-  // per-kind structural validation (malformed-command)
-  switch (command.kind) {
-    case "submit-order": {
-      const submission = command.submission;
-      if (!ORDER_KINDS.includes(submission?.kind)) {
-        errors.push(error("malformed-command", "submission.kind must be an OrderKind", "submission.kind"));
-      }
-      if (submission?.side !== "buy" && submission?.side !== "sell") {
-        errors.push(error("malformed-command", "submission.side must be buy or sell", "submission.side"));
-      }
-      if (!isPositiveDecimalString(submission?.quantity)) {
-        errors.push(error("malformed-command", "submission.quantity must be a positive decimal string", "submission.quantity"));
-      }
-      if (!TIME_IN_FORCE.includes(submission?.constraints?.timeInForce)) {
-        errors.push(error("malformed-command", "constraints.timeInForce must be GTC, IOC or FOK", "submission.constraints.timeInForce"));
-      }
-      if (submission?.kind === "limit" || submission?.kind === "stop-limit") {
-        if (!isPositiveDecimalString(submission?.limitPrice)) {
-          errors.push(error("malformed-command", `${submission.kind} requires a positive limitPrice`, "submission.limitPrice"));
-        }
-      }
-      if (submission?.kind === "stop" || submission?.kind === "stop-limit") {
-        if (!isPositiveDecimalString(submission?.stopPrice)) {
-          errors.push(error("malformed-command", `${submission.kind} requires a positive stopPrice`, "submission.stopPrice"));
-        }
-      }
-      break;
-    }
-    case "cancel-order":
-    case "replace-order": {
-      if (typeof command.orderId !== "string" || command.orderId.length === 0) {
-        errors.push(error("malformed-command", "orderId must be a non-empty string", "orderId"));
-      }
-      if (command.kind === "replace-order" && command.quantity !== undefined) {
-        if (!isPositiveDecimalString(command.quantity)) {
-          errors.push(error("malformed-command", "quantity, when present, must be a positive decimal string", "quantity"));
-        }
-      }
-      break;
-    }
-    case "close-position": {
-      if (typeof command.accountId !== "string" || command.accountId.length === 0) {
-        errors.push(error("malformed-command", "accountId must be a non-empty string", "accountId"));
-      }
-      if (typeof command.instrumentId !== "string" || command.instrumentId.length === 0) {
-        errors.push(error("malformed-command", "instrumentId must be a non-empty string", "instrumentId"));
-      }
-      break;
-    }
-    case "add-annotation": {
-      if (!Number.isFinite(command.at)) {
-        errors.push(error("malformed-command", "at must be a finite timestamp", "at"));
-      }
-      if (typeof command.text !== "string" || command.text.trim().length === 0) {
-        errors.push(error("malformed-command", "text must be a non-blank string", "text"));
-      }
-      break;
-    }
-    case "create-snapshot":
-      break;
-    case "branch-world": {
-      if (typeof command.sourceSnapshotId !== "string" || command.sourceSnapshotId.length === 0) {
-        errors.push(error("malformed-command", "sourceSnapshotId must be a non-empty string", "sourceSnapshotId"));
-      }
-      break;
-    }
-    case "set-scenario": {
-      if (!Array.isArray(command.scenario?.entries)) {
-        errors.push(error("malformed-command", "scenario.entries must be an array", "scenario.entries"));
-      } else {
-        for (const entry of command.scenario.entries) {
-          const regime = (entry as { regime?: unknown })?.regime;
-          if (
-            regime !== "trend" &&
-            regime !== "mean-reversion" &&
-            regime !== "high-volatility" &&
-            regime !== "low-liquidity" &&
-            regime !== "shock" &&
-            regime !== "halt-reopen"
-          ) {
-            errors.push(error("malformed-command", `scenario entry regime '${String(regime)}' is not a RegimeKind`, "scenario.entries.regime"));
-            break;
-          }
-          const from = (entry as { from?: unknown })?.from;
-          if (typeof from !== "number" || !Number.isFinite(from)) {
-            errors.push(error("malformed-command", "scenario entry from must be finite", "scenario.entries.from"));
-            break;
-          }
-          const to = (entry as { to?: unknown })?.to;
-          if (to !== undefined && (typeof to !== "number" || !Number.isFinite(to) || (to as number) < (from as number))) {
-            errors.push(error("malformed-command", "scenario entry to, when present, must be finite and not precede from", "scenario.entries.to"));
-            break;
-          }
-        }
-      }
-      break;
-    }
-  }
-  if (errors.length > 0) {
-    return { ok: false, errors };
-  }
-
-  // reference validation against the world definition + current state
-  if (!definition.participants.some((p) => p.participantId === command.issuedBy)) {
-    return {
-      ok: false,
-      errors: [error("unknown-participant", `participant ${String(command.issuedBy)} is not declared in this world`)],
-    };
-  }
-  if (command.kind === "submit-order" || command.kind === "close-position") {
-    if (!definition.instruments.some((i) => i.instrumentId === command.instrumentId)) {
-      errors.push(error("unknown-instrument", `instrument ${String(command.instrumentId)} is not declared in this world`, "instrumentId"));
-    }
-  }
-  if (command.kind === "submit-order" || command.kind === "close-position") {
-    if (!definition.accounts.some((a) => a.accountId === command.accountId)) {
-      errors.push(error("unknown-account", `account ${String(command.accountId)} is not declared in this world`, "accountId"));
-    }
-  }
-  if (command.kind === "add-annotation" && command.instrumentId !== undefined) {
-    if (!definition.instruments.some((i) => i.instrumentId === command.instrumentId)) {
-      errors.push(error("unknown-instrument", `instrument ${String(command.instrumentId)} is not declared in this world`, "instrumentId"));
-    }
-  }
-  if (command.kind === "cancel-order" || command.kind === "replace-order") {
-    // Unknown order ids are the honest validate-stage rejection; the
-    // matcher's domain rules own order-not-modifiable (terminal targets).
-    if (!ctx.state.matching.orders.some((o) => o.orderId === command.orderId)) {
-      errors.push(error("unknown-order", `order ${String(command.orderId)} does not exist in this world`, "orderId"));
-    }
-  }
-  if (errors.length > 0) {
-    return { ok: false, errors };
-  }
-
-  if (ctx.state.ackedCommandIds.has(command.commandId)) {
-    return {
-      ok: false,
-      errors: [
-        error("duplicate-command", `command ${String(command.commandId)} was already acknowledged`),
-      ],
-    };
-  }
-  return { ok: true };
-}
 
 /**
  * The `authorize` stage. World Alpha skeleton matrix:
@@ -343,8 +157,9 @@ function draft(
 /**
  * The `apply domain rules` stage. Implemented kinds return the ordered event
  * drafts the engine will journal (the mutation itself happens by reducing
- * those events — single path with replay); order commands delegate to the
- * typed matching seam; unimplemented kinds return the honest typed stub
+ * those events — single path with replay); the order family (submit/
+ * replace/cancel/close) routes through the W014/W015 seams in
+ * orderCommands.ts; unimplemented kinds return the honest typed stub
  * rejection naming the owning work order.
  */
 export function applyCommand(command: WorldCommand, ctx: LifecycleContext): LifecycleOutcome {
@@ -370,24 +185,15 @@ export function applyCommand(command: WorldCommand, ctx: LifecycleContext): Life
       return { kind: "applied", drafts: [draft(command, ctx, "world.scenario.set", payload)] };
     }
     case "submit-order":
+    case "replace-order":
     case "cancel-order":
-    case "replace-order": {
-      // THE W014 SEAM: the world core hands order commands to the matching
-      // engine (typed contract in matching/seam.ts). The engine journals the
-      // returned drafts and reduces them through the same reducer the
-      // matcher advanced its working copy through.
-      return applyMatchingCommand(command as SubmitOrderCommand | CancelOrderCommand | ReplaceOrderCommand, {
-        definition: ctx.definition,
-        matching: ctx.state.matching,
-        simulationTime: ctx.simulationTime,
-        nextSequence: ctx.nextSequence,
-        ...(ctx.reduceOnlyCheck === undefined ? {} : { reduceOnlyCheck: ctx.reduceOnlyCheck }),
-      });
-    }
     case "close-position":
-      return notImplemented(
-        "close-position:",
-        "requires positions and financial state (W015: packages/tradrl-world-sim/portfolio) plus matching (W014); the W013 skeleton implements the command lifecycle, not the domain rules",
+      // THE ORDER FAMILY (W014/W015 seams): the pre-trade stage then the
+      // venue — see world/orderCommands.ts for the documented domain-check
+      // order (close-position never passes the gate: it only ever reduces).
+      return applyOrderCommand(
+        command as CancelOrderCommand | ClosePositionCommand | ReplaceOrderCommand | SubmitOrderCommand,
+        ctx,
       );
     case "create-snapshot":
     case "branch-world":

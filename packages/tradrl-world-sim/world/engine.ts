@@ -42,7 +42,13 @@ import type { EventJournal } from "../journal/index.js";
 import { createEventJournal, replayJournal } from "../journal/index.js";
 import { assertValidWorldDefinition, type WorldDefinition } from "./definition.js";
 import { runCommandLifecycle } from "./lifecycle.js";
-import { buildDeterminismManifest, buildHeadlessReport, type HeadlessRunReport } from "./manifest.js";
+import {
+  buildDeterminismManifest,
+  buildHeadlessReport,
+  type HeadlessFinancialSummary,
+  type HeadlessPnlSummary,
+  type HeadlessRunReport,
+} from "./manifest.js";
 import { createFnv1aHasher } from "./hashing.js";
 import {
   createEvidencePort,
@@ -51,6 +57,14 @@ import {
   type EngineReadModel,
 } from "./projections.js";
 import { initialWorldState, reduceWorldEvent, type WorldState } from "./state.js";
+import {
+  financialLedgerOf,
+  financialsOf,
+  projectBalances,
+} from "../account/index.js";
+import { formatSignedMoney, isOpenPosition, projectPosition } from "../portfolio/index.js";
+import { createReduceOnlyCheck, projectRiskState } from "../risk/index.js";
+import type { Money, Position, RiskState } from "tradrl-world-contracts";
 
 /** Restore parameters: rebuild an engine from a preloaded journal. */
 export interface EngineRestore {
@@ -179,6 +193,10 @@ export function createHeadlessWorldEngine(
       // W014 seam: the matcher reserves the journal's next dense sequences
       // so its fill drafts can cite the trade events that generated them.
       nextSequence: (journal.getCursor() + 1) as SequenceNumber,
+      // W015 seam: the reduce-only position check over the live portfolio —
+      // the venue-side enforcement W014 left permissive until positions
+      // existed (documented known limitation, now wired).
+      reduceOnlyCheck: createReduceOnlyCheck(state.financial.portfolio),
     });
     if (outcome.kind === "rejected") {
       return { status: "rejected", rejection: outcome.rejection };
@@ -242,6 +260,47 @@ export function createHeadlessWorldEngine(
     evidence: evidencePort,
   };
 
+  /**
+   * The SIMULATION.md financial summary (balances, positions, P&L, risk) —
+   * deterministic account order (the definition), exact decimal text.
+   */
+  function financialSummary(): HeadlessFinancialSummary {
+    const asOf = clock.state().simulationTime as TimestampMs;
+    const balances: Money[] = [];
+    const positions: Position[] = [];
+    const pnl: HeadlessPnlSummary[] = [];
+    const risk: RiskState[] = [];
+    for (const account of definition.accounts) {
+      const accountId = String(account.accountId);
+      const ledger = financialLedgerOf(state.financial, accountId);
+      balances.push(...projectBalances(ledger));
+      const own = state.financial.portfolio.positions.filter(
+        (record) => String(record.accountId) === accountId,
+      );
+      positions.push(...own.filter(isOpenPosition).map(projectPosition));
+      const financials = financialsOf(state.financial, accountId);
+      const money = (scaled: bigint): Money => ({
+        amount: formatSignedMoney(scaled) as Money["amount"],
+        currency: financials.baseCurrency as Money["currency"],
+      });
+      pnl.push({
+        accountId: account.accountId,
+        realized: money(financials.realizedPnl),
+        unrealized: money(financials.unrealizedPnl),
+        total: money(financials.realizedPnl + financials.unrealizedPnl),
+      });
+      risk.push(
+        projectRiskState({
+          worldId: definition.scope.worldId,
+          accountId: account.accountId,
+          asOf,
+          risk: state.financial.risk,
+        }),
+      );
+    }
+    return { balances, positions, pnl, risk };
+  }
+
   return {
     worldId: definition.scope.worldId,
     protocol,
@@ -260,6 +319,7 @@ export function createHeadlessWorldEngine(
         seed: definition.seed,
         finalSimulationTime: clock.state().simulationTime,
         journal,
+        financial: financialSummary(),
       }),
   };
 }

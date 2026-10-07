@@ -1,5 +1,5 @@
 /**
- * THE DETERMINISM GOLDEN TEST — the W013/W014 package's flagship (A9).
+ * THE DETERMINISM GOLDEN TEST — the W013/W014/W015 package's flagship (A9).
  *
  * Spec: spec/ARCHITECTURE-LOCK.md A9 — "A determinism claim requires fixed
  * world definition, engine version, seed and command stream."
@@ -14,6 +14,16 @@
  * outcomes, cancels, replacements) so the matching engine's whole batch
  * journaling — trade prints, causal fills, book deltas — is under the A9
  * claim too.
+ * Spec: spec/DOMAIN-MODEL.md "Ownership"/"Financial precision" — the W015
+ * extension: the golden world carries TWO funded accounts (a trader with
+ * declared risk limits and a counterparty whose resting liquidity the flow
+ * trades against) and the stream includes close-position, so the golden
+ * claim now covers order flow → fills → ACCOUNT/PORTFOLIO/RISK: the
+ * identical-inputs runs must agree on the journal digest, the determinism
+ * manifest, the authoritative state (financial slice included) AND the
+ * headless financial report (balances, positions, P&L, risk), and a fresh
+ * instance replaying the journal must reproduce every event-derived
+ * financial figure bit-for-bit.
  *
  * Design: a fixed world definition (seed, versions, entities) and a SEEDED
  * command stream (mulberry32 PRNG choosing commands, rejections, duplicates
@@ -29,9 +39,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type {
+  Account,
   AddAnnotationCommand,
   CancelOrderCommand,
   OrderSide,
+  Participant,
   ReplaceOrderCommand,
   SetScenarioCommand,
   SubmitOrderCommand,
@@ -40,7 +52,14 @@ import type { DeterministicStreamVerification } from "tradrl-world-contracts/tim
 import { asWallTime } from "tradrl-world-contracts/time";
 import { validateEventStream } from "tradrl-world-contracts/time";
 import { createEventJournalFromRecords } from "../../journal/index.js";
+import {
+  formatSignedMoney,
+  isCanonicalSignedMoney,
+  parseSignedMoney,
+  signedMulDivHalfUp,
+} from "../../index.js";
 import { createHeadlessWorldEngine } from "../index.js";
+import type { HeadlessRunReport } from "../index.js";
 import type { WorldDefinition } from "../index.js";
 import {
   INSTRUMENT,
@@ -49,14 +68,53 @@ import {
   TRADER_ACCOUNT,
   WALL_START,
   addAnnotationCommand,
+  closePositionCommand,
   mulberry32,
   setScenarioCommand,
+  testAccount,
   testDefinition,
+  testParticipant,
+  testVenue,
 } from "./helpers.js";
 
 const GOLDEN_PRNG_SEED = 0x5eed_013;
-const ITERATIONS = 48;
+const ITERATIONS = 96;
 const REGIMES = ["trend", "mean-reversion", "high-volatility", "low-liquidity", "shock", "halt-reopen"] as const;
+const COUNTER = "participant-counter" as Participant["participantId"];
+const COUNTER_ACCOUNT = "account-counter" as Account["accountId"];
+
+/**
+ * The golden world (W015 extension): a TRADER account with declared risk
+ * limits and a funded COUNTER account with a second participant, so the
+ * golden flow OPENS real positions on both sides of the book (the W013/W014
+ * golden was single-account: every trade netted to zero and only fees moved
+ * cash). The counterparty rests in the warm-up; the seeded mix trades against
+ * its liquidity, so fills, fees, marks, P&L and risk all land under the A9
+ * claim (order flow → fills → account/portfolio/risk).
+ */
+function goldenDefinition(): WorldDefinition {
+  return testDefinition({
+    venues: [testVenue()],
+    accounts: [
+      testAccount(),
+      testAccount({
+        accountId: COUNTER_ACCOUNT,
+        balances: { USD: { amount: "50000.00" as never, currency: "USD" as never } } as never,
+        buyingPower: { amount: "50000.00" as never, currency: "USD" as never },
+        marginUsed: { amount: "0.00" as never, currency: "USD" as never },
+        marginAvailable: { amount: "50000.00" as never, currency: "USD" as never },
+        leverage: 2,
+      }),
+    ],
+    participants: [testParticipant(), testParticipant({ participantId: COUNTER, accountId: COUNTER_ACCOUNT })],
+    riskLimits: {
+      [TRADER_ACCOUNT]: {
+        maxOrderQuantity: "9" as never,
+        maxGrossExposure: { amount: "60000" as never, currency: "USD" as never },
+      },
+    },
+  });
+}
 
 /** A tick-aligned canonical price `4800 + 0.25 × ticksFromMid`. */
 function priceAt(ticksFromMid: number): string {
@@ -87,7 +145,7 @@ async function runGoldenEngine(options: {
   wallBase: number;
   definition?: WorldDefinition;
 }) {
-  const definition = options.definition ?? testDefinition();
+  const definition = options.definition ?? goldenDefinition();
   let wallTick = 0;
   const engine = createHeadlessWorldEngine({
     definition,
@@ -110,14 +168,36 @@ async function runGoldenEngine(options: {
       instrumentId: INSTRUMENT,
       submission,
     });
+  /** Submit one order as the counterparty (the other side of the book). */
+  const counterOrder = (submission: SubmitOrderCommand["submission"], commandId: string) =>
+    engine.command.submitOrder({
+      kind: "submit-order",
+      commandId: commandId as never,
+      worldId: definition.scope.worldId,
+      issuedBy: COUNTER,
+      issuedAt: START as never,
+      accountId: COUNTER_ACCOUNT,
+      instrumentId: INSTRUMENT,
+      submission,
+    });
 
-  // --- the W014 warm-up flow (deterministic, seed-independent) ---------------
-  // 1. a resting maker sell at 4800.25
-  await order({ kind: "limit", side: "sell", quantity: "10" as never, limitPrice: "4800.25" as never, constraints: { timeInForce: "GTC" } }, "cmd-flow-warm-1");
+  // --- the W014/W015 warm-up flow (deterministic, seed-independent) ---------
+  // 1. the counterparty rests a maker ask at 4800.25 (the trader will trade
+  //    against it, so BOTH accounts open real positions from the same tape)
+  await counterOrder({ kind: "limit", side: "sell", quantity: "10" as never, limitPrice: "4800.25" as never, constraints: { timeInForce: "GTC" } }, "cmd-flow-warm-1");
   // 2. an armed stop buy at 4800
   await order({ kind: "stop", side: "buy", quantity: "3" as never, stopPrice: "4800" as never, constraints: { timeInForce: "GTC" } }, "cmd-flow-warm-2");
   // 3. a market buy that trades at 4800.25, triggering and filling the stop
   await order({ kind: "market", side: "buy", quantity: "2" as never, constraints: { timeInForce: "IOC" } }, "cmd-flow-warm-3");
+  // 4. the counterparty rests a bid one tick below (does not cross its own
+  //    ask); a pure reduction for its short — accepted margin-free
+  await counterOrder({ kind: "limit", side: "buy", quantity: "5" as never, limitPrice: "4799.75" as never, constraints: { timeInForce: "GTC" } }, "cmd-flow-warm-4");
+  // 5. the trader CLOSES through the venue (W015): the reducing IOC market
+  //    sell crosses the bid — realized P&L lands on both accounts and the
+  //    mark moves off the entry price
+  await engine.command.closePosition(
+    closePositionCommand({ commandId: "cmd-flow-warm-5" as never }),
+  );
 
   // --- the seeded command mix ------------------------------------------------
   for (let i = 0; i < ITERATIONS; i += 1) {
@@ -233,7 +313,14 @@ async function runGoldenEngine(options: {
           },
           commandId,
         );
-      } else if (pick < 0.88 && live.length > 0) {
+      } else if (pick < 0.82) {
+        // W015: close the trader's position through the venue (a reducing
+        // IOC market order — acked, or the typed no-open-position rejection
+        // when flat; both are deterministic outcomes of the same stream)
+        await engine.command.closePosition(
+          closePositionCommand({ commandId: commandId as never, issuedAt: (START + i) as never }),
+        );
+      } else if (pick < 0.9 && live.length > 0) {
         // cancel a live order (deterministic pick from current state)
         const cancel: CancelOrderCommand = {
           kind: "cancel-order",
@@ -281,12 +368,13 @@ function outcomeOf(engine: Awaited<ReturnType<typeof runGoldenEngine>>) {
     digest,
     manifest,
     state: engine.worldState(),
+    report: engine.headlessReport(),
     verification: { manifest, digest } as DeterministicStreamVerification,
     journalSize: engine.journal.size(),
   };
 }
 
-test("A9 golden: identical inputs ⇒ identical digest, manifest and state across runs", async () => {
+test("A9 golden: identical inputs ⇒ identical digest, manifest, state and financial report across runs", async () => {
   const runA = outcomeOf(await runGoldenEngine({ prngSeed: GOLDEN_PRNG_SEED, wallBase: WALL_START }));
   const runB = outcomeOf(await runGoldenEngine({ prngSeed: GOLDEN_PRNG_SEED, wallBase: WALL_START }));
 
@@ -294,6 +382,7 @@ test("A9 golden: identical inputs ⇒ identical digest, manifest and state acros
   assert.deepEqual(runA.digest, runB.digest, "journal digest identical");
   assert.deepEqual(runA.manifest, runB.manifest, "determinism manifest identical");
   assert.deepEqual(runA.state, runB.state, "authoritative state identical");
+  assert.deepEqual(runA.report, runB.report, "headless financial report identical (W015)");
   assert.deepEqual(runA.verification, runB.verification, "DeterministicStreamVerification identical");
   assert.equal(runA.digest.lastSequence, runA.journalSize);
 });
@@ -305,11 +394,12 @@ test("A9 golden: wall time never leaks into the journal (varied wall clock, same
   );
   assert.deepEqual(otherHost.digest, hostRun.digest, "digest is wall-time independent");
   assert.deepEqual(otherHost.state, hostRun.state, "state is wall-time independent");
+  assert.deepEqual(otherHost.report, hostRun.report, "financial report is wall-time independent (W015)");
   assert.equal(otherHost.manifest.commandStreamHash, hostRun.manifest.commandStreamHash);
 });
 
 test("A9 golden: a fresh instance replaying the same journal reproduces everything", async () => {
-  const definition = testDefinition();
+  const definition = goldenDefinition();
   const source = await runGoldenEngine({ prngSeed: GOLDEN_PRNG_SEED, wallBase: WALL_START });
   const original = outcomeOf(source);
 
@@ -327,6 +417,21 @@ test("A9 golden: a fresh instance replaying the same journal reproduces everythi
 
   assert.deepEqual(restored.journal.digest(), original.digest, "restored digest identical");
   assert.deepEqual(restored.worldState(), original.state, "replayed state bit-identical");
+  // the W015 financial surface survives the replay bit-for-bit: every
+  // event-derived figure (balances, open positions, P&L, breach history) is
+  // reproduced from the journal alone. asOf-bearing projections re-derive
+  // from the replayed clock (the finalSimulationTime assertion below pins
+  // the one honest difference: the live run's clock advanced past the last
+  // event; the replayed clock starts at it).
+  const restoredReport: HeadlessRunReport = restored.headlessReport();
+  assert.deepEqual(restoredReport.balances, original.report.balances, "replayed balances identical");
+  assert.deepEqual(restoredReport.positions, original.report.positions, "replayed positions identical");
+  assert.deepEqual(restoredReport.pnl, original.report.pnl, "replayed P&L identical");
+  assert.deepEqual(
+    restoredReport.risk.map((entry) => ({ ...entry, asOf: undefined })),
+    original.report.risk.map((entry) => ({ ...entry, asOf: undefined })),
+    "replayed risk (limits + breaches) identical",
+  );
   const records = restored.journal.records();
   assert.equal(
     restored.clockState().simulationTime,
@@ -344,9 +449,12 @@ test("A9 golden: a fresh instance replaying the same journal reproduces everythi
     duplicate.status === "rejected" && duplicate.rejection.code,
     "duplicate-command",
   );
-  // and the W014 seam survives the replay: the restored engine keeps
+  // and the W014/W015 seams survive the replay: the restored engine keeps
   // accepting orders through the same lifecycle, with the replayed order
-  // registry continuing from where the journal left off
+  // registry continuing from where the journal left off. The probe is a
+  // small far-away resting SELL — it passes the trader's golden risk limits
+  // in every reachable end state (a reduction when long, gross 4804 when
+  // flat) and cannot cross (the book's bids rest well below mid).
   const ordersBefore = restored.worldState().matching.orders.length;
   const fresh = await restored.command.submitOrder({
     kind: "submit-order",
@@ -358,9 +466,9 @@ test("A9 golden: a fresh instance replaying the same journal reproduces everythi
     instrumentId: INSTRUMENT,
     submission: {
       kind: "limit",
-      side: "buy",
-      quantity: "7" as never,
-      limitPrice: "4799.75" as never,
+      side: "sell",
+      quantity: "1" as never,
+      limitPrice: "4804" as never,
       constraints: { timeInForce: "GTC" },
     },
   });
@@ -479,4 +587,63 @@ test("A9 golden: annotation ids are derived deterministically from the event-sou
     annotations.map((annotation) => String(annotation.annotationId)),
     annotations.map((_, index) => `ann:world-w013-tests:${String(index + 1)}`),
   );
+});
+
+test("A9 golden financial surface (W015): real positions, real fees, exact canonical figures", async () => {
+  const run = outcomeOf(await runGoldenEngine({ prngSeed: GOLDEN_PRNG_SEED, wallBase: WALL_START }));
+  const report = run.report;
+  // both accounts built position LEDGERS from journaled fills (records
+  // persist after closing — the single-account netting of the W013/W014
+  // golden, where every trade netted to zero, is gone)
+  assert.ok(
+    run.state.financial.portfolio.positions.length >= 2,
+    "both golden accounts hold position ledgers",
+  );
+  assert.ok(report.positions.length >= 1, "the golden flow ends with open positions");
+  for (const position of report.positions) {
+    assert.ok(isCanonicalSignedMoney(position.quantity), "quantity is canonical decimal text");
+    assert.ok(isCanonicalSignedMoney(position.averageEntryPrice), "average entry is canonical");
+    assert.ok(isCanonicalSignedMoney(position.realizedPnl.amount), "realized P&L is canonical");
+    assert.ok(isCanonicalSignedMoney(position.unrealizedPnl.amount), "unrealized P&L is canonical");
+    // THE EXACT-MATH LAW, recomputed here from the projected canonical text:
+    // unrealized = (mark − avgEntry) × signedQuantity, ONE half-up rounding
+    const mark = position.markPrice ?? position.averageEntryPrice;
+    const recomputed = formatSignedMoney(
+      signedMulDivHalfUp(
+        parseSignedMoney(mark) - parseSignedMoney(position.averageEntryPrice),
+        parseSignedMoney(position.quantity),
+        10n ** 12n,
+      ),
+    );
+    assert.equal(
+      position.unrealizedPnl.amount,
+      recomputed,
+      `unrealized P&L of ${String(position.accountId)} is (mark − avg) × qty`,
+    );
+  }
+  // fees really charged: both accounts started at their declared cash and
+  // the venue schedule (2/5 bps + 0.10 per order) collected on every fill
+  const traderCash = Number(report.balances[0]?.amount ?? "0");
+  assert.ok(traderCash < 100_000, `the trader paid fees (cash ${String(traderCash)})`);
+  const counterCash = Number(report.balances[1]?.amount ?? "0");
+  assert.ok(counterCash < 50_000, `the counterparty paid fees (cash ${String(counterCash)})`);
+  // the P&L consistency law per account: total = realized + unrealized
+  for (const entry of report.pnl) {
+    assert.ok(isCanonicalSignedMoney(entry.realized.amount));
+    assert.ok(isCanonicalSignedMoney(entry.unrealized.amount));
+    assert.equal(
+      entry.total.amount,
+      formatSignedMoney(
+        parseSignedMoney(entry.realized.amount) + parseSignedMoney(entry.unrealized.amount),
+      ),
+      `total P&L of ${String(entry.accountId)} = realized + unrealized`,
+    );
+  }
+  // the declared limits ride into the risk projection verbatim (A13: the
+  // runtime control's read side is the declaration, not derived state)
+  const traderRisk = report.risk.find((entry) => String(entry.accountId) === String(TRADER_ACCOUNT));
+  assert.deepEqual(traderRisk?.limits, {
+    maxOrderQuantity: "9",
+    maxGrossExposure: { amount: "60000", currency: "USD" },
+  });
 });

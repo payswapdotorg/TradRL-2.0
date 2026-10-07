@@ -24,6 +24,7 @@ import type {
   NewsPayload,
   Participant,
   RegimeScheduleEntry,
+  RiskLimits,
   ScenarioDefinition,
   Venue,
   WorldMeta,
@@ -31,6 +32,8 @@ import type {
   WorldScope,
 } from "tradrl-world-contracts";
 import type { SimulationTimeMs, WallTimeMs } from "tradrl-world-contracts/time";
+import { isCanonicalDecimal } from "../orderbook/index.js";
+import { validateRiskLimits } from "../risk/index.js";
 import { InvalidWorldDefinitionError } from "./errors.js";
 
 /** Engine identity constants (determinism manifest inputs, A9). */
@@ -45,11 +48,11 @@ export const CONTRACTS_DEPENDENCY_VERSION = "0.1.0";
 /** Skeleton limitations reported in WorldMeta.knownLimitations. */
 export const SKELETON_KNOWN_LIMITATIONS: readonly string[] = [
   "W014: matching is participant-to-participant — no synthetic market generator yet (W017), so books start empty and only participant liquidity rests on them",
-  "W014: reduce-only enforcement is structural — the typed position-check seam is permissive until the account engine wires it (W015)",
-  "W013 skeleton: no account/portfolio/risk engine — financial projections are typed not-implemented-in-skeleton rejections (W015)",
+  "W014/W015: the reduce-only venue seam is directional (no quantity) — a reduce-only order larger than the opposite position can still flip it",
+  "W015: no FX conversion — position P&L in an instrument whose quote currency differs from the account base currency aggregates 1:1",
+  "W015: stops are sized at their stop price at submission — a triggered stop executes as market (trigger-time exposure is uncontrolled)",
   "W013 skeleton: no snapshot/branch engine — snapshot/branch commands are typed not-implemented-in-skeleton rejections (W016)",
   "W013 skeleton: no synthetic market generator — no market events are produced by clock advance (W017)",
-  "W013 skeleton: no worker/process adapter — in-process headless use only (W018)",
 ];
 
 /** Clock genesis: how the simulation clock is born at engine creation. */
@@ -86,6 +89,13 @@ export interface WorldDefinition {
   readonly venues?: readonly Venue[];
   readonly accounts: readonly Account[];
   readonly participants: readonly Participant[];
+  /**
+   * Per-account risk limits (W015 seam): a declaration, not derived state —
+   * the A13 runtime gate enforces exactly these (unset limits are not
+   * enforced). Keyed by account id; absent accounts run unlimited except
+   * the account's own margin/buying-power model.
+   */
+  readonly riskLimits?: Readonly<Record<string, RiskLimits>>;
   /** Information world subset: news artifacts behind the A7 firewall. */
   readonly informationArtifacts?: readonly InformationArtifact<NewsPayload>[];
 }
@@ -105,6 +115,10 @@ function isValidRegimeKind(kind: unknown): boolean {
     kind === "shock" ||
     kind === "halt-reopen"
   );
+}
+
+function isCanonicalDecimalText(value: unknown): boolean {
+  return isCanonicalDecimal(value) && Number(value) >= 0;
 }
 
 /** Structural validation of a world definition (fails fast at creation). */
@@ -191,6 +205,25 @@ export function validateWorldDefinition(definition: WorldDefinition): readonly s
     if (account.permissions.liveExecutionAllowed !== false) {
       errors.push(`account ${String(account.accountId)}: live execution must be disallowed (A14)`);
     }
+    // W015 seam: the margin model requires an integer leverage ≥ 1 (exact
+    // rational divisor — DOMAIN-MODEL.md "Financial precision") and
+    // canonical decimal balances (they seed the exact ledger).
+    if (!Number.isInteger(account.leverage) || account.leverage < 1) {
+      errors.push(`account ${String(account.accountId)}: leverage must be an integer ≥ 1 (W015 margin model)`);
+    }
+    for (const [currency, money] of Object.entries(account.balances)) {
+      if (!isCanonicalDecimalText(money.amount)) {
+        errors.push(`account ${String(account.accountId)}: balance ${currency} must be canonical decimal text`);
+      }
+    }
+  }
+
+  // W015 seam: declared risk limits are validated structurally (fail fast)
+  for (const [accountId, limits] of Object.entries(definition.riskLimits ?? {})) {
+    if (!accountIds.has(accountId)) {
+      errors.push(`riskLimits references unknown account ${accountId}`);
+    }
+    errors.push(...validateRiskLimits(limits, `riskLimits.${accountId}`));
   }
 
   const participantIds = new Set<string>();

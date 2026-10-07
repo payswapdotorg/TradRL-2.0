@@ -20,6 +20,13 @@
  * - ./matching/index.js — the matching engine (W014): order kinds × TIF ×
  *   policies, fees, latency, fills with the causal trade reference, the
  *   typed lifecycle seam the world core calls.
+ * - ./account/index.js — the authoritative account state (W015): ledger,
+ *   margin model, order acceptance checks, the composite financial state.
+ * - ./portfolio/index.js — the position ledger and P&L (W015): signed
+ *   exact-money math, mark-to-market, the W003 Portfolio projection and
+ *   the close-position seam.
+ * - ./risk/index.js — the pre-trade risk gate (W015): declared limits,
+ *   typed outcomes, breach history, the reduce-only position check.
  *
  * Zero runtime dependencies beyond `tradrl-world-contracts`.
  */
@@ -28,3 +35,6 @@ export * from "./clock/index.js";
 export * from "./journal/index.js";
 export * from "./world/index.js";
 export * from "./adapter/index.js";
+export * from "./account/index.js";
+export * from "./portfolio/index.js";
+export * from "./risk/index.js";
