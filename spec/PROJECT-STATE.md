@@ -4,35 +4,36 @@ Repository: payswapdotorg/TradRL-2.0
 Upstream base: zai-org/zcode
 Program: TRADRL-2.0
 
-Status at architecture bootstrap:
-- program implementation: not started
+## Current program state
+
+- W001: merged at 9f0e10924cac319261f7689b40ebe11988f772e9
+- Current ready frontier: W002, W003
 - World Alpha: not started
 - Agent/RL implementation: gated behind World Alpha
 - Arena: optional, non-blocking
-- max workers: 3
+- Maximum workers: 3
 
-## Primary objective
+## Immediate objective
 
-Build Trader World Alpha as the first useful TradRL product surface inside the existing ZCode workbench.
+Build Trader World Alpha inside the existing ZCode workbench.
 
-## State ownership
+That means a first-class Trading World dockable surface backed by a real deterministic simulated market with order-book execution, portfolio/risk, clock, snapshots, branching, journal/evidence, headless parity and responsive UX.
 
-`program/graph.json` is authoritative for Work Order status.
+## Authoritative state
 
-This document records the current milestone and architectural context.
+program/graph.json is authoritative for Work Order status.
 
-## Carried-forward architecture
+## Architectural decisions carried forward
 
-- Agent = Body + Cognitive Substrate via Possession.
-- Organization is discoverable/optimizable.
+- ZCode is the outer workbench.
+- Trading World is the first product surface.
+- Market World is the authoritative primitive.
+- Human and AI use the same World Protocol.
+- Agent = Body possessed by Cognitive Substrate.
 - Capability discovery is empirical.
-- Specialized models can be selected when measured capability warrants them.
-- World modes: exact replay, reactive replay, counterfactual.
-- Time Machine enforces point-in-time knowledge.
-- Reward/evaluation are constraint-aware.
+- Specialized models are chosen by measured capability, not labels.
+- World fidelity modes are exact replay, reactive replay and counterfactual.
+- Time Machine is point-in-time safe.
+- Evaluation is constraint-aware and search-integrity aware.
 - Firm Brain is tenant isolated.
-- Arena is optional human expertise, never the learning engine.
-
-## Update rule
-
-After every merge that changes readiness, the TL updates graph state and this document from repository facts.
+- Arena is optional human expertise, never the core learning engine.
