@@ -1,0 +1,35 @@
+{
+  "name": "tradrl-world-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "description": "Canonical TradRL trading/world domain contracts (spec/DOMAIN-MODEL.md, spec/WORLD-PROTOCOL.md).",
+  "exports": {
+    ".": "./src/index.ts",
+    "./ids": "./src/ids.ts",
+    "./primitives": "./src/primitives.ts",
+    "./instrument": "./src/instrument.ts",
+    "./orders": "./src/orders.ts",
+    "./execution": "./src/execution.ts",
+    "./account": "./src/account.ts",
+    "./portfolio": "./src/portfolio.ts",
+    "./risk": "./src/risk.ts",
+    "./participant": "./src/participant.ts",
+    "./information": "./src/information.ts",
+    "./market": "./src/market.ts",
+    "./world": "./src/world.ts",
+    "./events": "./src/events.ts",
+    "./commands": "./src/commands.ts",
+    "./ports": "./src/ports.ts"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
