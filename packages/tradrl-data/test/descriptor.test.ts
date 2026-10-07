@@ -64,8 +64,8 @@ test("range must be finite and ordered", () => {
     ).some((problem) => problem.includes("must not exceed")),
   );
   assert.ok(
-    validateDatasetDescriptor(aDescriptor({ range: { from: Number.NaN } })).some((problem) =>
-      problem.includes("range.from"),
+    validateDatasetDescriptor(aDescriptor({ range: { from: at(Number.NaN) } })).some(
+      (problem) => problem.includes("range.from"),
     ),
   );
 });

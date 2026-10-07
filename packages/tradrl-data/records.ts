@@ -7,12 +7,12 @@
  * No IO, no clock reads, no RNG (ARCHITECTURE-LOCK.md A9).
  */
 
+import type { TimestampMs } from "tradrl-world-contracts";
 import type {
   HistoricalBarRecord,
   HistoricalQuoteRecord,
   HistoricalRecord,
   HistoricalTradeRecord,
-  TimestampMs,
 } from "tradrl-world-contracts/data";
 
 /** Type guard: is this record a bar? */

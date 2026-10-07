@@ -83,12 +83,21 @@ owns. The imported event taxonomy rides the W004 canonical types for quotes
 and trades (`market.quote.updated`, `market.trade.printed`) plus the
 W020-owned `market.bar.closed` extension declared in `contracts/data`.
 
-## Environment note (worktree shim)
+## Environment note (worktree stand-ins)
 
-`packages/tradrl-data/node_modules/` is an UNTRACKED worktree stand-in (the
-W008/W011 pattern): `tradrl-world-contracts` is a shim re-exporting the real
-worktree sources (it adds the `./data` subpath the real exports map does not
-carry yet) and `tradrl-world-sim` is a hardlink copy. Neither is committed.
-Registering the real `"./data": "./src/data.ts"` exports entry and the
-`tradrl-data` importer in `pnpm-lock.yaml` are TL action items (the W013
-precedent).
+The following are UNTRACKED worktree stand-ins (symlink creation is blocked
+in this sandbox; nothing here is ever committed — `git status` stays clean):
+
+- `packages/tradrl-data/node_modules/tradrl-world-contracts/` — a shim
+  package re-exporting the real worktree sources; it carries the `./data`
+  subpath the real exports map does not have yet (the TL registers it).
+- `packages/tradrl-data/node_modules/tradrl-world-sim/` — a hardlink copy
+  of the worktree sim package (same inodes, read-only use).
+- `packages/tradrl-world-sim/node_modules/tradrl-world-contracts/` and the
+  `packages/ui` + `packages/shared` `node_modules` — hardlink copies/`.mjs`
+  re-export shims replicating the main checkout's workspace links so the
+  sim (307/307) and ui (222/222) regression suites run from THIS worktree.
+
+Registering the real `"./data": "./src/data.ts"` exports entry in
+`packages/tradrl-world-contracts/package.json` and the `tradrl-data`
+importer in `pnpm-lock.yaml` are TL action items (the W013 precedent).

@@ -15,7 +15,6 @@
  */
 
 import type {
-  HistoricalRecord,
   InstrumentId,
   TimestampMs,
   WorldId,
@@ -26,6 +25,7 @@ import type {
   DatasetRange,
   HistoricalBarRecord,
   HistoricalQuoteRecord,
+  HistoricalRecord,
   HistoricalTradeRecord,
 } from "tradrl-world-contracts/data";
 import type { DatasetViolation } from "./errors.js";
@@ -252,12 +252,13 @@ function recordViolations(
       { kind: "malformed-record", index, detail: `record ${String(index)}: must be an object` },
     ];
   }
-  if (record.kind !== "bar" && record.kind !== "trade" && record.kind !== "quote") {
+  const kind = (record as { readonly kind?: unknown }).kind;
+  if (kind !== "bar" && kind !== "trade" && kind !== "quote") {
     return [
       {
         kind: "malformed-record",
         index,
-        detail: `record ${String(index)}: unknown record kind '${String(record.kind)}'`,
+        detail: `record ${String(index)}: unknown record kind '${String(kind)}'`,
       },
     ];
   }

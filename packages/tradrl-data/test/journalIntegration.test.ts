@@ -41,6 +41,7 @@ import {
   WORLD,
   aDescriptor,
   aTrade,
+  at,
   happyImportRecords,
   snapshotIdOf,
   snapshotTestDefinition,
@@ -90,7 +91,7 @@ test("journal queries filter imported events (EventQuery semantics)", () => {
   const bars = journal.read({ types: ["market.bar.closed"] });
   assert.equal(bars.length, 3);
   assert.ok(bars.every((envelope) => envelope.eventType === "market.bar.closed"));
-  const lateWindow = journal.read({ from: T0 + 4 * MINUTE });
+  const lateWindow = journal.read({ from: at(T0 + 4 * MINUTE) });
   assert.equal(lateWindow.length, 3);
 });
 
@@ -101,10 +102,10 @@ test("the journal's own laws keep governing imported data (later out-of-time app
     happyInput({
       descriptor: aDescriptor({
         datasetId: "ds-fixture-later" as never,
-        range: { from: T0 + 5 * MINUTE, to: T0 + 10 * MINUTE },
+        range: { from: at(T0 + 5 * MINUTE), to: at(T0 + 10 * MINUTE) },
         knownGaps: [],
       }),
-      records: [aTrade({ timestamp: T0 + 5 * MINUTE + 1_000, tradeId: "later-1" })],
+      records: [aTrade({ timestamp: at(T0 + 5 * MINUTE + 1_000), tradeId: "later-1" })],
     }),
   );
   const sealed = journal.append([...laterImport.drafts]);
@@ -115,10 +116,10 @@ test("the journal's own laws keep governing imported data (later out-of-time app
     happyInput({
       descriptor: aDescriptor({
         datasetId: "ds-fixture-early" as never,
-        range: { from: T0 + 4 * MINUTE, to: T0 + 5 * MINUTE },
+        range: { from: at(T0 + 4 * MINUTE), to: at(T0 + 5 * MINUTE) },
         knownGaps: [],
       }),
-      records: [aTrade({ timestamp: T0 + 4 * MINUTE + 5_000, tradeId: "early-1" })],
+      records: [aTrade({ timestamp: at(T0 + 4 * MINUTE + 5_000), tradeId: "early-1" })],
     }),
   );
   assert.throws(

@@ -121,14 +121,13 @@ export function validateDatasetDescriptor(
       problems.push(...gapProblems(descriptor.knownGaps[i], i));
     }
     // Gaps must not overlap each other and must sit inside the declared range.
-    const gaps = descriptor.knownGaps.filter(
-      (gap): gap is DatasetGap =>
-        typeof gap === "object" &&
-        gap !== null &&
-        isFiniteTime((gap as Partial<DatasetGap>).from) &&
-        isFiniteTime((gap as Partial<DatasetGap>).to) &&
-        (gap as Partial<DatasetGap>).from < (gap as Partial<DatasetGap>).to,
-    );
+    const gaps = descriptor.knownGaps.filter((gap): gap is DatasetGap => {
+      if (typeof gap !== "object" || gap === null) {
+        return false;
+      }
+      const { from, to } = gap as Partial<DatasetGap>;
+      return isFiniteTime(from) && isFiniteTime(to) && from < to;
+    });
     const ordered = [...gaps].sort((left, right) => left.from - right.from);
     for (let i = 1; i < ordered.length; i += 1) {
       const previous = ordered[i - 1]!;
