@@ -17,3 +17,6 @@ export * from "./primitives.js";
 export * from "./instrument.js";
 export * from "./orders.js";
 export * from "./execution.js";
+export * from "./account.js";
+export * from "./portfolio.js";
+export * from "./risk.js";
