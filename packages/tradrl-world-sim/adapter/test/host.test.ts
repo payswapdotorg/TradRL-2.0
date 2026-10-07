@@ -52,7 +52,7 @@ test("host.describe reports adapter+engine identity and the envelope version", a
   assert.equal(info.journalCursor, 0);
 });
 
-test("dispatch reaches the engine ports: query ok, typed stubs as remote errors", async () => {
+test("dispatch reaches the engine ports: query ok, typed errors as remote errors", async () => {
   const { runtime, emitted } = harness();
   runtime.core.handleClientMessage({
     kind: "request",
@@ -62,7 +62,10 @@ test("dispatch reaches the engine ports: query ok, typed stubs as remote errors"
   runtime.core.handleClientMessage({
     kind: "request",
     requestId: 2,
-    call: { port: "query", method: "getQuote", args: ["instrument-es-fut"] },
+    // getQuote is delivered since W017 (a book projection of the real book);
+    // the remote-error path is exercised with an unknown-entity query — a
+    // typed engine error crossing the adapter boundary, never a fabricated quote
+    call: { port: "query", method: "getQuote", args: ["instrument-unknown"] },
   });
   await new Promise((resolve) => setTimeout(resolve, 0));
   const metaResponse = emitted.find((m) => m.kind === "response" && m.requestId === 1);
@@ -76,8 +79,8 @@ test("dispatch reaches the engine ports: query ok, typed stubs as remote errors"
   assert.ok(
     quoteResponse?.kind === "response" &&
       quoteResponse.outcome.status === "error" &&
-      quoteResponse.outcome.error.name === "NotImplementedInSkeletonError",
-    "the W017 stub surfaces as a typed remote error — never a fabricated quote",
+      quoteResponse.outcome.error.name === "UnknownWorldEntityError",
+    "an unknown-entity query surfaces as a typed remote error — never a fabricated quote",
   );
 });
 
@@ -94,8 +97,8 @@ test("command results are VALUES (acked or typed rejection), not wire errors", a
     // W014/W015 made submit-order real — the default helper's on-grid price
     // passes the pre-trade stage and the venue, so the ack itself is the
     // value-not-wire-error case (the typed validate rejection below is the
-    // other). W016's pre-W015 repair of this test used an off-grid price as
-    // its rejection-value case; main's W015 repair carries the stronger
+    // other). W016's and W017's pre-W015 repairs of this test used rejection
+    // cases of the same kind; main's W015 repair carries the stronger
     // three-part form, which is what survives here.
     call: { port: "command", method: "submitOrder", args: [submitOrderCommand()] },
   });

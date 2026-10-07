@@ -48,12 +48,13 @@ export const CONTRACTS_DEPENDENCY_VERSION = "0.1.0";
 
 /** Skeleton limitations reported in WorldMeta.knownLimitations. */
 export const SKELETON_KNOWN_LIMITATIONS: readonly string[] = [
-  "W014: matching is participant-to-participant — no synthetic market generator yet (W017), so books start empty and only participant liquidity rests on them",
+  "W017: the synthetic market generator quotes and trades through the real matching engine with parameter-driven regime profiles — no microstructure model beyond tick-grid quoting/taking; generated participants have no inventory/margin awareness of their own — with W015 their orders pass the account acceptance and risk gates like any participant order (the planner never sizes to buying power)",
+  "W017: generator turns fire on the schedule's action grid (tickMs, default 1000ms); a seek across a long interval replays every intermediate turn (O(turns))",
+  "W017: schedule gaps (times no regime window covers) produce no participant actions, and the W004 regime-change payload cannot express 'no regime' — the last announcement remains the journal's regime truth",
   "W014/W015: the reduce-only venue seam is directional (no quantity) — a reduce-only order larger than the opposite position can still flip it",
   "W015: no FX conversion — position P&L in an instrument whose quote currency differs from the account base currency aggregates 1:1",
   "W015: stops are sized at their stop price at submission — a triggered stop executes as market (trigger-time exposure is uncontrolled)",
   "W016: snapshot payloads are engine-session artifacts — journal replay rebuilds them from journaled truth, but a bare journal does not carry a branch world's ancestor lineage (the branch record lives on the parent world's journal)",
-  "W013 skeleton: no synthetic market generator — no market events are produced by clock advance (W017)",
 ];
 
 /** Clock genesis: how the simulation clock is born at engine creation. */

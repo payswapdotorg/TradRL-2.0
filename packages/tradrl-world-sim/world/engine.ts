@@ -30,6 +30,7 @@
 import type {
   BranchConfiguration,
   ClockPort,
+  CommandId,
   CommandPort,
   CommandResult,
   DeterminismManifest,
@@ -50,6 +51,7 @@ import type { ClockState } from "tradrl-world-contracts/time";
 import { asClockPort, createSimulationClock, type SimulationClock } from "../clock/index.js";
 import type { EventJournal, JournalRecord } from "../journal/index.js";
 import { createEventJournal, createEventJournalFromRecords } from "../journal/index.js";
+import type { PendingEventDraft } from "../journal/eventJournal.js";
 import { withBranchWorldId } from "../branch/definition.js";
 import { branchGenesisState } from "../branch/genesis.js";
 import type { BranchLineageRecord } from "../branch/lineage.js";
@@ -149,6 +151,12 @@ export interface HeadlessWorldEngine {
   clockState(): ClockState;
   /** Snapshot of the authoritative world state (engine surface, not a port). */
   worldState(): WorldState;
+  /**
+   * The W017 generator seam (engine surface, not a port): journal + reduce
+   * generator-produced market events through the single command path. See
+   * the generator module (generator/engine.ts) — the only intended caller.
+   */
+  applyGeneratorEvents(drafts: readonly PendingEventDraft[]): readonly WorldEventEnvelope[];
   determinismManifest(): DeterminismManifest;
   headlessReport(): HeadlessRunReport;
   /** W016: full snapshot payloads taken in this session (restore/branch inputs). */
@@ -349,20 +357,13 @@ export function createHeadlessWorldEngine(
     if (outcome.kind === "rejected") {
       return { status: "rejected", rejection: outcome.rejection };
     }
-    const occurredAt = clock.state().simulationTime as TimestampMs;
-    const sealed = journal.append(outcome.drafts, { recordedAt: occurredAt });
-    // Mutate authoritative state by reducing exactly what was journaled —
-    // the same path replay uses.
-    const records = journal.records();
-    for (const record of records.slice(records.length - sealed.length)) {
-      state = reduceWorldEvent(state, record);
-    }
+    const sealed = journalAndReduce(outcome.drafts);
     const ack: CommandResult & { status: "acked" } = {
       status: "acked",
       ack: {
         commandId: command.commandId,
         worldId: definition.scope.worldId,
-        acceptedAt: occurredAt,
+        acceptedAt: sealed.length > 0 ? sealed[sealed.length - 1]!.occurredAt : (clock.state().simulationTime as TimestampMs),
         resultingEventIds: sealed.map(
           (envelope: WorldEventEnvelope): EventId => envelope.eventId,
         ),
@@ -423,6 +424,58 @@ export function createHeadlessWorldEngine(
     }
   }
 
+  /**
+   * The single journal→reduce path (A6): append ordered drafts, then advance
+   * the authoritative state by reducing exactly what was journaled — the
+   * same path replay uses. Shared by the command lifecycle and the W017
+   * generator seam below.
+   */
+  function journalAndReduce(drafts: readonly PendingEventDraft[]): readonly WorldEventEnvelope[] {
+    const occurredAt = clock.state().simulationTime as TimestampMs;
+    const sealed = journal.append(drafts, { recordedAt: occurredAt });
+    const records = journal.records();
+    for (const record of records.slice(records.length - sealed.length)) {
+      state = reduceWorldEvent(state, record);
+    }
+    return sealed;
+  }
+
+  /**
+   * THE W017 SEAM (engine surface, not a World Protocol port): journal and
+   * reduce market events produced by the synthetic market generator
+   * (generator/engine.ts) through the exact single path commands use — so
+   * generated market events advance the authoritative state and replay
+   * bit-identically (A6/A9). The generator OWNS which events these are
+   * (regime announcements, halt/reopen transitions, quote projections); this
+   * method is deliberately mechanics-only: no lifecycle, no command-stream
+   * hashing (generated events are deterministic functions of definition +
+   * seed + clock operations, never commands).
+   */
+  function applyGeneratorEvents(
+    drafts: readonly PendingEventDraft[],
+  ): readonly WorldEventEnvelope[] {
+    if (drafts.length === 0) {
+      return [];
+    }
+    const sealed = journalAndReduce(drafts);
+    // Publish through the same side-channel commands use: the batch's
+    // causation id (a generator turn id) stands in for the command id so
+    // downstream projection subscribers see generated events too (W018/W019).
+    const turnId = sealed[sealed.length - 1]!.causationId as unknown as CommandId;
+    const ack: CommandResult & { status: "acked" } = {
+      status: "acked",
+      ack: {
+        commandId: turnId,
+        worldId: definition.scope.worldId,
+        acceptedAt: sealed[sealed.length - 1]!.occurredAt,
+        resultingEventIds: sealed.map((envelope: WorldEventEnvelope): EventId => envelope.eventId),
+        journalCursor: journal.getCursor(),
+      },
+    };
+    options.onPublished?.({ ack, events: sealed });
+    return sealed;
+  }
+
   const queryPort: QueryPort = createQueryPort(readModel);
   const evidencePort: EvidencePort = createEvidencePort(readModel, () =>
     buildDeterminismManifest({
@@ -473,6 +526,7 @@ export function createHeadlessWorldEngine(
     journal,
     clockState: () => clock.state(),
     worldState: () => state,
+    applyGeneratorEvents,
     determinismManifest: () =>
       buildDeterminismManifest({
         definition,

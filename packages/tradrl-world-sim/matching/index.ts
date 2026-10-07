@@ -23,6 +23,7 @@ export {
   MATCHING_PRODUCER,
   MATCHING_ORDER_EVENT_TYPES,
   MATCHING_STATE_EVENT_TYPES,
+  isMatchingOrderEventType,
   isMatchingStateEventType,
   isOrderAcceptedPayload,
   isOrderCanceledPayload,

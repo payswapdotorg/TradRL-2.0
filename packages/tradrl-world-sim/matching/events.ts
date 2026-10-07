@@ -64,11 +64,17 @@ export const MATCHING_ORDER_EVENT_TYPES = [
 
 export type MatchingOrderEventType = (typeof MATCHING_ORDER_EVENT_TYPES)[number];
 
+/** Type guard: does this event type belong to the order lifecycle? */
+export function isMatchingOrderEventType(eventType: string): boolean {
+  return (MATCHING_ORDER_EVENT_TYPES as readonly string[]).includes(eventType);
+}
+
 /**
  * Every event type whose reduction belongs to the matching state reducer
  * (matching/state.ts): the order lifecycle above plus the market facts the
  * matcher produces or consumes (`market.halted`/`market.reopened` transition
- * the book; foreign producers of them are W017's to add).
+ * the book; the market generator — W017, delivered — produces the regime
+ * ones, so both producers are lawful there, see marketFacts.ts).
  */
 export const MATCHING_STATE_EVENT_TYPES: readonly string[] = [
   ...MATCHING_ORDER_EVENT_TYPES,

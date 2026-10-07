@@ -57,13 +57,16 @@ test("a command over the thread boundary acks and publishes with engine sequence
   await worker.terminate();
 });
 
-test("typed stubs and clock rejections cross the thread as serialized errors", async () => {
+test("typed engine errors and clock rejections cross the thread as serialized errors", async () => {
   const { worker, client } = await spawnReadyClient();
   await assert.rejects(
-    client.call("query", "getQuote", ["instrument-es-fut"]),
+    // getQuote is delivered since W017 (a book projection of the real book);
+    // the serialized-error path is exercised with an unknown-entity query —
+    // a typed engine error crossing the thread, never a fabricated quote
+    client.call("query", "getQuote", ["instrument-unknown"]),
     (error: unknown) =>
-      (error as { remoteName?: string }).remoteName === "NotImplementedInSkeletonError" &&
-      (error as { data?: { surface?: string } }).data?.surface === "market-generator",
+      (error as { remoteName?: string }).remoteName === "UnknownWorldEntityError" &&
+      (error as { data?: { kind?: string } }).data?.kind === "instrument",
   );
   await client.call("clock", "step", [5_000]);
   await assert.rejects(

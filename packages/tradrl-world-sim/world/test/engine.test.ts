@@ -19,7 +19,6 @@ import {
   ENGINE_ID,
   ENGINE_VERSION,
   EngineInvariantError,
-  NotImplementedInSkeletonError,
   UnknownWorldEntityError,
   createHeadlessWorldEngine,
   type HeadlessWorldEngine,
@@ -307,26 +306,48 @@ test("QueryPort: book and trades project the matching state; DOM shape holds", a
   assert.deepEqual(await e.query.getTrades(INSTRUMENT), []);
 });
 
-test("QueryPort: still-unimplemented domain projections are typed rejections", async () => {
+test("QueryPort: the formerly-stub projections are real; unknown snapshots fail closed", async () => {
   const e = engine();
-  const expectations: [Promise<unknown>, string, string][] = [
-    [e.query.getQuote(INSTRUMENT), "market-generator", "QueryPort.getQuote"],
-  ];
   // W016 made QueryPort.getSnapshot real — a world with no snapshot yet
-  // fails closed with the typed entity error instead.
+  // fails closed with the typed entity error instead of a stub rejection.
   await assert.rejects(e.query.getSnapshot(), (error: unknown) => {
     assert.ok(error instanceof UnknownWorldEntityError, "QueryPort.getSnapshot");
     assert.equal(error.kind, "snapshot");
     return true;
   });
-  for (const [promise, surface, operation] of expectations) {
-    await assert.rejects(promise, (error: unknown) => {
-      assert.ok(error instanceof NotImplementedInSkeletonError, operation);
-      assert.equal(error.surface, surface);
-      assert.equal(error.operation, operation);
+  // W017 made getQuote real (the generator fills the books; the empty-book
+  // quote shape is pinned by its own test below) and W015 made the financial
+  // projections real — no QueryPort method is a not-implemented stub anymore.
+  const quote = await e.query.getQuote(INSTRUMENT);
+  assert.equal(quote.instrumentId, INSTRUMENT);
+});
+
+test("QueryPort.getQuote projects the top-of-book from the authoritative book (W017)", async () => {
+  const e = engine();
+  // the empty book projects an honest empty quote (no fabricated prices)
+  const empty = await e.query.getQuote(INSTRUMENT);
+  assert.deepEqual(empty, {
+    instrumentId: INSTRUMENT,
+    asOf: e.clockState().simulationTime as never,
+  });
+  await e.command.submitOrder(
+    submitOrderCommand({
+      commandId: "cmd-quote-1" as never,
+      submission: { kind: "limit", side: "buy", quantity: "10" as never, limitPrice: "4800.25" as never, constraints: { timeInForce: "GTC" } },
+    }),
+  );
+  const quoted = await e.query.getQuote(INSTRUMENT);
+  assert.equal(quoted.bid, "4800.25");
+  assert.equal(quoted.bidSize, "10");
+  assert.equal(quoted.ask, undefined);
+  assert.equal(quoted.last, undefined);
+  await assert.rejects(
+    e.query.getQuote("instrument-ghost" as never),
+    (error: unknown) => {
+      assert.ok(error instanceof UnknownWorldEntityError);
       return true;
-    });
-  }
+    },
+  );
 });
 
 test("QueryPort.getNews applies the information firewall at the current simulation time (A7)", async () => {
