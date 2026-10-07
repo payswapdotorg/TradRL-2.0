@@ -9,8 +9,9 @@
  * - `layout/` — the world-side cockpit layout model, declarative profiles
  *   (default trader cockpit; W029 extends the catalogue) and persistence.
  * - `runtime/` — the typed world-client seam over the W003 four-port World
- *   Protocol (type-only contracts shim + fail-closed simulated noop until
- *   W013/W018 attach the deterministic engine transport).
+ *   Protocol: the fail-closed simulated noop (W006) and, since W018, the
+ *   engine-backed transport provider (`engineWorldClient.ts` +
+ *   `useEngineWorldClient.ts`) over the world adapter envelope.
  * - `components/` — the cockpit shell hosted inside the W005 pane.
  *
  * The registry contract types defined here are TradRL-UI-owned for now; if
@@ -99,6 +100,28 @@ export type {
   TradingWorldClient,
   TradingWorldClientStatus,
 } from "./runtime/worldClient.js";
+
+// W018 — the engine-backed transport (provider + factory; the provider
+// SELECTION still sits in components/TradingWorldShell.tsx, TL-wired).
+export {
+  attachEngineWorldClient,
+  TradingWorldRemoteError,
+  TradingWorldRuntimeMismatchError,
+  TradingWorldTransportClosedError,
+} from "./runtime/engineWorldClient.js";
+export type {
+  AttachEngineWorldClientInput,
+  EngineWorldClient,
+  EngineWorldHostSurface,
+} from "./runtime/engineWorldClient.js";
+export {
+  createEngineWorldClientController,
+  useEngineWorldClient,
+} from "./runtime/useEngineWorldClient.js";
+export type {
+  EngineWorldClientController,
+  UseEngineWorldClientInput,
+} from "./runtime/useEngineWorldClient.js";
 
 export { TradingWorldShell } from "./components/TradingWorldShell.js";
 export type { TradingWorldShellProps } from "./components/TradingWorldShell.js";

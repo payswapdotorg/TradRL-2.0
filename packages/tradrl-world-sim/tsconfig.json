@@ -15,5 +15,4 @@
     "sourceMap": false,
     "types": ["node"]
   },
-  "include": ["index.ts", "clock", "world", "journal", "orderbook", "matching"]
 }

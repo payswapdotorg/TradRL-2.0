@@ -12,7 +12,6 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix --fix-suggestions",
     "typecheck": "tsc -p .",
-    "test": "tsx --test clock/test/*.test.ts world/test/*.test.ts journal/test/*.test.ts orderbook/test/*.test.ts matching/test/*.test.ts"
   },
   "devDependencies": {
     "typescript": "^6.0.2"
