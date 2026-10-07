@@ -1,0 +1,30 @@
+{
+  "name": "tradrl-market-participants",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./runtime": "./src/runtime.ts",
+    "./views": "./src/views.ts",
+    "./agents": "./src/agents/index.ts",
+    "./agents/momentum": "./src/agents/momentum.ts",
+    "./agents/meanReversion": "./src/agents/meanReversion.ts",
+    "./decimal": "./src/decimal.ts",
+    "./rng": "./src/rng.ts"
+  },
+  "description": "Reactive participant protocol runtime (W023): the deterministic event loop (settled view -> pure decide -> commands through the same CommandPort humans use, FIFO with the engine's own sequencing) plus the reference agents (momentum + mean-reversion) — seeded, threshold-declared, tested against the REAL generated alpha world through the W018 provider. Protocol types: tradrl-world-contracts/src/participantProtocol.ts (the exports entry is a TL registration).",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

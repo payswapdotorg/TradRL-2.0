@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This package is a source-exported runtime surface (mirrors the
+    // tradrl-world-data / tradrl-world-sim pattern): package.json "exports"
+    // point at TypeScript sources and nothing is emitted as a build artifact.
+    // Tests are included so the protocol laws are type-checked too.
+    // `rootDir` is deliberately NOT set: the program pulls in the consumed
+    // `tradrl-world-contracts` sources through the package specifier, which
+    // live outside this package directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["src", "test"]
+}
