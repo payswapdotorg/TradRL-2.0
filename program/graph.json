@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T13:55:00Z",
+  "updated_at": "2026-10-07T13:58:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -407,7 +407,7 @@
       "write_surface": [
         "packages/tradrl-adapters/crypto/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w026"
     },
     {
@@ -420,7 +420,7 @@
       "write_surface": [
         "packages/tradrl-information/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w027"
     },
     {
@@ -472,7 +472,7 @@
       "write_surface": [
         "apps/tradrl-world-cli/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w031"
     },
     {
