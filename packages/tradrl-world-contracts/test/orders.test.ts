@@ -48,12 +48,16 @@ type _statusExact = Expect<Equal<OrderStatus, (typeof ALL_STATUSES)[number]>>;
 type _kindExact = Expect<Equal<OrderKind, (typeof ALL_KINDS)[number]>>;
 type _tifExact = Expect<Equal<TimeInForce, (typeof ALL_TIF)[number]>>;
 
-// Post-only and reduce-only are optional execution constraints on every order.
+// Post-only and reduce-only are optional execution constraints; every order
+// carries the constraints object itself as a required field.
 type _constraintsShape = Expect<
   Equal<RequiredKeys<OrderExecutionConstraints>, "timeInForce">
 >;
 type _constraintFlags = Expect<
-  Equal<"postOnly" | "reduceOnly" extends OptionalKeys<Order> ? true : false, true>
+  Equal<"postOnly" | "reduceOnly" extends OptionalKeys<OrderExecutionConstraints> ? true : false, true>
+>;
+type _orderCarriesConstraints = Expect<
+  Equal<"constraints" extends RequiredKeys<Order> ? true : false, true>
 >;
 
 // --- fixtures ----------------------------------------------------------------
