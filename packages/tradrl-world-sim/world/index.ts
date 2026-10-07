@@ -58,6 +58,8 @@ export {
 export {
   buildDeterminismManifest,
   buildHeadlessReport,
+  type HeadlessFinancialSummary,
+  type HeadlessPnlSummary,
   type HeadlessRunReport,
   type ManifestInputs,
 } from "./manifest.js";

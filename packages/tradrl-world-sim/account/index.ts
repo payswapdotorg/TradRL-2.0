@@ -17,6 +17,13 @@ export {
   type AccountLedgerState,
 } from "./state.js";
 export {
+  financialLedgerOf,
+  financialsOf,
+  initialFinancialState,
+  reduceFinancialEvent,
+  type FinancialState,
+} from "./financialState.js";
+export {
   computeAccountFinancials,
   formatFinancials,
   marginForPosition,

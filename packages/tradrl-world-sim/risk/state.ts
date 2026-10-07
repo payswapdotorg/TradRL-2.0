@@ -29,7 +29,7 @@
  *   this is defense in depth against corrupt journals).
  */
 
-import type { RiskBreach, RiskGateId, RiskLimits } from "tradrl-world-contracts";
+import type { RiskBreach, RiskGateId } from "tradrl-world-contracts";
 import type { WorldEventEnvelope } from "tradrl-world-contracts";
 import { isOrderFilledPayload } from "../matching/index.js";
 import { parseScaled, type Scaled } from "../orderbook/index.js";

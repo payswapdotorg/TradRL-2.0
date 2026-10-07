@@ -6,13 +6,22 @@
  * runtime versions, command stream hash).
  * Spec: spec/ARCHITECTURE-LOCK.md A9 (a determinism claim requires fixed
  * world definition, engine version, seed and command stream).
- * Spec: spec/SIMULATION.md "Headless report" (world id, mode, seed, final
+ * Spec: spec/SIMULATION.md "Headless report" — world id, mode, seed, final
  * simulation time, balances, positions, P&L, risk, event count, event hash,
- * branch lineage — the financial fields arrive with W015 and are explicitly
- * absent here).
+ * branch lineage. The financial fields are the W015 engine surface
+ * (exact decimal text, deterministic account/definition order).
  */
 
-import type { BranchRecord, DeterminismManifest, WorldMode, WorldId } from "tradrl-world-contracts";
+import type {
+  AccountId,
+  BranchRecord,
+  DeterminismManifest,
+  Money,
+  Position,
+  RiskState,
+  WorldMode,
+  WorldId,
+} from "tradrl-world-contracts";
 import type { SimulationTimeMs } from "tradrl-world-contracts/time";
 import type { EventJournal } from "../journal/eventJournal.js";
 import type { Fnv1aHasher } from "./hashing.js";
@@ -55,16 +64,39 @@ export function buildDeterminismManifest(inputs: ManifestInputs): DeterminismMan
   };
 }
 
+/** The P&L breakdown of one account (the SIMULATION.md headless report). */
+export interface HeadlessPnlSummary {
+  readonly accountId: AccountId;
+  readonly realized: Money;
+  readonly unrealized: Money;
+  readonly total: Money;
+}
+
+/** The financial summary the headless report carries (W015 engine surface). */
+export interface HeadlessFinancialSummary {
+  /** Every declared account's balances, in definition order. */
+  readonly balances: readonly Money[];
+  /** Open positions (definition account order, ledger order within). */
+  readonly positions: readonly Position[];
+  /** Per-account realized/unrealized/total P&L. */
+  readonly pnl: readonly HeadlessPnlSummary[];
+  /** Per-account risk state (limits + breaches). */
+  readonly risk: readonly RiskState[];
+}
+
 /**
- * The headless run report (SIMULATION.md) as far as the skeleton reaches:
- * financial fields (balances/positions/P&L/risk) land with W014/W015 and are
- * deliberately not faked here.
+ * The headless run report (SIMULATION.md): identity, the financial state
+ * (W015), the journal digest and the (still empty) branch lineage.
  */
 export interface HeadlessRunReport {
   readonly worldId: WorldId;
   readonly mode: WorldMode;
   readonly seed: string;
   readonly finalSimulationTime: SimulationTimeMs;
+  readonly balances: readonly Money[];
+  readonly positions: readonly Position[];
+  readonly pnl: readonly HeadlessPnlSummary[];
+  readonly risk: readonly RiskState[];
   readonly eventCount: number;
   readonly eventHash: string;
   readonly branchLineage: readonly BranchRecord[];
@@ -77,6 +109,7 @@ export function buildHeadlessReport(input: {
   readonly seed: string;
   readonly finalSimulationTime: SimulationTimeMs;
   readonly journal: EventJournal;
+  readonly financial: HeadlessFinancialSummary;
 }): HeadlessRunReport {
   const digest = input.journal.digest();
   return {
@@ -84,6 +117,10 @@ export function buildHeadlessReport(input: {
     mode: input.mode,
     seed: input.seed,
     finalSimulationTime: input.finalSimulationTime,
+    balances: input.financial.balances,
+    positions: input.financial.positions,
+    pnl: input.financial.pnl,
+    risk: input.financial.risk,
     eventCount: digest.eventCount,
     eventHash: digest.eventChecksum,
     branchLineage: [],

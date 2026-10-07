@@ -27,7 +27,7 @@
  * - grossExposure   = Σ |open quantity| × mark (the un-leveraged notional).
  */
 
-import type { Account, AccountId } from "tradrl-world-contracts";
+import type { Account, AccountId, CurrencyCode } from "tradrl-world-contracts";
 import type { Scaled } from "../orderbook/index.js";
 import { mulDivHalfUp } from "../orderbook/index.js";
 import { absScaled, formatSignedMoney } from "../portfolio/index.js";
@@ -40,7 +40,7 @@ const SCALE = 10n ** 12n;
 /** The exact per-account financial aggregates (all in the base currency). */
 export interface AccountFinancials {
   readonly accountId: AccountId;
-  readonly baseCurrency: string;
+  readonly baseCurrency: CurrencyCode;
   readonly leverage: number;
   readonly cash: Scaled;
   readonly realizedPnl: Scaled;
@@ -103,7 +103,7 @@ export function computeAccountFinancials(
   const marginAvailable = equity - marginUsed;
   return {
     accountId: ledger.accountId,
-    baseCurrency: String(ledger.baseCurrency),
+    baseCurrency: ledger.baseCurrency,
     leverage: ledger.leverage,
     cash,
     realizedPnl: realized,

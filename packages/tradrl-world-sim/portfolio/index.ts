@@ -39,3 +39,4 @@ export {
   projectPortfolio,
   type PortfolioFinancialInputs,
 } from "./aggregate.js";
+export { applyClosePosition, openQuantityOf } from "./closePosition.js";

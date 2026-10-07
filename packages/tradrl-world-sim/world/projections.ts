@@ -11,17 +11,21 @@
  * Spec: spec/ACCEPTANCE-WORLD-ALPHA.md L (evidence: causal events and
  * provenance for every applied command).
  *
- * W014 seam boundary (typed, honest):
+ * W015 seam boundary (typed, honest):
  * - getOrderBook / getTrades / getOrders project the authoritative matching
  *   state (orders, books, trade tape) — W014's engine surface;
- * - getSnapshot (QueryPort) / getPortfolio / getRisk / getQuote still throw
- *   NotImplementedInSkeletonError (W016 / W015 / W017);
- * - getPositions returns the true empty list (positions arrive with W015);
+ * - getPositions / getPortfolio / getRisk project the authoritative
+ *   financial state (positions, P&L, margin, breaches) — W015's engine
+ *   surface, exact decimal text, never fabricated (WORLD-PROTOCOL.md "UI
+ *   projection law");
+ * - getSnapshot (QueryPort) / getQuote still throw
+ *   NotImplementedInSkeletonError (W016 / W017);
  * - EvidencePort.getSnapshot returns undefined and getBranchLineage returns
  *   the true empty lineage (snapshots/branches are W016).
  */
 
 import type {
+  AccountId,
   DeterminismManifest,
   EvidencePort,
   EventQuery,
@@ -47,6 +51,13 @@ import { computeInformationBoundary } from "tradrl-world-contracts/time";
 import type { EventJournal } from "../journal/eventJournal.js";
 import type { ClockEventLookup } from "../clock/simulationClock.js";
 import { bookSnapshot } from "../orderbook/index.js";
+import {
+  financialLedgerOf,
+  computeAccountFinancials,
+  ledgerOf,
+} from "../account/index.js";
+import { isOpenPosition, projectPosition, projectPortfolio } from "../portfolio/index.js";
+import { projectRiskState } from "../risk/index.js";
 import { NotImplementedInSkeletonError, UnknownWorldEntityError } from "./errors.js";
 import { projectWorldMeta, type WorldDefinition } from "./definition.js";
 import type { WorldState } from "./state.js";
@@ -69,6 +80,25 @@ function assertObservable(
   at: SimulationTimeMs,
 ): WorldEventEnvelope | undefined {
   return isEventObservableAt(envelope, at) ? envelope : undefined;
+}
+
+/**
+ * Resolve the account a financial projection targets: the given id, or the
+ * world's first declared account when omitted (documented single-account
+ * default; multi-account consumers pass the id explicitly).
+ */
+function resolveAccountId(read: () => EngineReadModel, accountId?: AccountId): AccountId {
+  if (accountId !== undefined) {
+    if (ledgerOf(read().state.financial.accounts, accountId) === undefined) {
+      throw new UnknownWorldEntityError("account", String(accountId));
+    }
+    return accountId;
+  }
+  const first = read().definition.accounts[0];
+  if (first === undefined) {
+    throw new UnknownWorldEntityError("account", "(the world declares none)");
+  }
+  return first.accountId;
 }
 
 /** Build the QueryPort over a live read model. */
@@ -139,15 +169,51 @@ export function createQueryPort(read: () => EngineReadModel): QueryPort {
       );
       return orders;
     },
-    async getPositions(): Promise<readonly Position[]> {
-      // True empty projection: positions arrive with fills (W014/W015).
-      return [];
+    async getPositions(accountId?: AccountId): Promise<readonly Position[]> {
+      // W015: the open positions of one account (or all, in ledger order) —
+      // closed records stay in state for realized-P&L truth, projections
+      // show what is open.
+      const model = read();
+      const positions = model.state.financial.portfolio.positions.filter(
+        (record) =>
+          isOpenPosition(record) &&
+          (accountId === undefined || String(record.accountId) === String(accountId)),
+      );
+      if (accountId !== undefined && ledgerOf(model.state.financial.accounts, accountId) === undefined) {
+        throw new UnknownWorldEntityError("account", String(accountId));
+      }
+      return positions.map(projectPosition);
     },
-    async getPortfolio(): Promise<Portfolio> {
-      throw new NotImplementedInSkeletonError("account-portfolio-risk", "QueryPort.getPortfolio");
+    async getPortfolio(accountId?: AccountId): Promise<Portfolio> {
+      // W015: the W003 Portfolio projection — cash, buying power, positions
+      // and the realized/unrealized/total P&L at the observation time (A7:
+      // asOf is the clock position; marks are the last printed trades).
+      const resolved = resolveAccountId(read, accountId);
+      const model = read();
+      const ledger = financialLedgerOf(model.state.financial, String(resolved));
+      const own = model.state.financial.portfolio.positions.filter(
+        (record) => String(record.accountId) === String(resolved),
+      );
+      const financials = computeAccountFinancials(ledger, own);
+      return projectPortfolio({
+        accountId: resolved,
+        worldId: model.definition.scope.worldId,
+        asOf: model.clockState.simulationTime as Portfolio["asOf"],
+        financials,
+        positions: own,
+      });
     },
-    async getRisk(): Promise<RiskState> {
-      throw new NotImplementedInSkeletonError("account-portfolio-risk", "QueryPort.getRisk");
+    async getRisk(accountId?: AccountId): Promise<RiskState> {
+      // W015: the W003 RiskState projection — the declared limits in force
+      // and the breach history recorded from journaled events.
+      const resolved = resolveAccountId(read, accountId);
+      const model = read();
+      return projectRiskState({
+        worldId: model.definition.scope.worldId,
+        accountId: resolved,
+        asOf: model.clockState.simulationTime as RiskState["asOf"],
+        risk: model.state.financial.risk,
+      });
     },
     async getNews(query: NewsQuery = {}) {
       const model = read();
