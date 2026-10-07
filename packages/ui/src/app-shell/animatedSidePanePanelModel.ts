@@ -5,18 +5,26 @@ export type OpenTabLauncherItemId =
   | "review"
   | "terminal"
   | "browser"
-  | "developer-tools";
+  | "developer-tools"
+  // TradRL Trading World（W005 seam）：入口仅在宿主提供 onOpenTradingWorld
+  // 回调（TL 在 WorkspaceShellLayout/useAppPanels 接线）且当前没有已打开的
+  // Trading World tab 时出现；已打开时与 review 同构地隐藏（结构化 id 幂等）。
+  | "trading-world";
 
 export function resolveOpenTabLauncherItemIds({
   developerToolsEnabled,
   hasReviewTab,
   canOpenSelectionSideConversation = false,
   supportsEmbeddedBrowser = true,
+  canOpenTradingWorld = false,
+  hasTradingWorldTab = false,
 }: {
   developerToolsEnabled: boolean;
   hasReviewTab: boolean;
   canOpenSelectionSideConversation?: boolean;
   supportsEmbeddedBrowser?: boolean;
+  canOpenTradingWorld?: boolean;
+  hasTradingWorldTab?: boolean;
 }): OpenTabLauncherItemId[] {
   const itemIds: OpenTabLauncherItemId[] = [];
 
@@ -36,6 +44,10 @@ export function resolveOpenTabLauncherItemIds({
 
   if (developerToolsEnabled) {
     itemIds.push("developer-tools");
+  }
+
+  if (canOpenTradingWorld && !hasTradingWorldTab) {
+    itemIds.push("trading-world");
   }
 
   return itemIds;
