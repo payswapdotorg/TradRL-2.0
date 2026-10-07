@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- Side pane tab 状态集中维护 Browser/Git/CodeViewer/Treemapping/Whiteboard 的打开、复用、关闭和排序规则；拆分需要同步迁移现有内存恢复逻辑。 */
+/* eslint-disable max-lines -- Side pane tab 状态集中维护 Browser/Git/CodeViewer/Treemapping/Whiteboard/TradingWorld 的打开、复用、关闭和排序规则；拆分需要同步迁移现有内存恢复逻辑。 */
 import { createUuid, type BrowserTabResidencyState } from "@zcode/shared";
 import { inferMediaPreview, isPptxPreviewPath, type CodeViewerSource } from "@/lib/codeViewer.js";
 import { normalizeCodeViewerSource } from "@/lib/codeViewerSource.js";
@@ -94,6 +94,42 @@ export interface TerminalSidePaneTab {
   title: string;
   cwd?: string;
   remoteSessionId?: string | null;
+}
+
+/**
+ * TradRL Trading World 面板 tab（W005 生命周期契约，contracts/ui/）。
+ *
+ * 身份是 **(workspaceKey, worldId)**：结构化 id 幂等，再次打开同一个 world 只聚焦
+ * 已有 tab（同 bash-output / git 的复用规则），不开出并排的重复 tab。可见性与 git
+ * 同构——workspace 级（任意对话可见，跨 workspace 隐藏），"折叠面板 ≠ 销毁世界状态"
+ * 由外层 forceMount/挂载闭锁保证。
+ *
+ * ## 外壳不透明律（AGENTS.md 产品边界 / ZCODE-INTEGRATION-MAP 禁止耦合）
+ *
+ * `worldId` / `layoutProfileId` 对外壳是**不透明字符串**：外壳只持久化、比较、按
+ * workspace 隔离它们，绝不分支其内容、不解释其语义——markets/orders/portfolio
+ * 等交易域概念一律不得出现在外壳侧。真正的 World 解析归 TradRL（W006+）所有。
+ */
+export interface TradingWorldSidePaneTab {
+  id: string;
+  type: "trading-world";
+  /** 打开 tab 时冻结的对话归属；null 表示草稿态。 */
+  ownerTaskId?: string | null;
+  /** 工作区隔离 key（workspaceIdentity || workspacePath）；world 按 workspace 隔离。 */
+  workspaceKey: string;
+  openedAt?: number;
+  /** 不透明的 world 身份（TradRL 自有语义，外壳不解释）。 */
+  worldId: string;
+  /** 不透明的布局档案/预设引用（W029）；外壳不解释。 */
+  layoutProfileId: string;
+}
+
+/** 打开/聚焦一个 Trading World 面板 tab 的请求（world 与布局档案由调用方显式给出）。 */
+export interface OpenTradingWorldSidePaneRequest {
+  workspaceKey: string;
+  worldId: string;
+  layoutProfileId: string;
+  ownerTaskId?: string | null;
 }
 
 /** browser-use 受控浏览器视图（renderer `<webview>` + main CDP）。 */
@@ -532,7 +568,8 @@ export type WorkspaceSidePaneTab =
   | WorkflowRunDirectorySidePaneTab
   | WorkflowActorSessionSidePaneTab
   | WorkflowWorkspaceSidePaneTab
-  | WorkflowArtifactSidePaneTab;
+  | WorkflowArtifactSidePaneTab
+  | TradingWorldSidePaneTab;
 
 /**
  * Browser/browser-use 的页面与 CDP 生命周期依赖 `<webview>` 持续连接 DOM。
@@ -1055,6 +1092,9 @@ const WORKSPACE_GLOBAL_SIDE_PANE_TAB_TYPES = new Set<WorkspaceSidePaneTab["type"
   "git",
   "developer-tools",
   "treemapping",
+  // Trading World 是 workspace 级面板：任意对话下可见（tab 自带 workspaceKey，
+  // sidePaneTabMatchesWorkspace 仍把它隔离在所属 workspace 内）。
+  "trading-world",
 ]);
 
 function isWorkspaceGlobalSidePaneTab(tab: WorkspaceSidePaneTab): boolean {
@@ -1591,6 +1631,79 @@ export function openTerminalSidePane(
   options: { title: string; cwd?: string; remoteSessionId?: string | null },
 ): WorkspaceSidePaneState {
   return activateSidePaneTab(current, createTerminalSidePaneTab(options));
+}
+
+/** Trading World tab 的结构化 id：同一 (workspace, world) 幂等复用同一个 tab。 */
+export function buildTradingWorldSidePaneTabId(options: {
+  workspaceKey: string;
+  worldId: string;
+}): string {
+  return [
+    "trading-world",
+    encodeSidePaneTabIdPart(options.workspaceKey),
+    encodeSidePaneTabIdPart(options.worldId),
+  ].join(":");
+}
+
+function createTradingWorldSidePaneTab(
+  options: OpenTradingWorldSidePaneRequest,
+): TradingWorldSidePaneTab {
+  return {
+    id: buildTradingWorldSidePaneTabId(options),
+    type: "trading-world",
+    ...(options.ownerTaskId !== undefined ? { ownerTaskId: options.ownerTaskId } : {}),
+    workspaceKey: options.workspaceKey,
+    openedAt: Date.now(),
+    worldId: options.worldId,
+    layoutProfileId: options.layoutProfileId,
+  };
+}
+
+/**
+ * 打开或聚焦一个 Trading World 面板 tab（结构化 id 幂等，同 bash-output）。
+ *
+ * 再开同一 world 只聚焦已有 tab，并把 `layoutProfileId` 落点刷新为本次请求
+ * （同 workflow-run 对落点的处理）；`worldId`/`workspaceKey` 是 id 的组成部分，
+ * 合并时天然不会漂移。外壳不解释任何字段语义（见 TradingWorldSidePaneTab 注释）。
+ */
+export function openTradingWorldSidePane(
+  current: WorkspaceSidePaneState | null,
+  options: OpenTradingWorldSidePaneRequest,
+): WorkspaceSidePaneState {
+  const nextTab = createTradingWorldSidePaneTab(options);
+  const existing = current?.tabs.find(
+    (tab): tab is TradingWorldSidePaneTab =>
+      tab.type === "trading-world" && tab.id === nextTab.id,
+  );
+  return activateSidePaneTab(
+    current,
+    existing ? { ...existing, layoutProfileId: options.layoutProfileId } : nextTab,
+  );
+}
+
+/** 切换 Trading World 面板：当前活动 tab 就是目标 world 则关闭，否则打开/聚焦（同 toggleGit）。 */
+export function toggleTradingWorldSidePane(
+  current: WorkspaceSidePaneState | null,
+  options: OpenTradingWorldSidePaneRequest,
+): WorkspaceSidePaneState | null {
+  const activeTab = getActiveSidePaneTab(current);
+  if (
+    activeTab?.type === "trading-world" &&
+    activeTab.id === buildTradingWorldSidePaneTabId(options)
+  ) {
+    return closeSidePaneTab(current, activeTab.id);
+  }
+  return openTradingWorldSidePane(current, options);
+}
+
+/** 关闭指定 (workspace, world) 的 Trading World 面板 tab；目标不存在时原样返回。 */
+export function closeTradingWorldSidePane(
+  current: WorkspaceSidePaneState | null,
+  options: { workspaceKey: string; worldId: string },
+): WorkspaceSidePaneState | null {
+  const targetId = buildTradingWorldSidePaneTabId(options);
+  const target = current?.tabs.some((tab) => tab.id === targetId) ? targetId : null;
+  return target ? closeSidePaneTab(current, target) : current;
 }
 
 export function openSubagentSessionSidePane(

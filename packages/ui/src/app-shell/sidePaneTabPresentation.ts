@@ -1,4 +1,5 @@
 import { getSidePaneTabTitle } from "@/app-shell/SidePaneTabTrigger.js";
+import { TRADING_WORLD_PANE_TITLE } from "@/app-shell/TradingWorldSidePane.js";
 import type { WorkspaceSidePaneTab } from "@/lib/workspaceSidePane.js";
 
 export interface SidePaneTabPresentationLabels {
@@ -66,6 +67,10 @@ export function getSidePaneTabSearchHint(tab: WorkspaceSidePaneTab): string {
   }
   if (tab.type === "terminal" || tab.type === "bash-output")
     return `${tab.title} terminal shell command`;
+  // world/layout 是不透明 id：进搜索面便于排查（同 workflow-run 对 runId 的处理），
+  // 但不进标题。
+  if (tab.type === "trading-world")
+    return `${tab.worldId} ${tab.layoutProfileId} trading world market simulation`;
   return tab.source.path ?? tab.source.title;
 }
 
@@ -118,5 +123,6 @@ export function getSidePaneTabTypeLabel(
   if (tab.type === "model-trajectory") return labels.modelTrajectoryTitle;
   if (tab.type === "developer-tools") return labels.developerToolsTitle;
   if (tab.type === "terminal" || tab.type === "bash-output") return labels.terminalTitle;
+  if (tab.type === "trading-world") return TRADING_WORLD_PANE_TITLE;
   return labels.codeViewerTitle;
 }

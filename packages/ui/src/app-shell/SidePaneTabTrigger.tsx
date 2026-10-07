@@ -6,6 +6,7 @@ import {
   BotIcon,
   BotMessageSquareIcon,
   BugIcon,
+  CandlestickChartIcon,
   FileCode2Icon,
   FileDiffIcon,
   MapIcon,
@@ -30,6 +31,7 @@ import {
 import { TabsTrigger } from "@/components/ui/tabs.js";
 import { FileDisplayIcon, resolveFileDisplayDescriptor } from "@/lib/fileDisplay.js";
 import type { WorkspaceSidePaneTab } from "@/lib/workspaceSidePane.js";
+import { TRADING_WORLD_PANE_TITLE } from "@/app-shell/TradingWorldSidePane.js";
 import { Button } from "@/components/ui/button.js";
 import { BrowserUseTabIcon } from "@/app-shell/BrowserUseTabIcon.js";
 import { BrowserTabFavicon } from "@/app-shell/BrowserTabFavicon.js";
@@ -332,6 +334,12 @@ export function SidePaneTabIcon({ tab }: { tab: WorkspaceSidePaneTab }) {
     return <SquareTerminalIcon className="size-3.5" />;
   }
 
+  // Trading World 是 TradRL 的市场工作台入口：蜡烛图字形与其它工具 tab 一眼区分；
+  // 图标必须在打开前就稳定（内存恢复时元数据未回填），不随 world 状态变化。
+  if (tab.type === "trading-world") {
+    return <CandlestickChartIcon className="size-3.5" />;
+  }
+
   // 同 getSidePaneTabTitle——browser-use tab 无 source，若不在此拦截会 fallthrough
   // 到下方 `tab.source.type` 读 undefined.type 崩溃。
   // agent 导航后由 <webview> favicon 事件回填 faviconUrl，与 human browser tab 一致地展示真实图标；
@@ -545,6 +553,12 @@ export function getSidePaneTabTitle(
   // 用页面标题（agent 导航后由 getState 回填），缺省复用 browser.title 文案。
   if (tab.type === "browser-use") {
     return tab.title?.trim() || formatMessage({ id: "browser.title" });
+  }
+
+  // Trading World 是固定产品名（不本地化，W006+ 接管真实 i18n 时再评估）；
+  // world/layout 详情进 tooltip 与 overview 的搜索 hint，不进 tab 标题。
+  if (tab.type === "trading-world") {
+    return TRADING_WORLD_PANE_TITLE;
   }
 
   return tab.source.title || formatMessage({ id: "codeViewer.title" });

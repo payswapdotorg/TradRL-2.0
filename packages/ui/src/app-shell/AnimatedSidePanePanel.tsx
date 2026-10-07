@@ -40,6 +40,10 @@ import {
 import { ResizableHandle, ResizablePanel } from "@/components/ui/resizable.js";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs.js";
 import { SidePaneTabOverview } from "@/app-shell/SidePaneTabOverview.js";
+import {
+  TRADING_WORLD_PANE_TITLE,
+  TradingWorldSidePane,
+} from "@/app-shell/TradingWorldSidePane.js";
 import { SubagentSessionSidePane } from "@/app-shell/SubagentSessionSidePane.js";
 import { SubagentDirectorySidePane } from "@/app-shell/SubagentDirectorySidePane.js";
 import { SelectionSideChatPane } from "@/app-shell/SelectionSideChatPane.js";
@@ -91,6 +95,7 @@ import { getVisibleSidePaneTabs } from "@/lib/workspaceSidePane.js";
 import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import {
   BugIcon,
+  CandlestickChartIcon,
   FileDiffIcon,
   GlobeIcon,
   MessageSquareTextIcon,
@@ -316,6 +321,7 @@ export function AnimatedSidePanePanel({
   onOpenTerminalTab,
   onOpenReviewTab,
   onOpenSelectionSideConversation,
+  onOpenTradingWorld,
   onRevealGitFileInTree,
   onOpenBrowserUrl,
   onOpenCodeViewer,
@@ -381,6 +387,12 @@ export function AnimatedSidePanePanel({
   onOpenTerminalTab: () => void;
   onOpenReviewTab: () => void;
   onOpenSelectionSideConversation: () => void;
+  /**
+   * TradRL Trading World（W005 seam）：打开回调**可选**——TL 在
+   * WorkspaceShellLayout/useAppPanels 接线后，"+" 启动器与新增 tab 菜单才会
+   * 出现 Trading World 入口；缺席时零行为变化。渲染/持久化/生命周期不依赖它。
+   */
+  onOpenTradingWorld?: () => void;
   onRevealGitFileInTree?: (path: string) => void;
   onOpenBrowserUrl: (url: string) => void;
   onOpenCodeViewer: (source: CodeViewerSource) => void;
@@ -448,6 +460,7 @@ export function AnimatedSidePanePanel({
   const previousIsVisibleRef = useRef(isVisible);
   const panelLayout = resolveAnimatedSidePanePanelLayout();
   const hasReviewTab = visibleTabs.some((tab) => tab.type === "git");
+  const hasTradingWorldTab = visibleTabs.some((tab) => tab.type === "trading-world");
   const canOpenSelectionSideConversation = shouldOfferSelectionSideConversation({
     activeTaskId,
   });
@@ -757,6 +770,19 @@ export function AnimatedSidePanePanel({
             <span>{intl.formatMessage({ id: "developerTools.title" })}</span>
           </DropdownMenuItem>
         ) : null}
+        {/* TradRL Trading World（W005 seam）：回调由 TL 在外壳层接线后入口才出现，
+            缺席时零行为变化；office 模式与 terminal/review 同样收敛。 */}
+        {!isOfficeMode && onOpenTradingWorld && !hasTradingWorldTab ? (
+          <DropdownMenuItem
+            data-side-pane-add-item="trading-world"
+            onSelect={() => {
+              onOpenTradingWorld();
+            }}
+          >
+            <CandlestickChartIcon className="size-4" />
+            <span>{TRADING_WORLD_PANE_TITLE}</span>
+          </DropdownMenuItem>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -791,14 +817,28 @@ export function AnimatedSidePanePanel({
       icon: BugIcon,
       onOpen: onOpenDeveloperTools,
     },
+    "trading-world": {
+      id: "trading-world",
+      label: TRADING_WORLD_PANE_TITLE,
+      icon: CandlestickChartIcon,
+      // 可选回调：仅当 TL 已接线（resolveOpenTabLauncherItemIds 的
+      // canOpenTradingWorld）时才会进入启动器，这里防御性地空转。
+      onOpen: () => onOpenTradingWorld?.(),
+    },
   };
   const openTabLauncherItems: OpenTabLauncherItem[] = resolveOpenTabLauncherItemIds({
     canOpenSelectionSideConversation,
     developerToolsEnabled,
     hasReviewTab,
     supportsEmbeddedBrowser,
+    canOpenTradingWorld: Boolean(onOpenTradingWorld),
+    hasTradingWorldTab,
   })
-    .filter((itemId) => !isOfficeMode || (itemId !== "terminal" && itemId !== "review"))
+    .filter(
+      (itemId) =>
+        !isOfficeMode ||
+        (itemId !== "terminal" && itemId !== "review" && itemId !== "trading-world"),
+    )
     .map((itemId) => openTabLauncherItemById[itemId]);
   const closeSidePaneButton =
     isVisible && onCloseSidePane ? (
@@ -1262,6 +1302,17 @@ export function AnimatedSidePanePanel({
                             isVisible={isVisible && tab.id === visibleActiveTabId}
                             isWindowsDesktop={isWindowsDesktop}
                             onOpenBrowserUrl={onOpenBrowserUrl}
+                          />
+                        ) : tab.type === "trading-world" ? (
+                          // TradRL Trading World（W005 seam）：外壳只认识生命周期
+                          // （挂载/可见/聚焦/关闭），不认识交易域；世界内容归
+                          // packages/ui/src/trading-world/（W006+）。折叠 ≠ 销毁由
+                          // 外层 forceMount + 挂载闭锁保证（J-WORLD-02）。
+                          <TradingWorldSidePane
+                            tab={tab}
+                            visible={isVisible}
+                            focused={isVisible && tab.id === visibleActiveTabId}
+                            onClose={() => onCloseTab(tab.id)}
                           />
                         ) : (
                           <HumanBrowserView
