@@ -1,0 +1,32 @@
+{
+  "name": "possession",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./compatibility": "./compatibility.ts",
+    "./contracts": "./contracts.ts",
+    "./lifecycle": "./lifecycle.ts",
+    "./lineage": "./lineage.ts",
+    "./projection": "./projection.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Possession/compatibility/lineage runtime (W034, the agent-body/cognitive-substrate structure pattern): Agent = Body possessed by Cognitive Substrate (spec/ARCHITECTURE.md §12). The PossessionDescriptor composes a W032 Body with a W033 Cognitive Substrate plus the grant (who/what bound them) and the declared scope; compatibility checking answers 'can THIS substrate possess THIS body' (the substrate's proposed command kinds and rate envelope vs the body's embodiment, the W032 attach constraints, and W033's validateDecisionStream as the decision-level proof — every incompatibility names the exact field/limit mismatch in the envelope-breach style); the lifecycle is unpossessed → possessed → released (fail-closed pure transforms, the W032 lifecycle table precedent); the lineage is the body's possession history as an ordered, content-addressed digest chain (each record digested with the W016 hashing family, each link citing its predecessor — any mutation of history breaks the chain loudly); and projectEffectiveAgent composes the agent AS DATA (body + substrate + the tighter-of effective envelope + the maximalBodyView ∩ scope view-grant intersection — a pure projection, never a mutation).",
+  "dependencies": {
+    "agent-body": "workspace:*",
+    "cognitive-substrate": "workspace:*",
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-world-sim": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
