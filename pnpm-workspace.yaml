@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - packages/tradrl-adapters/*
+  - packages/tradrl-evaluation/*
   - apps/zcode-cli
   - apps/tradrl-world-cli
   - apps/zcode-cli/packages/*
