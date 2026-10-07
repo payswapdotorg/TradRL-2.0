@@ -50,7 +50,6 @@ import {
 } from "./clockTimelineData.js";
 import {
   createClockTimelineProjectionController,
-  type ClockTimelineProjectionController,
   type ClockTimelineProjectionSnapshot,
 } from "./clockTimelineProjection.js";
 import { SimulationClockSurfaceStatusBody } from "./SimulationClockSurfaceStates.js";

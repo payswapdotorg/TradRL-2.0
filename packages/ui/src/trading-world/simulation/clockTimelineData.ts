@@ -29,7 +29,7 @@
  *   silently swallowed, never re-invented client-side.
  */
 
-import type { ClockRejection, ClockRejectionCode } from "tradrl-world-contracts/time";
+import type { ClockRejectionCode } from "tradrl-world-contracts/time";
 
 import {
   formatSimulationTimestampMs,
