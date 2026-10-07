@@ -1,0 +1,29 @@
+{
+  "name": "agent-body",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./contracts": "./contracts.ts",
+    "./envelope": "./envelope.ts",
+    "./lifecycle": "./lifecycle.ts",
+    "./validate": "./validate.ts",
+    "./view": "./view.ts"
+  },
+  "description": "Agent Body contracts runtime (W032, the tradrl-information structure pattern): the typed contracts for an agent's BODY — the part that acts in a world. A Body is a participant bound to one world (the W003 Participant interop; the W023-era seat kinds flow through) with a declared embodiment (instruments/venues it may touch, order kinds, TIFs, command kinds), a declared risk envelope (the A13 RiskLimits shape — the runtime gate enforces; a Body looser than its world's limits is invalid at attach, never silently clipped), an attach → active → detached fail-closed lifecycle as pure data transforms, and the A7 observation firewall (available-then grants; withheld artifacts are named). No runtime intelligence — that is W033's Cognitive Substrate (R050).",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-world-sim": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
