@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T07:30:00Z",
+  "updated_at": "2026-10-07T08:20:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -102,8 +102,10 @@
       "write_surface": [
         "packages/ui/src/trading-world/"
       ],
-      "status": "ready",
-      "branch": "work/w006"
+      "status": "merged",
+      "branch": "work/w006",
+      "merged_sha": "de4c91f",
+      "pr": 7
     },
     {
       "id": "W007",
@@ -115,7 +117,7 @@
       "write_surface": [
         "packages/ui/src/trading-world/charts/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w007"
     },
     {
@@ -128,7 +130,7 @@
       "write_surface": [
         "packages/ui/src/trading-world/market/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w008"
     },
     {
@@ -141,7 +143,7 @@
       "write_surface": [
         "packages/ui/src/trading-world/orderbook/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w009"
     },
     {
@@ -154,7 +156,7 @@
       "write_surface": [
         "packages/ui/src/trading-world/orders/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w010"
     },
     {
@@ -167,7 +169,7 @@
       "write_surface": [
         "packages/ui/src/trading-world/portfolio/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w011"
     },
     {
@@ -180,7 +182,7 @@
       "write_surface": [
         "packages/ui/src/trading-world/simulation/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w012"
     },
     {
@@ -195,8 +197,10 @@
         "world",
         "journal"
       ],
-      "status": "ready",
-      "branch": "work/w013"
+      "status": "merged",
+      "branch": "work/w013",
+      "merged_sha": "e3fa3ce",
+      "pr": 6
     },
     {
       "id": "W014",
@@ -208,7 +212,7 @@
         "packages/tradrl-world-sim/orderbook",
         "matching"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w014"
     },
     {
@@ -222,7 +226,7 @@
         "portfolio",
         "risk"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w015"
     },
     {
@@ -236,7 +240,7 @@
         "snapshot",
         "branch"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w016"
     },
     {
@@ -263,7 +267,7 @@
         "packages/tradrl-world-sim/adapter/",
         "packages/ui/src/trading-world/runtime/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w018"
     },
     {
