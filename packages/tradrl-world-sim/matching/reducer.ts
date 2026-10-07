@@ -26,12 +26,14 @@ import type { BookDeltaPayload, TradePrintPayload } from "tradrl-world-contracts
 import { parseScaled, placeOrder, reduceOrder, removeOrder } from "../orderbook/index.js";
 import { EngineInvariantError } from "../world/errors.js";
 import {
+  isMatchingOrderEventType,
   isOrderAcceptedPayload,
   isOrderCanceledPayload,
   isOrderFilledPayload,
   isOrderRejectedPayload,
   isOrderReplacedPayload,
   isOrderTriggeredPayload,
+  MATCHING_PRODUCER,
 } from "./events.js";
 import type {
   OrderAcceptedPayload,
@@ -253,11 +255,22 @@ function stopWorking(
 /**
  * Reduce one journaled event into the matching state. Pure; the single way
  * this state ever advances — live (right after append) and replay alike.
+ *
+ * PRODUCER LAW (the W014 deferral, delivered with W017): the order lifecycle
+ * is the matching engine's alone — no other producer (the market generator
+ * included) may journal order facts. Verified up front, before any payload
+ * inspection, live and on replay alike.
  */
 export function reduceMatchingEvent(
   state: MatchingState,
   envelope: WorldEventEnvelope,
 ): MatchingState {
+  if (isMatchingOrderEventType(envelope.eventType) && envelope.producer !== MATCHING_PRODUCER) {
+    throw new EngineInvariantError(
+      `event ${String(envelope.eventId)}: producer '${String(envelope.producer)}' may not produce ` +
+        `order lifecycle events (only '${String(MATCHING_PRODUCER)}' can)`,
+    );
+  }
   switch (envelope.eventType) {
     case "matching.order.accepted":
       if (!isOrderAcceptedPayload(envelope.payload)) {
@@ -324,9 +337,9 @@ export function reduceMatchingEvent(
     case "market.book.delta":
       return verifyBookDelta(state, envelope.payload as BookDeltaPayload, envelope);
     case "market.halted":
-      return reduceHaltOrReopen(state, (envelope.payload as { scope: unknown }).scope, true);
+      return reduceHaltOrReopen(state, envelope, true);
     case "market.reopened":
-      return reduceHaltOrReopen(state, (envelope.payload as { scope: unknown }).scope, false);
+      return reduceHaltOrReopen(state, envelope, false);
     default:
       throw new EngineInvariantError(
         `matching reducer cannot reduce event type '${envelope.eventType}'`,

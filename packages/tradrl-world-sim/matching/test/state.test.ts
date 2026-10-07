@@ -296,3 +296,88 @@ test("trade prints update the tape and the last-trade price (stop reference)", (
   assert.equal(state.trades[0]?.aggressorSide, "buy");
   assert.equal(state.trades[0]?.sequence, run.envelopes.find((e) => e.eventType === "market.trade.printed")?.sequence);
 });
+
+// --- producer verification (the W014 deferral, delivered with W017) --------------
+
+test("foreign producers cannot forge order lifecycle events or trade prints", () => {
+  const definition = matchingDefinition();
+  const state = initialMatchingState(definition);
+  // a foreign matching.order.accepted (e.g. the market generator pretending
+  // to be the venue) is journal corruption — the order lifecycle is the
+  // matching engine's alone
+  const forgedAccept = envelopeOf(
+    {
+      eventType: "matching.order.accepted",
+      producer: "market-generator" as never,
+      payload: {
+        type: "matching.order.accepted",
+        orderId: "ord:world-w014-tests:1",
+        instrumentId: INSTRUMENT,
+        accountId: MAKER_ACCOUNT,
+        submittedBy: MAKER,
+        kind: "limit",
+        side: "buy",
+        quantity: "1",
+        limitPrice: "4800",
+        constraints: { timeInForce: "GTC" },
+        restingQuantity: "1",
+        submittedAt: START as never,
+      },
+    },
+    1,
+  );
+  assert.throws(() => reduceMatchingEvent(state, forgedAccept), (error: unknown) => {
+    assert.ok(error instanceof EngineInvariantError);
+    assert.match(error.message, /may not produce/);
+    return true;
+  });
+  // and a foreign trade print never reaches the tape
+  const forgedTrade = envelopeOf(
+    {
+      eventType: "market.trade.printed",
+      producer: "market-generator" as never,
+      payload: {
+        type: "market.trade.printed",
+        tradeId: "trd:world-w014-tests:1",
+        instrumentId: INSTRUMENT,
+        price: "4800",
+        quantity: "1",
+        aggressorSide: "buy",
+      },
+    },
+    1,
+  );
+  assert.throws(() => reduceMatchingEvent(state, forgedTrade), (error: unknown) => {
+    assert.ok(error instanceof EngineInvariantError);
+    assert.match(error.message, /market\.trade\.printed/);
+    return true;
+  });
+});
+
+test("trading-state transitions accept the matching engine and the market generator, nothing else", () => {
+  const definition = matchingDefinition();
+  const haltOf = (producer: string, sequence: number) =>
+    envelopeOf(
+      {
+        eventType: "market.halted",
+        producer: producer as never,
+        payload: {
+          type: "market.halted",
+          scope: { kind: "instrument", instrumentId: INSTRUMENT },
+          reason: "regime",
+        },
+      },
+      sequence,
+    );
+  // both lawful producers transition the book
+  let state = reduceMatchingEvent(initialMatchingState(definition), haltOf("market-generator", 1));
+  assert.equal(state.books[String(INSTRUMENT)]?.tradingState, "halted");
+  state = reduceMatchingEvent(initialMatchingState(definition), haltOf("matching-engine", 1));
+  assert.equal(state.books[String(INSTRUMENT)]?.tradingState, "halted");
+  // anyone else fails closed
+  assert.throws(() => reduceMatchingEvent(initialMatchingState(definition), haltOf("rogue-producer", 1)), (error: unknown) => {
+    assert.ok(error instanceof EngineInvariantError);
+    assert.match(error.message, /may not produce market\.halted/);
+    return true;
+  });
+});

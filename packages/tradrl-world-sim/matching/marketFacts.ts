@@ -9,25 +9,51 @@
  * reduction path (reducer.ts dispatches here); live matching and replay
  * share them exactly.
  *
+ * PRODUCER VERIFICATION (the W014 deferral, delivered by W017 — the market
+ * generator is the journal's second producer now): order facts and trade
+ * prints are ONLY ever produced by the matching engine, and a halt/reopen
+ * may come from the matching engine (a venue-policy halt) or the market
+ * generator (a regime-driven one — W017). Anything else fails closed as
+ * journal corruption: no producer can forge order/trade facts or trading
+ * states through this reducer.
+ *
  * Book-delta law: `market.book.delta` events produced by THIS engine
  * (producer `matching-engine`) are projections of facts already reduced —
  * the reducer verifies them against the queue-derived book and throws on
- * mismatch (journal corruption). Foreign delta events belong to the market
- * generator (W017) and fail closed here.
+ * mismatch (journal corruption). Foreign delta events fail closed here
+ * (the generator never emits them — it quotes through real orders).
  */
 
-import type { WorldEventEnvelope } from "tradrl-world-contracts";
+import type { ProducerId, WorldEventEnvelope } from "tradrl-world-contracts";
 import type { BookDeltaPayload, TradePrintPayload } from "tradrl-world-contracts/time";
 import { haltBook, parseScaled, reopenBook, withLastTradePrice } from "../orderbook/index.js";
+import { MARKET_GENERATOR_PRODUCER } from "../generator/events.js";
 import { EngineInvariantError } from "../world/errors.js";
 import { MATCHING_PRODUCER } from "./events.js";
 import { bookOf, withBook, type MatchingState, type TradeRecord } from "./state.js";
+
+/** The producers allowed to journal trading-state transitions. */
+const HALT_PRODUCERS: readonly ProducerId[] = [MATCHING_PRODUCER, MARKET_GENERATOR_PRODUCER];
+
+function assertProducer(
+  envelope: WorldEventEnvelope,
+  allowed: readonly ProducerId[],
+  what: string,
+): void {
+  if (!allowed.includes(envelope.producer)) {
+    throw new EngineInvariantError(
+      `event ${String(envelope.eventId)}: producer '${String(envelope.producer)}' may not produce ${what} ` +
+        `(allowed: ${allowed.map(String).join(", ")})`,
+    );
+  }
+}
 
 function reduceTradePrint(
   state: MatchingState,
   payload: TradePrintPayload,
   envelope: WorldEventEnvelope,
 ): MatchingState {
+  assertProducer(envelope, [MATCHING_PRODUCER], "market.trade.printed");
   if (
     typeof payload?.tradeId !== "string" ||
     typeof payload.instrumentId !== "string" ||
@@ -64,7 +90,7 @@ function verifyBookDelta(
 ): MatchingState {
   if (envelope.producer !== MATCHING_PRODUCER) {
     throw new EngineInvariantError(
-      "foreign market.book.delta events are the market generator's surface (W017), not reducible here",
+      "foreign market.book.delta events are not reducible here (W017's generator quotes through real orders — it never emits book deltas)",
     );
   }
   if (!Array.isArray(payload?.operations) || typeof payload.instrumentId !== "string") {
@@ -101,14 +127,19 @@ function verifyBookDelta(
   return state;
 }
 
-function reduceHaltOrReopen(state: MatchingState, scope: unknown, halted: boolean): MatchingState {
-  const target = scope as { kind?: string; instrumentId?: unknown; venueId?: unknown };
+function reduceHaltOrReopen(state: MatchingState, envelope: WorldEventEnvelope, halted: boolean): MatchingState {
+  assertProducer(envelope, HALT_PRODUCERS, halted ? "market.halted" : "market.reopened");
+  const target = (envelope.payload as { scope: unknown }).scope as {
+    kind?: string;
+    instrumentId?: unknown;
+    venueId?: unknown;
+  };
   const books: Record<string, MatchingState["books"][string]> = { ...state.books };
   for (const [key, book] of Object.entries(books)) {
     const matches =
       target?.kind === "instrument"
         ? String(book.instrumentId) === String(target.instrumentId)
-        : String(book.venueId) === String(target.venueId);
+        : String(book.venueId) === String(target?.venueId);
     if (matches) {
       books[key] = halted ? haltBook(book) : reopenBook(book);
     }
