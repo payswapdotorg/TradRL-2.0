@@ -25,6 +25,7 @@ const required = [
   "docs/LLM-ARCHITECT-HANDOFF.md",
   "docs/ARCHITECT-QUICKSTART.md",
 ];
+
 for (const path of required) {
   if (!existsSync(resolve(root, path))) {
     throw new Error(`missing source-of-truth file: ${path}`);
@@ -67,29 +68,56 @@ for (const item of items) visit(item.id);
 const active = items.filter((x) => ["in_progress", "in_review"].includes(x.status));
 if (active.length > 3) throw new Error(`too many active work items: ${active.length}`);
 
-const surfaceOwners = new Map();
+function scopeOf(surface) {
+  const trimmed = String(surface).trim();
+  const wildcardIndex = trimmed.indexOf("*");
+  const prefix = (wildcardIndex >= 0 ? trimmed.slice(0, wildcardIndex) : trimmed).replace(/\/+$/u, "");
+  return {
+    prefix,
+    wildcard: wildcardIndex >= 0,
+  };
+}
+
+function scopesOverlap(a, b) {
+  const left = scopeOf(a);
+  const right = scopeOf(b);
+  if (left.prefix === right.prefix) return true;
+  const leftCoversRight =
+    left.wildcard && right.prefix.startsWith(left.prefix.endsWith("/") ? left.prefix : `${left.prefix}/`);
+  const rightCoversLeft =
+    right.wildcard && left.prefix.startsWith(right.prefix.endsWith("/") ? right.prefix : `${right.prefix}/`);
+  return leftCoversRight || rightCoversLeft;
+}
+
+const ownedScopes = [];
 for (const item of active) {
   for (const surface of item.write_surface ?? []) {
-    if (surfaceOwners.has(surface)) {
-      throw new Error(`active write-surface collision: ${surface} (${surfaceOwners.get(surface)} vs ${item.id})`);
+    for (const previous of ownedScopes) {
+      if (scopesOverlap(previous.surface, surface)) {
+        throw new Error(
+          `active write-surface overlap: ${previous.item} [${previous.surface}] vs ${item.id} [${surface}]`,
+        );
+      }
     }
-    surfaceOwners.set(surface, item.id);
+    ownedScopes.push({ item: item.id, surface });
   }
 }
 
-const ready = items.filter((item) => {
-  if (item.status !== "ready") return false;
-  return (item.deps ?? []).every((dep) => byId.get(dep)?.status === "merged");
-});
+const ready = items.filter((item) =>
+  item.status === "ready" &&
+  (item.deps ?? []).every((dep) => byId.get(dep)?.status === "merged"),
+);
 
 const wronglyBlocked = items.filter((item) =>
   item.status === "blocked" &&
-  (item.deps ?? []).every((dep) => byId.get(dep)?.status === "merged")
+  (item.deps ?? []).every((dep) => byId.get(dep)?.status === "merged"),
 );
 if (wronglyBlocked.length) {
-  throw new Error(`blocked items have all dependencies merged: ${wronglyBlocked.map((x) => x.id).join(", ")}`);
+  throw new Error(
+    `blocked items have all dependencies merged: ${wronglyBlocked.map((x) => x.id).join(", ")}`,
+  );
 }
 
 console.log(
-  `TradRL governance OK: ${items.length} work items; ${ready.length} ready; ${active.length} active/review; no dependency cycles/collisions.`,
+  `TradRL governance OK: ${items.length} work items; ${ready.length} ready; ${active.length} active/review; no dependency cycles or active-surface overlaps.`,
 );
