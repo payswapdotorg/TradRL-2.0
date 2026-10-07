@@ -12,5 +12,7 @@
     "rootDir": ".",
     "types": ["node"]
   },
-  "include": ["src", "test"]
+  // `time/` (W004 market event/time/information contracts) is included so the
+  // same noEmit typecheck gates its src and compile-time contract assertions.
+  "include": ["src", "test", "time/src", "time/test"]
 }
