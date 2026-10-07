@@ -190,18 +190,36 @@ export function alphaWorldDefinition(worldId: string): WorldDefinition {
   };
 }
 
+/**
+ * Options for {@link createAlphaEngineTransport} (additive, W019 disclosed
+ * seam): the default behavior is UNCHANGED — an omitted option reproduces the
+ * exact pre-W019 transport. `wallTimeSource` exists so the W019 determinism
+ * golden can run the SAME composed attachment twice with wall axes a day
+ * apart and prove wall time never enters the digests (A9 — the W017-golden
+ * methodology at the integration level). It is forwarded verbatim to the
+ * W018 in-process adapter's existing seam.
+ */
+export interface AlphaEngineTransportOptions {
+  /** Injected wall-axis source (the engine-test pattern; default: host clock). */
+  readonly wallTimeSource?: () => WorldDefinition["clock"]["initialWallTime"];
+}
+
 /** One transport per attach — the W018 controller owns its lifecycle. */
-export function createAlphaEngineTransport(worldId: string): WorldTransport {
+export function createAlphaEngineTransport(
+  worldId: string,
+  options: AlphaEngineTransportOptions = {},
+): WorldTransport {
   return createInProcessWorldTransport({
     definition: alphaWorldDefinition(worldId),
     // TL wiring (W017 follow-up): host the GENERATED market, not the plain
     // headless engine — the books fill with real generated liquidity as
     // the clock advances (deterministic: same definition+seed+clock).
-    createEngine: (options) =>
+    createEngine: (engineOptions) =>
       createGeneratedWorldEngine({
-        definition: options.definition,
-        wallTimeSource: options.wallTimeSource,
-        onPublished: options.onPublished,
+        definition: engineOptions.definition,
+        wallTimeSource: engineOptions.wallTimeSource,
+        onPublished: engineOptions.onPublished,
       }),
+    ...(options.wallTimeSource === undefined ? {} : { wallTimeSource: options.wallTimeSource }),
   });
 }
