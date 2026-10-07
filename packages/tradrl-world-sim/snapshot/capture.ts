@@ -63,8 +63,10 @@ export interface WorldSnapshot {
   readonly journalDigest: EventStreamDigest;
   /**
    * The journal prefix itself — the authoritative history up to the cursor.
-   * Records are immutable and shared by reference with the engine's journal;
-   * they make restore-with-tail EXACTLY equivalent to full replay.
+   * Stored as a frozen array of the journal's frozen records (W016 A8: a
+   * snapshot is an immutable capture — verified structurally, not by
+   * convention); the prefix is what makes restore-with-tail EXACTLY
+   * equivalent to full replay.
    */
   readonly records: readonly JournalRecord[];
 }
@@ -129,9 +131,14 @@ export function buildWorldSnapshot(input: BuildSnapshotInput): WorldSnapshot {
     state: serializeWorldState(state),
     clock: { simulationTime: createdAt },
     journalDigest: eventStreamDigest(records.map((record) => record.envelope)),
-    records,
+    // W016 (A8): the prefix is stored as a frozen copy — the snapshot is an
+    // immutable capture; the shared record objects are frozen by the journal.
+    records: Object.freeze([...records]),
   };
-  return { ...content, descriptor: { ...content.descriptor, digest: snapshotDigestOf(content) } };
+  return Object.freeze({
+    ...content,
+    descriptor: Object.freeze({ ...content.descriptor, digest: snapshotDigestOf(content) }),
+  });
 }
 
 /** Structural verification problems reported by `verifyWorldSnapshot`. */

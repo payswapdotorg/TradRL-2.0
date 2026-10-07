@@ -165,16 +165,19 @@ export function reduceWorldEvent(state: WorldState, record: JournalRecord): Worl
           `event ${String(envelope.eventId)}: malformed world.snapshot.created payload`,
         );
       }
-      const summary: SnapshotSummary = {
+      const summary: SnapshotSummary = Object.freeze({
         snapshotId: payload.snapshotId,
         journalCursor: payload.journalCursor,
         digest: payload.digest,
         createdAt: payload.createdAt,
         ...(payload.parentSnapshotId === undefined ? {} : { parentSnapshotId: payload.parentSnapshotId }),
         ...(payload.label === undefined ? {} : { label: payload.label }),
-      };
+      });
       return withAckedCommand(
-        Object.freeze({ ...state, snapshots: [...state.snapshots, summary] }),
+        Object.freeze({
+          ...state,
+          snapshots: Object.freeze([...state.snapshots, summary]),
+        }),
         envelope.causationId as unknown as CommandId,
       );
     }
@@ -188,7 +191,7 @@ export function reduceWorldEvent(state: WorldState, record: JournalRecord): Worl
           `event ${String(envelope.eventId)}: malformed world.branch.created payload`,
         );
       }
-      const branchRecord: BranchLineageRecord = {
+      const branchRecord: BranchLineageRecord = Object.freeze({
         worldId: payload.branchWorldId,
         parentWorldId: payload.parentWorldId,
         sourceSnapshotId: payload.sourceSnapshotId,
@@ -201,9 +204,14 @@ export function reduceWorldEvent(state: WorldState, record: JournalRecord): Worl
         createdAt: payload.createdAt,
         snapshotDigest: payload.snapshotDigest,
         branchPointSequence: payload.branchPointSequence,
-      };
+      });
+      // W016 (A8 / DOMAIN-MODEL "Branch lineage is immutable"): the record
+      // and its registry are frozen — lineage cannot be edited in place.
       return withAckedCommand(
-        Object.freeze({ ...state, branches: [...state.branches, branchRecord] }),
+        Object.freeze({
+          ...state,
+          branches: Object.freeze([...state.branches, branchRecord]),
+        }),
         envelope.causationId as unknown as CommandId,
       );
     }

@@ -20,7 +20,11 @@
  * W016 boundary (journal/snapshot/branch): the snapshot/branch ENGINE is
  * W016's surface. This module stores exactly the records branch reads will
  * need — the ordered envelopes plus per-record journaling metadata — and
- * offers the digest/cursor a snapshot descriptor references.
+ * offers the digest/cursor a snapshot descriptor references. W016 hardens
+ * the A8 immutability law structurally: sealed envelopes and stored records
+ * are frozen — a record that has entered ANY journal (parent, snapshot
+ * prefix, replay) can never be mutated in place, so a branch child cannot
+ * tamper with its parent's history even by accident.
  *
  * Determinism: event ids, entry ids and sequences are pure functions of
  * (worldId, sequence position). No wall time, randomness or insertion order
@@ -189,7 +193,9 @@ function seal(
     schemaVersion: draft.schemaVersion,
     payload: draft.payload,
   };
-  return envelope;
+  // W016 (A8): sealed envelopes are frozen — journal history is structurally
+  // immutable once written, enforced here at the single writer.
+  return Object.freeze(envelope);
 }
 
 /** Pairwise ordered-stream law between one new envelope and the journal tail. */
@@ -240,11 +246,13 @@ export function createEventJournal(worldId: WorldId): EventJournal {
         previous = envelope;
       }
       for (const envelope of sealed) {
-        records.push({
-          entryId: entryIdFor(worldId, envelope.sequence),
-          envelope,
-          recordedAt,
-        });
+        records.push(
+          Object.freeze({
+            entryId: entryIdFor(worldId, envelope.sequence),
+            envelope,
+            recordedAt,
+          }),
+        );
       }
       return sealed;
     },
