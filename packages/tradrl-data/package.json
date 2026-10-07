@@ -1,0 +1,29 @@
+{
+  "name": "tradrl-data",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./errors": "./errors.ts",
+    "./records": "./records.ts",
+    "./validate": "./validate.ts",
+    "./adapters": "./adapters.ts",
+    "./loader": "./loader.ts"
+  },
+  "description": "Historical dataset/event import (W020): typed dataset descriptors with honest fidelity declarations (source, range, known gaps), historical bar/trade/quote record shapes whose occurredAt/availableAt come from the record (A7), event adapters mapping records onto the W004 journal event envelope, and a pure deterministic loader producing journal-ready event records (engine-appendable drafts + restore-path records). No fetching — real datasets arrive through W021/W026 adapters.",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-world-sim": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
