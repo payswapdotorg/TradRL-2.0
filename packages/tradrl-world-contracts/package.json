@@ -21,13 +21,18 @@
     "./world": "./src/world.ts",
     "./events": "./src/events.ts",
     "./commands": "./src/commands.ts",
-    "./ports": "./src/ports.ts"
+    "./ports": "./src/ports.ts",
+    "./time": "./time/src/index.ts",
+    "./time/timeSemantics": "./time/src/timeSemantics.ts",
+    "./time/clock": "./time/src/clock.ts",
+    "./time/marketEvents": "./time/src/marketEvents.ts",
+    "./time/informationBoundary": "./time/src/informationBoundary.ts"
   },
   "scripts": {
     "lint": "oxlint",
     "lint:fix": "oxlint --fix --fix-suggestions",
     "typecheck": "tsc -p .",
-    "test": "tsx --test test/*.test.ts"
+    "test": "tsx --test test/*.test.ts time/test/*.test.ts"
   },
   "devDependencies": {
     "typescript": "^6.0.2"
