@@ -32,6 +32,9 @@ import type { BranchLineageRecord } from "../branch/lineage.js";
 import { isMatchingStateEventType, initialMatchingState, reduceMatchingEvent } from "../matching/index.js";
 import type { MatchingState } from "../matching/index.js";
 import { initialFinancialState, reduceFinancialEvent, type FinancialState } from "../account/index.js";
+import { isGeneratorStateEventType } from "../generator/events.js";
+import { initialMarketGeneratorState, reduceMarketGeneratorEvent } from "../generator/state.js";
+import type { MarketGeneratorState } from "../generator/state.js";
 import { ENGINE_ID, ENGINE_VERSION, type WorldDefinition } from "./definition.js";
 import { EngineInvariantError } from "./errors.js";
 import {
@@ -85,6 +88,8 @@ export interface WorldState {
   readonly snapshots: readonly SnapshotSummary[];
   /** Branches created FROM this world — event-derived (W016, replay-safe). */
   readonly branches: readonly BranchLineageRecord[];
+  /** The W017 generator slice: the regime in force per the last announcement. */
+  readonly market: MarketGeneratorState;
 }
 
 /** The initial state derived from a world definition. */
@@ -99,6 +104,7 @@ export function initialWorldState(definition: WorldDefinition): WorldState {
     financial: initialFinancialState(definition),
     snapshots: [],
     branches: [],
+    market: initialMarketGeneratorState(),
   });
 }
 
@@ -231,6 +237,16 @@ export function reduceWorldEvent(state: WorldState, record: JournalRecord): Worl
           ),
           envelope.causationId as unknown as CommandId,
         );
+      }
+      // The W017 seam: generator-owned market events (regime announcements,
+      // quote projections) reduce in the generator slice through the same
+      // function replay uses. Their causation is a generator turn id, not a
+      // command id, so they never enter the acked-command set.
+      if (isGeneratorStateEventType(envelope.eventType)) {
+        return Object.freeze({
+          ...state,
+          market: reduceMarketGeneratorEvent(state.market, state.matching, envelope),
+        });
       }
       throw new EngineInvariantError(
         `cannot reduce event type '${envelope.eventType}' ` +
