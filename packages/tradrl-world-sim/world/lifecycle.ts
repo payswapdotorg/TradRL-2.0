@@ -17,9 +17,12 @@
  * - close-position applies as a reducing IOC market order through the W014
  *   matching seam (positions reduce via real fills — never a balance edit).
  * - Implemented since W013/W014: add-annotation, set-scenario and the
- *   order commands through the typed matching seam.
- * - Typed not-implemented-in-skeleton rejections remain for
- *   create-snapshot / branch-world (W016 snapshot/branch engine).
+ *   order commands through the typed matching seam (world/orderCommands.ts).
+ * W016 SEAMS: create-snapshot / branch-world are real — the snapshot seam
+ *   captures the world at the current journal position (content-addressed)
+ *   and the branch seam validates the source snapshot and drafts the
+ *   parent-journaled branch record. Every command kind is implemented; the
+ *   validate stage lives in world/validate.ts (the W015 split).
  */
 
 import type {
@@ -31,9 +34,15 @@ import type {
 } from "tradrl-world-contracts";
 import type { CausationId, CorrelationId, TimestampMs } from "tradrl-world-contracts";
 import type { SimulationTimeMs } from "tradrl-world-contracts/time";
-import type { PendingEventDraft } from "../journal/eventJournal.js";
+import type { EventJournal, PendingEventDraft } from "../journal/eventJournal.js";
 import type { ReduceOnlyPositionCheck } from "../matching/index.js";
 import type { CancelOrderCommand, ClosePositionCommand, ReplaceOrderCommand, SubmitOrderCommand } from "tradrl-world-contracts";
+import type { CreateSnapshotCommand, SnapshotId } from "tradrl-world-contracts";
+import type { WorldSnapshot } from "../snapshot/capture.js";
+import { applyCreateSnapshotCommand } from "../snapshot/seam.js";
+import type { SnapshotCommandContext } from "../snapshot/seam.js";
+import { applyBranchWorldCommand } from "../branch/seam.js";
+import type { BranchCommandContext } from "../branch/seam.js";
 import { applyOrderCommand } from "./orderCommands.js";
 import { validateCommand } from "./validate.js";
 export { validateCommand } from "./validate.js";
@@ -44,6 +53,7 @@ import {
 } from "./events.js";
 import type { AnnotationAddedPayload, ScenarioSetPayload } from "./events.js";
 import type { WorldDefinition } from "./definition.js";
+import { EngineInvariantError } from "./errors.js";
 import { nextAnnotationId, type WorldState } from "./state.js";
 
 /** What the lifecycle stages see (a read-only slice of the engine). */
@@ -64,6 +74,19 @@ export interface LifecycleContext {
    * this callback; documented known limitation).
    */
   readonly reduceOnlyCheck?: ReduceOnlyPositionCheck;
+  /**
+   * W016 seam: the authoritative journal — required by the snapshot/branch
+   * seams (cursor, prefix records). Supplied by the engine; a direct
+   * lifecycle caller that omits it gets a typed invariant error when the
+   * command kind needs it.
+   */
+  readonly journal?: EventJournal;
+  /**
+   * W016 seam: full snapshot payloads available in this engine session —
+   * required by the branch seam (the engine supplies them; replay rebuilds
+   * them from journaled truth).
+   */
+  readonly snapshotPayloads?: ReadonlyMap<SnapshotId, WorldSnapshot>;
 }
 
 /** The outcome of the lifecycle before the engine journals/reduces/acks. */
@@ -123,13 +146,6 @@ export function authorizeCommand(
     }
   }
   return { ok: true };
-}
-
-function notImplemented(operation: string, detail: string): LifecycleOutcome {
-  return {
-    kind: "rejected",
-    rejection: { stage: "domain-rules", code: "not-implemented-in-skeleton", message: `${operation} ${detail}` },
-  };
 }
 
 function draft(
@@ -195,12 +211,27 @@ export function applyCommand(command: WorldCommand, ctx: LifecycleContext): Life
         command as CancelOrderCommand | ClosePositionCommand | ReplaceOrderCommand | SubmitOrderCommand,
         ctx,
       );
-    case "create-snapshot":
-    case "branch-world":
-      return notImplemented(
-        `${command.kind}:`,
-        "requires the snapshot/branch engine (W016: packages/tradrl-world-sim/snapshot, branch); history stays immutable and journaled in the skeleton",
-      );
+    case "create-snapshot": {
+      // THE W016 SNAPSHOT SEAM: capture the world at the current journal
+      // position (content-addressed) and draft its journaled descriptor.
+      if (ctx.journal === undefined) {
+        throw new EngineInvariantError(
+          "create-snapshot requires the lifecycle context journal (engine-supplied; direct lifecycle callers must provide one)",
+        );
+      }
+      return applyCreateSnapshotCommand(command as CreateSnapshotCommand, ctx as SnapshotCommandContext);
+    }
+    case "branch-world": {
+      // THE W016 BRANCH SEAM: validate the source snapshot and draft the
+      // parent-journaled branch record with complete lineage facts. The
+      // child engine is created by the engine when this command acks.
+      if (ctx.journal === undefined || ctx.snapshotPayloads === undefined) {
+        throw new EngineInvariantError(
+          "branch-world requires the lifecycle context journal and snapshot payloads (engine-supplied; direct lifecycle callers must provide them)",
+        );
+      }
+      return applyBranchWorldCommand(command, ctx as BranchCommandContext);
+    }
   }
 }
 

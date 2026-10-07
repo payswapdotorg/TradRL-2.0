@@ -91,6 +91,12 @@ test("command results are VALUES (acked or typed rejection), not wire errors", a
   runtime.core.handleClientMessage({
     kind: "request",
     requestId: 2,
+    // W014/W015 made submit-order real — the default helper's on-grid price
+    // passes the pre-trade stage and the venue, so the ack itself is the
+    // value-not-wire-error case (the typed validate rejection below is the
+    // other). W016's pre-W015 repair of this test used an off-grid price as
+    // its rejection-value case; main's W015 repair carries the stronger
+    // three-part form, which is what survives here.
     call: { port: "command", method: "submitOrder", args: [submitOrderCommand()] },
   });
   // a structurally broken command: the typed validate-stage rejection value

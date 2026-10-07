@@ -7,6 +7,11 @@
  * with sorted keys, undefined omitted, arrays in order; FNV-1a chain): two
  * structurally equal inputs always produce the same string and checksum.
  * Wall time and randomness never enter (A9).
+ *
+ * W016: `bigint` values (the W014 orderbook/matching decimal scale) are
+ * canonically rendered as `<digits>n` — deterministic across runs and
+ * platforms, and unreachable for the pre-W016 inputs (definitions and
+ * commands are plain JSON data), so existing digests are unchanged.
  */
 
 const FNV32_OFFSET = 0x811c9dc5;
@@ -15,6 +20,9 @@ const FNV32_PRIME = 0x01000193;
 function canonicalize(value: unknown): string {
   if (value === null) {
     return "null";
+  }
+  if (typeof value === "bigint") {
+    return `${value.toString()}n`;
   }
   if (Array.isArray(value)) {
     return `[${value.map(canonicalize).join(",")}]`;

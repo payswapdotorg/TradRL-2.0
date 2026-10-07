@@ -6,11 +6,13 @@
  * acks). Spec/ARCHITECTURE-LOCK.md A6/A13, spec/ACCEPTANCE-WORLD-ALPHA.md K.
  *
  * The boundary is asserted per command kind: implemented kinds (add-
- * annotation, set-scenario, and the W014 order commands through the typed
- * matching seam) produce ordered event drafts; domain-ruled kinds reject
+ * annotation, set-scenario, the W014 order commands through the typed
+ * matching seam, and the W016 snapshot/branch commands through their
+ * typed seams) produce ordered event drafts; domain-ruled kinds reject
  * at the documented stage with honest codes (unknown-order for cancel/
- * replace on ids no journal ever accepted, not-implemented-in-skeleton
- * naming the owning work order for the rest).
+ * replace on ids no journal ever accepted, unknown-snapshot and the
+ * sibling codes for branch-world, not-implemented-in-skeleton naming the
+ * owning work order for the rest).
  */
 
 import { test } from "node:test";
@@ -20,6 +22,7 @@ import type {
   CancelOrderCommand,
   CommandRejection,
   CreateSnapshotCommand,
+  SnapshotId,
   WorldCommand,
 } from "tradrl-world-contracts";
 import {
@@ -32,6 +35,8 @@ import {
   type LifecycleContext,
 } from "../index.js";
 import { createEventJournal } from "../../journal/index.js";
+import type { JournalRecord } from "../../journal/index.js";
+import { buildWorldSnapshot, type WorldSnapshot } from "../../snapshot/index.js";
 import {
   INSTRUMENT,
   START,
@@ -45,12 +50,20 @@ import {
   testDefinition,
 } from "./helpers.js";
 
-function ctx(): LifecycleContext {
+/** A lifecycle context with the W016 seam fields (journal + payload store). */
+interface SeamContext extends LifecycleContext {
+  readonly journal: ReturnType<typeof createEventJournal>;
+  readonly snapshotPayloads: Map<SnapshotId, WorldSnapshot>;
+}
+
+function ctx(): SeamContext {
   return {
     definition: testDefinition(),
     state: initialWorldState(testDefinition()),
     simulationTime: (START + 10_000) as never,
     nextSequence: 1 as never,
+    journal: createEventJournal(WORLD),
+    snapshotPayloads: new Map(),
   };
 }
 
@@ -59,7 +72,7 @@ function ctx(): LifecycleContext {
  * lifecycle, journal the drafts (dense sequences from 1) and reduce the
  * sealed records — the single-path law, so later commands see real state.
  */
-function ctxAfter(...commands: readonly WorldCommand[]): LifecycleContext {
+function ctxAfter(...commands: readonly WorldCommand[]): SeamContext {
   const definition = testDefinition();
   const journal = createEventJournal(WORLD);
   let state = initialWorldState(definition);
@@ -69,6 +82,8 @@ function ctxAfter(...commands: readonly WorldCommand[]): LifecycleContext {
       state,
       simulationTime: (START + 10_000) as never,
       nextSequence: (journal.getCursor() + 1) as never,
+      journal,
+      snapshotPayloads: new Map(),
     });
     if (outcome.kind === "applied") {
       const sealed = journal.append(outcome.drafts, { recordedAt: (START + 10_000) as never });
@@ -86,6 +101,65 @@ function ctxAfter(...commands: readonly WorldCommand[]): LifecycleContext {
     state,
     simulationTime: (START + 10_000) as never,
     nextSequence: (journal.getCursor() + 1) as never,
+    journal,
+    snapshotPayloads: new Map(),
+  };
+}
+
+/**
+ * Advance a context AND take a real snapshot through the lifecycle (the
+ * snapshot event is journaled + reduced like the engine does; the payload
+ * is rebuilt exactly the engine way so the branch seam can consume it).
+ */
+function ctxAfterSnapshot(
+  ...commands: readonly WorldCommand[]
+): SeamContext & { readonly snapshot: WorldSnapshot } {
+  const advanced = ctxAfter(...commands);
+  const outcome = runCommandLifecycle(
+    {
+      kind: "create-snapshot",
+      commandId: "cmd-ctx-snap" as never,
+      worldId: WORLD,
+      issuedBy: TRADER,
+      issuedAt: (START + 10_000) as never,
+    },
+    advanced,
+  );
+  if (outcome.kind !== "applied") {
+    throw new Error("ctx snapshot command failed");
+  }
+  const sealed = advanced.journal.append(outcome.drafts, { recordedAt: (START + 10_000) as never });
+  let state = advanced.state;
+  const payload = (sealed[0] as unknown as { payload: {
+    snapshotId: SnapshotId; digest: string; journalCursor: number; createdAt: number;
+  } }).payload;
+  for (const envelope of sealed) {
+    const record: JournalRecord = {
+      entryId: `jrn:${WORLD}:${String(envelope.sequence)}` as never,
+      envelope,
+      recordedAt: (START + 10_000) as never,
+    };
+    state = reduceWorldEvent(state, record);
+  }
+  const snapshot = buildWorldSnapshot({
+    definition: advanced.definition,
+    state: advanced.state,
+    records: advanced.journal.records().slice(0, payload.journalCursor),
+    snapshotId: payload.snapshotId,
+    createdAt: payload.createdAt as never,
+  });
+  if (snapshot.descriptor.digest !== payload.digest) {
+    throw new Error("ctx snapshot digest mismatch");
+  }
+  const snapshotPayloads = new Map<SnapshotId, WorldSnapshot>([[payload.snapshotId, snapshot]]);
+  return {
+    definition: advanced.definition,
+    state,
+    simulationTime: (START + 10_000) as never,
+    nextSequence: (advanced.journal.getCursor() + 1) as never,
+    journal: advanced.journal,
+    snapshotPayloads,
+    snapshot,
   };
 }
 
@@ -396,29 +470,132 @@ test("W015: close-position on a flat account is the typed no-open-position rejec
   assert.match(rejection?.message ?? "", /no open position/);
 });
 
-test("stub boundary: create-snapshot and branch-world reject naming W016", () => {
+test("W016 seam: create-snapshot captures the world at the cursor and drafts its descriptor", () => {
+  const context = ctxAfter(addAnnotationCommand(), submitOrderCommand());
+  const before = context.state;
   const snapshot: CreateSnapshotCommand = {
     kind: "create-snapshot",
     commandId: "cmd-snap-1" as never,
     worldId: WORLD,
     issuedBy: TRADER,
     issuedAt: START as never,
+    label: "pre-branch",
   };
+  const outcome = runCommandLifecycle(snapshot, context);
+  assert.equal(outcome.kind, "applied");
+  if (outcome.kind !== "applied") return;
+  const draft = outcome.drafts[0]!;
+  assert.equal(draft.eventType, "world.snapshot.created");
+  const payload = draft.payload as {
+    snapshotId: string;
+    journalCursor: number;
+    digest: string;
+    createdAt: number;
+    parentSnapshotId?: string;
+    label?: string;
+  };
+  assert.equal(payload.snapshotId, "snap:world-w013-tests:1");
+  assert.equal(payload.journalCursor, context.journal.getCursor());
+  assert.equal(payload.label, "pre-branch");
+  assert.equal(payload.parentSnapshotId, undefined, "first snapshot has no parent");
+  // the digest is the content address of the captured state + prefix
+  const rebuilt = buildWorldSnapshot({
+    definition: context.definition,
+    state: before,
+    records: context.journal.records().slice(0, payload.journalCursor),
+    snapshotId: payload.snapshotId as never,
+    createdAt: payload.createdAt as never,
+  });
+  assert.equal(rebuilt.descriptor.digest, payload.digest);
+  // a second snapshot chains its parent and gets the next deterministic id
+  const second = runCommandLifecycle(
+    { ...snapshot, commandId: "cmd-snap-2" as never },
+    {
+      ...context,
+      state: {
+        ...context.state,
+        snapshots: [
+          {
+            snapshotId: payload.snapshotId as never,
+            journalCursor: payload.journalCursor as never,
+            digest: payload.digest,
+            createdAt: payload.createdAt as never,
+          },
+        ],
+      },
+    },
+  );
+  assert.equal(second.kind, "applied");
+  const secondPayload =
+    second.kind === "applied" ? (second.drafts[0]!.payload as { snapshotId: string; parentSnapshotId: string }) : undefined;
+  assert.equal(secondPayload?.snapshotId, "snap:world-w013-tests:2");
+  assert.equal(secondPayload?.parentSnapshotId, "snap:world-w013-tests:1");
+});
+
+test("W016 seam: create-snapshot rejects a blank label at validate", () => {
+  const snapshot: CreateSnapshotCommand = {
+    kind: "create-snapshot",
+    commandId: "cmd-snap-blank" as never,
+    worldId: WORLD,
+    issuedBy: TRADER,
+    issuedAt: START as never,
+    label: "   ",
+  };
+  const outcome = runCommandLifecycle(snapshot, ctx());
+  const rejection = rejectionOf(outcome);
+  assert.equal(rejection?.stage, "validate");
+  assert.equal(rejection?.code, "malformed-command");
+});
+
+test("W016 seam: branch-world drafts the parent record and rejects unknown snapshots", () => {
+  const context = ctxAfterSnapshot(addAnnotationCommand());
   const branch: BranchWorldCommand = {
     kind: "branch-world",
     commandId: "cmd-branch-1" as never,
     worldId: WORLD,
     issuedBy: TRADER,
     issuedAt: START as never,
-    sourceSnapshotId: "snap-1" as never,
+    sourceSnapshotId: context.snapshot.descriptor.snapshotId,
+    configuration: { label: "what-if" },
   };
-  for (const command of [snapshot, branch]) {
-    const outcome = runCommandLifecycle(command, ctx());
-    const rejection = rejectionOf(outcome);
-    assert.equal(rejection?.stage, "domain-rules");
-    assert.equal(rejection?.code, "not-implemented-in-skeleton");
-    assert.match(rejection?.message ?? "", /W016/);
-  }
+  const outcome = runCommandLifecycle(branch, context);
+  assert.equal(outcome.kind, "applied");
+  if (outcome.kind !== "applied") return;
+  const draft = outcome.drafts[0]!;
+  assert.equal(draft.eventType, "world.branch.created");
+  const payload = draft.payload as {
+    branchWorldId: string;
+    parentWorldId: string;
+    sourceSnapshotId: string;
+    snapshotDigest: string;
+    branchPointSequence: number;
+    configuration: { label: string };
+    createdViaCommand: string;
+  };
+  assert.equal(payload.branchWorldId, "wld:world-w013-tests:1");
+  assert.equal(payload.parentWorldId, WORLD);
+  assert.equal(payload.sourceSnapshotId, context.snapshot.descriptor.snapshotId);
+  assert.equal(payload.snapshotDigest, context.snapshot.descriptor.digest);
+  assert.equal(payload.branchPointSequence, context.snapshot.descriptor.journalCursor);
+  assert.equal(payload.createdViaCommand, "cmd-branch-1");
+  assert.deepEqual(payload.configuration, { label: "what-if" });
+
+  // unknown snapshot id: the honest domain-rules rejection
+  const unknown = runCommandLifecycle(
+    { ...branch, commandId: "cmd-branch-2" as never, sourceSnapshotId: "snap-ghost" as never },
+    context,
+  );
+  assert.equal(rejectionOf(unknown)?.stage, "domain-rules");
+  assert.equal(rejectionOf(unknown)?.code, "unknown-snapshot");
+
+  // journaled descriptor but no restorable payload in the session store
+  const summaryOnly = ctxAfterSnapshot(addAnnotationCommand());
+  const notRestorable = runCommandLifecycle(
+    { ...branch, commandId: "cmd-branch-3" as never },
+    { ...summaryOnly, snapshotPayloads: new Map() },
+  );
+  assert.equal(rejectionOf(notRestorable)?.stage, "domain-rules");
+  assert.equal(rejectionOf(notRestorable)?.code, "snapshot-not-restorable");
 });
 
 test("lifecycle ordering: validation precedes authorization precedes domain rules", () => {

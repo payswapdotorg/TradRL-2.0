@@ -117,8 +117,13 @@ export function validateCommand(
       }
       break;
     }
-    case "create-snapshot":
+    case "create-snapshot": {
+      // W016: the optional label, when present, must be a non-blank string.
+      if (command.label !== undefined && command.label.trim().length === 0) {
+        errors.push(error("malformed-command", "label, when present, must be a non-blank string", "label"));
+      }
       break;
+    }
     case "branch-world": {
       if (typeof command.sourceSnapshotId !== "string" || command.sourceSnapshotId.length === 0) {
         errors.push(error("malformed-command", "sourceSnapshotId must be a non-empty string", "sourceSnapshotId"));

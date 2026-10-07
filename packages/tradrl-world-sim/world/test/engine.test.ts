@@ -311,8 +311,14 @@ test("QueryPort: still-unimplemented domain projections are typed rejections", a
   const e = engine();
   const expectations: [Promise<unknown>, string, string][] = [
     [e.query.getQuote(INSTRUMENT), "market-generator", "QueryPort.getQuote"],
-    [e.query.getSnapshot(), "snapshot-branch", "QueryPort.getSnapshot"],
   ];
+  // W016 made QueryPort.getSnapshot real — a world with no snapshot yet
+  // fails closed with the typed entity error instead.
+  await assert.rejects(e.query.getSnapshot(), (error: unknown) => {
+    assert.ok(error instanceof UnknownWorldEntityError, "QueryPort.getSnapshot");
+    assert.equal(error.kind, "snapshot");
+    return true;
+  });
   for (const [promise, surface, operation] of expectations) {
     await assert.rejects(promise, (error: unknown) => {
       assert.ok(error instanceof NotImplementedInSkeletonError, operation);
