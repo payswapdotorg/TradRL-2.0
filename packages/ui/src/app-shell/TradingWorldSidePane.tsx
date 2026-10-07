@@ -1,17 +1,22 @@
 import { CandlestickChartIcon, XIcon } from "lucide-react";
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
+import { TradingWorldShell } from "@/trading-world/index.js";
 import type { TradingWorldSidePaneTab } from "@/lib/workspaceSidePane.js";
 
 /**
- * TradRL Trading World side-pane placeholder surface (W005 seam).
+ * TradRL Trading World side-pane surface (W005 seam; body hosted by W006).
  *
  * 外壳只认识这个组件的**生命周期形状**（挂载/聚焦/关闭 + 容器自适应布局），
  * 不认识任何交易域语义：`tab.worldId` / `tab.layoutProfileId` 在外壳侧是不透明
  * 字符串，由 Trading World 自己解释（contracts/ui/ 契约 + AGENTS.md 产品边界）。
  *
- * 完整的市场工作台（charts / watchlist / DOM / orders / portfolio / clock）是
- * W006+ 的 surface；W005 只交付注册 + 生命周期 parity + 常驻模拟披露徽标。
+ * W006 integration touch (additive, the only edit outside
+ * packages/ui/src/trading-world/): the placeholder body is replaced by the
+ * Trading World cockpit shell — the tool-registry-backed trader cockpit with
+ * per-tool layout persistence. Header chrome (title, persistent SIMULATED
+ * disclosure badge, close button) and all lifecycle data attributes stay
+ * exactly as W005 shipped them.
  */
 
 /** 面板固定展示名（产品名，不本地化；W006+ 接管真实 i18n 时再评估）。 */
@@ -74,22 +79,10 @@ export function TradingWorldSidePane({
           <XIcon className="size-3.5" />
         </Button>
       </header>
-      <div
-        data-trading-world-placeholder=""
-        className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 overflow-y-auto px-5 py-10 text-center"
-      >
-        <p className="text-ui-base font-medium text-foreground">Trading World</p>
-        <p className="max-w-[20rem] text-ui-base text-foreground-subtle">
-          Placeholder surface. The market workspace (watchlist, chart, order book, orders,
-          portfolio, simulation clock) docks here in a later milestone.
-        </p>
-        <p
-          data-trading-world-id=""
-          title="Opaque world identity persisted by the workspace shell"
-          className="font-mono text-ui-xs text-foreground-subtlest"
-        >
-          {tab.worldId}
-        </p>
+      {/* W006: 世界侧驾驶舱（工具注册表 + 面板内布局 + world-client seam）。
+          折叠 ≠ 销毁仍由外层 forceMount + 挂载闭锁保证（J-WORLD-02）。 */}
+      <div className="flex min-h-0 flex-1 flex-col">
+        <TradingWorldShell tab={tab} visible={visible} focused={focused} />
       </div>
     </section>
   );
