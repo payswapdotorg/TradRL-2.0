@@ -8,14 +8,14 @@
  * authorization/venue gates are runtime controls, never prompt text),
  * A15 + spec/ACCEPTANCE-WORLD-ALPHA.md K (typed denials).
  *
- * SKELETON BOUNDARY (honest stubs, each naming the work order that fills it):
- * - Implemented for real: add-annotation, set-scenario (world-core facts).
+ * W014 SEAM (the honest boundary after W013+ W014):
+ * - Implemented for real: add-annotation, set-scenario (world-core facts)
+ *   and submit-order / cancel-order / replace-order through the typed
+ *   matching seam (matching/seam.ts) — order kinds × TIF × policies are the
+ *   matcher's domain (matching/submission.ts documents the matrix).
  * - Typed not-implemented-in-skeleton rejections at the domain-rules stage:
- *   submit-order (W014 matching + W015 risk), close-position (W014+W015),
- *   create-snapshot / branch-world (W016 snapshot/branch engine).
- * - cancel-order / replace-order fail at the validate stage with
- *   unknown-order in the skeleton: the order registry is empty until W014
- *   owns the order-lifecycle transitions (the honest current truth).
+ *   close-position (W014 matching + W015 portfolio/risk), create-snapshot /
+ *   branch-world (W016 snapshot/branch engine).
  */
 
 import type {
@@ -24,6 +24,7 @@ import type {
   CommandValidationErrorCode,
   OrderKind,
   ParticipantId,
+  SequenceNumber,
   TimeInForce,
   ValidateCommandResult,
   WorldCommand,
@@ -31,6 +32,9 @@ import type {
 import type { CausationId, CorrelationId, TimestampMs } from "tradrl-world-contracts";
 import type { SimulationTimeMs } from "tradrl-world-contracts/time";
 import type { PendingEventDraft } from "../journal/eventJournal.js";
+import { applyMatchingCommand } from "../matching/index.js";
+import type { ReduceOnlyPositionCheck } from "../matching/index.js";
+import type { CancelOrderCommand, ReplaceOrderCommand, SubmitOrderCommand } from "tradrl-world-contracts";
 import {
   ENGINE_EVENT_SCHEMA_VERSION,
   WORLD_CORE_PRODUCER,
@@ -45,11 +49,23 @@ export interface LifecycleContext {
   readonly state: WorldState;
   /** Current clock position — stamps emitted events (occurredAt). */
   readonly simulationTime: SimulationTimeMs;
+  /**
+   * W014 seam: the sequence the journal will assign this command's first
+   * draft (cursor + 1). The matcher reserves dense sequences for its batch
+   * so fill drafts can cite the trade events that generated them.
+   */
+  readonly nextSequence: SequenceNumber;
+  /**
+   * W015 seam: the reduce-only position check (absent ⇒ permissive — the
+   * venue cannot verify position effects until the account engine wires
+   * this callback; documented known limitation).
+   */
+  readonly reduceOnlyCheck?: ReduceOnlyPositionCheck;
 }
 
 /** The outcome of the lifecycle before the engine journals/reduces/acks. */
 export type LifecycleOutcome =
-  | { readonly kind: "applied"; readonly draft: PendingEventDraft }
+  | { readonly kind: "applied"; readonly drafts: readonly PendingEventDraft[] }
   | { readonly kind: "rejected"; readonly rejection: CommandRejection };
 
 const ORDER_KINDS: readonly OrderKind[] = ["market", "limit", "stop", "stop-limit"];
@@ -220,9 +236,9 @@ export function validateCommand(
     }
   }
   if (command.kind === "cancel-order" || command.kind === "replace-order") {
-    // The skeleton order registry is empty (W014 owns order transitions):
-    // the honest truth for any order id today is unknown-order.
-    if (!ctx.state.orders.some((o) => o.orderId === command.orderId)) {
+    // Unknown order ids are the honest validate-stage rejection; the
+    // matcher's domain rules own order-not-modifiable (terminal targets).
+    if (!ctx.state.matching.orders.some((o) => o.orderId === command.orderId)) {
       errors.push(error("unknown-order", `order ${String(command.orderId)} does not exist in this world`, "orderId"));
     }
   }
@@ -325,10 +341,11 @@ function draft(
 }
 
 /**
- * The `apply domain rules` stage. Implemented kinds return the event draft
- * the engine will journal (the mutation itself happens by reducing that
- * event — single path with replay); unimplemented kinds return the honest
- * typed stub rejection naming the owning work order.
+ * The `apply domain rules` stage. Implemented kinds return the ordered event
+ * drafts the engine will journal (the mutation itself happens by reducing
+ * those events — single path with replay); order commands delegate to the
+ * typed matching seam; unimplemented kinds return the honest typed stub
+ * rejection naming the owning work order.
  */
 export function applyCommand(command: WorldCommand, ctx: LifecycleContext): LifecycleOutcome {
   switch (command.kind) {
@@ -341,7 +358,7 @@ export function applyCommand(command: WorldCommand, ctx: LifecycleContext): Life
         at: command.at as TimestampMs,
         text: command.text,
       };
-      return { kind: "applied", draft: draft(command, ctx, "world.annotation.added", payload) };
+      return { kind: "applied", drafts: [draft(command, ctx, "world.annotation.added", payload)] };
     }
     case "set-scenario": {
       const payload: ScenarioSetPayload = {
@@ -350,26 +367,27 @@ export function applyCommand(command: WorldCommand, ctx: LifecycleContext): Life
         ...(command.scenario.label === undefined ? {} : { label: command.scenario.label }),
         entries: command.scenario.entries,
       };
-      return { kind: "applied", draft: draft(command, ctx, "world.scenario.set", payload) };
+      return { kind: "applied", drafts: [draft(command, ctx, "world.scenario.set", payload)] };
     }
     case "submit-order":
-      return notImplemented(
-        "submit-order:",
-        "requires the matching engine (W014: packages/tradrl-world-sim/matching) and account/risk gating (W015: packages/tradrl-world-sim/account, risk); the W013 skeleton implements the command lifecycle, not the domain rules",
-      );
+    case "cancel-order":
+    case "replace-order": {
+      // THE W014 SEAM: the world core hands order commands to the matching
+      // engine (typed contract in matching/seam.ts). The engine journals the
+      // returned drafts and reduces them through the same reducer the
+      // matcher advanced its working copy through.
+      return applyMatchingCommand(command as SubmitOrderCommand | CancelOrderCommand | ReplaceOrderCommand, {
+        definition: ctx.definition,
+        matching: ctx.state.matching,
+        simulationTime: ctx.simulationTime,
+        nextSequence: ctx.nextSequence,
+        ...(ctx.reduceOnlyCheck === undefined ? {} : { reduceOnlyCheck: ctx.reduceOnlyCheck }),
+      });
+    }
     case "close-position":
       return notImplemented(
         "close-position:",
         "requires positions and financial state (W015: packages/tradrl-world-sim/portfolio) plus matching (W014); the W013 skeleton implements the command lifecycle, not the domain rules",
-      );
-    case "cancel-order":
-    case "replace-order":
-      // Unreachable in the skeleton (validation rejects with unknown-order
-      // while the order registry is empty); kept as the documented stub for
-      // the W014 order lifecycle.
-      return notImplemented(
-        `${command.kind}:`,
-        "requires the matching engine order lifecycle (W014: packages/tradrl-world-sim/matching)",
       );
     case "create-snapshot":
     case "branch-world":

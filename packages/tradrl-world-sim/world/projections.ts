@@ -11,11 +11,12 @@
  * Spec: spec/ACCEPTANCE-WORLD-ALPHA.md L (evidence: causal events and
  * provenance for every applied command).
  *
- * Skeleton stub boundary (typed, honest, each naming its work order):
- * - getSnapshot (QueryPort) / getPortfolio / getRisk / getQuote /
- *   getOrderBook / getTrades throw NotImplementedInSkeletonError;
- * - getOrders / getPositions return the true empty lists (no order can
- *   exist in the skeleton: order commands are stubbed);
+ * W014 seam boundary (typed, honest):
+ * - getOrderBook / getTrades / getOrders project the authoritative matching
+ *   state (orders, books, trade tape) — W014's engine surface;
+ * - getSnapshot (QueryPort) / getPortfolio / getRisk / getQuote still throw
+ *   NotImplementedInSkeletonError (W016 / W015 / W017);
+ * - getPositions returns the true empty list (positions arrive with W015);
  * - EvidencePort.getSnapshot returns undefined and getBranchLineage returns
  *   the true empty lineage (snapshots/branches are W016).
  */
@@ -45,6 +46,7 @@ import type { ClockState } from "tradrl-world-contracts/time";
 import { computeInformationBoundary } from "tradrl-world-contracts/time";
 import type { EventJournal } from "../journal/eventJournal.js";
 import type { ClockEventLookup } from "../clock/simulationClock.js";
+import { bookSnapshot } from "../orderbook/index.js";
 import { NotImplementedInSkeletonError, UnknownWorldEntityError } from "./errors.js";
 import { projectWorldMeta, type WorldDefinition } from "./definition.js";
 import type { WorldState } from "./state.js";
@@ -91,15 +93,51 @@ export function createQueryPort(read: () => EngineReadModel): QueryPort {
     async getQuote() {
       throw new NotImplementedInSkeletonError("market-generator", "QueryPort.getQuote");
     },
-    async getOrderBook(): Promise<OrderBookSnapshot> {
-      throw new NotImplementedInSkeletonError("matching-orderbook", "QueryPort.getOrderBook");
+    async getOrderBook(instrumentId, depth?): Promise<OrderBookSnapshot> {
+      // W014: the DOM projection over the authoritative matching book state
+      // (venue truth; the A7 firewall on the underlying book-delta events is
+      // served by getTimeline/getEvents).
+      const model = read();
+      const book = model.state.matching.books[String(instrumentId)];
+      if (book === undefined) {
+        throw new UnknownWorldEntityError("instrument", String(instrumentId));
+      }
+      return bookSnapshot(book, {
+        asOf: model.clockState.simulationTime as never,
+        sequence: model.journal.getCursor(),
+        ...(depth === undefined ? {} : { depth }),
+      });
     },
-    async getTrades(): Promise<readonly Trade[]> {
-      throw new NotImplementedInSkeletonError("matching-orderbook", "QueryPort.getTrades");
+    async getTrades(instrumentId, query = {}): Promise<readonly Trade[]> {
+      // W014: the Time & Sales projection — the trade tape is firewalled by
+      // each trade's availableAt (venue latency policy, A7).
+      const model = read();
+      const at = observationTime(read);
+      let trades = model.state.matching.trades.filter(
+        (trade) =>
+          trade.instrumentId === instrumentId &&
+          (trade.availableAt === undefined || trade.availableAt <= at),
+      );
+      if (query.from !== undefined) {
+        trades = trades.filter((trade) => trade.occurredAt >= query.from!);
+      }
+      if (query.to !== undefined) {
+        trades = trades.filter((trade) => trade.occurredAt <= query.to!);
+      }
+      const projected = trades.map(({ availableAt: _availableAt, ...trade }) => trade);
+      return query.limit === undefined ? projected : projected.slice(0, query.limit);
     },
-    async getOrders() {
-      // True empty projection: no order can exist in the skeleton.
-      return [];
+    async getOrders(query = {}) {
+      // W014: the order registry projection (venue truth — the registry is
+      // the venue's own record; event-level observability is served by the
+      // evidence/timeline ports).
+      const orders = read().state.matching.orders.filter(
+        (order) =>
+          (query.accountId === undefined || order.accountId === query.accountId) &&
+          (query.instrumentId === undefined || order.instrumentId === query.instrumentId) &&
+          (query.statuses === undefined || query.statuses.includes(order.status)),
+      );
+      return orders;
     },
     async getPositions(): Promise<readonly Position[]> {
       // True empty projection: positions arrive with fills (W014/W015).

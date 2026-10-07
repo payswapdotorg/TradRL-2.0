@@ -16,6 +16,7 @@ import type {
   SetScenarioCommand,
   SubmitOrderCommand,
   TimestampMs,
+  Venue,
   WorldScope,
 } from "tradrl-world-contracts";
 import type { SimulationTimeMs, WallTimeMs } from "tradrl-world-contracts/time";
@@ -109,6 +110,22 @@ export function testNewsArtifact(
     provenance: { producer: "test-wire" as never, recordedAt: at(START) },
     version: "1",
     payload: { headline },
+  };
+}
+
+/** A fee/latency venue bound to the test instrument's `venue-sim`. */
+export function testVenue(overrides: Partial<Venue> = {}): Venue {
+  return {
+    venueId: "venue-sim" as Venue["venueId"],
+    worldId: WORLD,
+    name: "sim-venue",
+    matchingModel: "price-time-priority",
+    allowedOrderKinds: ["market", "limit", "stop", "stop-limit"],
+    feeSchedule: { makerRateBps: 2, takerRateBps: 5, fixedFee: "0.10" as never },
+    latency: { acknowledgementMs: 250, fillPropagationMs: 500 },
+    calendar: { sessions: [{ opensAt: 0 as never, closesAt: Number.MAX_SAFE_INTEGER as never }] },
+    haltPolicy: { haltOnShock: false },
+    ...overrides,
   };
 }
 

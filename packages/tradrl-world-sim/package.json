@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "license": "Apache-2.0",
-  "description": "Headless deterministic World engine skeleton (W013): simulation clock, world core + command lifecycle, append-only event journal.",
+  "description": "Headless deterministic World engine (W013 core, W014 orderbook + matching): simulation clock, world core + command lifecycle, append-only event journal, price-time-priority order book and matching engine.",
   "dependencies": {
     "tradrl-world-contracts": "workspace:*"
   },
@@ -12,7 +12,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix --fix-suggestions",
     "typecheck": "tsc -p .",
-    "test": "tsx --test clock/test/*.test.ts world/test/*.test.ts journal/test/*.test.ts"
+    "test": "tsx --test clock/test/*.test.ts world/test/*.test.ts journal/test/*.test.ts orderbook/test/*.test.ts matching/test/*.test.ts"
   },
   "devDependencies": {
     "typescript": "^6.0.2"

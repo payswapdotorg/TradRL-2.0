@@ -30,10 +30,12 @@ import {
   TRADER,
   WORLD,
   addAnnotationCommand,
+  closePositionCommand,
   fixedWallTimeSource,
   setScenarioCommand,
   submitOrderCommand,
   testDefinition,
+  testVenue,
 } from "./helpers.js";
 
 function engine(
@@ -109,21 +111,102 @@ test("the clock stamps emitted events (occurredAt follows the simulation axis)",
   assert.equal(e.worldState().annotations[0]?.addedAt, START + 25_000);
 });
 
-test("stub boundary through the port: submit-order rejects not-implemented-in-skeleton", async () => {
+test("W014 seam through the port: submit-order acks, journals and reduces", async () => {
   const e = engine();
   const result = await e.command.submitOrder(submitOrderCommand());
-  assert.deepEqual(result, {
-    status: "rejected",
-    rejection: {
-      stage: "domain-rules",
-      code: "not-implemented-in-skeleton",
-      message:
-        "submit-order: requires the matching engine (W014: packages/tradrl-world-sim/matching) " +
-        "and account/risk gating (W015: packages/tradrl-world-sim/account, risk); " +
-        "the W013 skeleton implements the command lifecycle, not the domain rules",
-    },
-  });
-  assert.equal(e.journal.size(), 0, "rejected commands journal nothing");
+  assert.equal(result.status, "acked");
+  if (result.status !== "acked") return;
+  // the matcher's batch is journaled as one ordered command transaction:
+  // acceptance of the resting order, then its W004 book delta
+  assert.deepEqual(
+    result.ack.resultingEventIds.map((id) => e.journal.getRecordByEventId(id)?.envelope.eventType),
+    ["matching.order.accepted", "market.book.delta"],
+  );
+  assert.equal(result.ack.journalCursor, 2);
+  const state = e.worldState();
+  assert.equal(state.matching.orders.length, 1);
+  assert.equal(String(state.matching.orders[0]?.orderId), "ord:world-w013-tests:1");
+  assert.equal(state.matching.orders[0]?.status, "accepted");
+  const book = state.matching.books[String(INSTRUMENT)];
+  assert.equal(book?.bids.length, 1);
+  assert.equal(book?.bids[0]?.price, "4800.25");
+});
+
+test("W014 seam through the port: crossing fills cite their trades (causality)", async () => {
+  const e = engine();
+  await e.command.submitOrder(
+    submitOrderCommand({ commandId: "cmd-maker" as never }),
+  );
+  const taker = await e.command.submitOrder(
+    submitOrderCommand({
+      commandId: "cmd-taker" as never,
+      submission: {
+        kind: "market",
+        side: "sell",
+        quantity: "4" as never,
+        constraints: { timeInForce: "IOC" },
+      },
+    }),
+  );
+  assert.equal(taker.status, "acked");
+  const state = e.worldState();
+  assert.equal(state.matching.trades.length, 1);
+  assert.equal(state.matching.fills.length, 2, "taker fill + maker fill");
+  const trade = state.matching.trades[0]!;
+  const tradeEvent = e.journal.findEvent(trade.sequence)!;
+  assert.equal(tradeEvent.eventType, "market.trade.printed");
+  for (const fill of state.matching.fills) {
+    assert.equal(String(fill.marketRef.tradeId), String(trade.tradeId));
+    assert.equal(fill.marketRef.sequence, trade.sequence);
+    const own = e.journal.getRecordByEventId(fill.eventId!);
+    assert.ok(own, "the fill's event is journaled");
+    assert.ok(own !== undefined && own.envelope.sequence > trade.sequence);
+  }
+  // both orders reached honest terminal/working states
+  const statuses = state.matching.orders.map((order) => order.status).sort();
+  assert.deepEqual(statuses, ["filled", "partially-filled"]);
+});
+
+test("W014 venue policy through the port: fees on fills, latency-gated trades (A7)", async () => {
+  const e = engine({ definition: testDefinition({ venues: [testVenue()] }) });
+  const maker = await e.command.submitOrder(
+    submitOrderCommand({ commandId: "cmd-maker" as never }),
+  );
+  assert.equal(maker.status, "acked");
+  await e.command.submitOrder(
+    submitOrderCommand({
+      commandId: "cmd-taker" as never,
+      submission: {
+        kind: "market",
+        side: "sell",
+        quantity: "4" as never,
+        constraints: { timeInForce: "IOC" },
+      },
+    }),
+  );
+  const state = e.worldState();
+  // fees per the venue schedule (trade at 4800.25 × 4 = 19201 notional):
+  // taker 5 bps + the one-time 0.10 fixed fee = 9.7005; maker 2 bps + the
+  // one-time 0.10 fixed fee = 3.9402 (the fixed fee is per order, on its
+  // first fill — both orders pay it exactly once)
+  const [takerFill, makerFill] = state.matching.fills;
+  assert.equal(takerFill?.liquidity, "taker");
+  assert.equal(takerFill?.fee.amount, "9.7005");
+  assert.equal(takerFill?.fee.rateBps, 5);
+  assert.equal(makerFill?.liquidity, "maker");
+  assert.equal(makerFill?.fee.amount, "3.9402");
+  assert.equal(makerFill?.fee.rateBps, 2);
+  // latency: market facts become observable at T + 250 + 500 (A7 firewall)
+  assert.deepEqual(
+    await e.query.getTrades(INSTRUMENT),
+    [],
+    "the trade is not observable before its availableAt",
+  );
+  await e.clock.step(750);
+  const trades = await e.query.getTrades(INSTRUMENT);
+  assert.equal(trades.length, 1);
+  assert.equal(trades[0]?.price, "4800.25");
+  assert.equal(trades[0]?.quantity, "4");
 });
 
 test("validation and authorization rejections carry their stage through the port", async () => {
@@ -181,19 +264,52 @@ test("QueryPort: instruments resolve; unknown ids are typed errors", async () =>
   );
 });
 
-test("QueryPort: orders and positions are honestly empty projections", async () => {
+test("QueryPort: orders project the registry; positions are honestly empty", async () => {
   const e = engine();
   assert.deepEqual(await e.query.getOrders(), []);
   assert.deepEqual(await e.query.getOrders({ instrumentId: INSTRUMENT }), []);
+  await e.command.submitOrder(submitOrderCommand());
+  const orders = await e.query.getOrders({ instrumentId: INSTRUMENT });
+  assert.equal(orders.length, 1);
+  assert.equal(orders[0]?.status, "accepted");
+  assert.deepEqual(
+    await e.query.getOrders({ statuses: ["filled"] }),
+    [],
+    "status filters apply",
+  );
   assert.deepEqual(await e.query.getPositions(), []);
 });
 
-test("QueryPort: domain projections are typed not-implemented rejections", async () => {
+test("QueryPort: book and trades project the matching state; DOM shape holds", async () => {
+  const e = engine();
+  const emptyBook = await e.query.getOrderBook(INSTRUMENT);
+  assert.deepEqual(emptyBook, {
+    instrumentId: INSTRUMENT,
+    asOf: START,
+    sequence: 0,
+    bids: [],
+    asks: [],
+  });
+  await e.command.submitOrder(submitOrderCommand());
+  const book = await e.query.getOrderBook(INSTRUMENT);
+  assert.deepEqual(book.bids, [{ price: "4800.25", quantity: "10", orderCount: 1 }]);
+  assert.deepEqual(book.asks, []);
+  const depthLimited = await e.query.getOrderBook(INSTRUMENT, 0);
+  assert.deepEqual(depthLimited.bids, [], "depth is honored");
+  await assert.rejects(
+    e.query.getOrderBook("instrument-ghost" as never),
+    (error: unknown) => {
+      assert.ok(error instanceof UnknownWorldEntityError);
+      return true;
+    },
+  );
+  assert.deepEqual(await e.query.getTrades(INSTRUMENT), []);
+});
+
+test("QueryPort: domain projections still not implemented are typed rejections", async () => {
   const e = engine();
   const expectations: [Promise<unknown>, string, string][] = [
     [e.query.getQuote(INSTRUMENT), "market-generator", "QueryPort.getQuote"],
-    [e.query.getOrderBook(INSTRUMENT), "matching-orderbook", "QueryPort.getOrderBook"],
-    [e.query.getTrades(INSTRUMENT), "matching-orderbook", "QueryPort.getTrades"],
     [e.query.getPortfolio(), "account-portfolio-risk", "QueryPort.getPortfolio"],
     [e.query.getRisk(), "account-portfolio-risk", "QueryPort.getRisk"],
     [e.query.getSnapshot(), "snapshot-branch", "QueryPort.getSnapshot"],
@@ -422,7 +538,7 @@ test("commands and clock operations serialize in arrival order", async () => {
 
 test("a rejected queued operation does not break the queue", async () => {
   const e = engine();
-  const failing = e.command.submitOrder(submitOrderCommand());
+  const failing = e.command.closePosition(closePositionCommand());
   const succeeding = e.command.addAnnotation(addAnnotationCommand());
   assert.equal((await failing).status, "rejected");
   assert.equal((await succeeding).status, "acked");
@@ -442,7 +558,7 @@ test("the determinism manifest covers definition, engine, deps and the command s
   await e.command.addAnnotation(addAnnotationCommand());
   const one = e.determinismManifest();
   assert.equal(one.commandStreamHash.endsWith(":1"), true);
-  // rejected commands are part of the stream too
+  // every command enters the stream — acked or rejected alike (here: acked)
   await e.command.submitOrder(submitOrderCommand());
   const two = e.determinismManifest();
   assert.equal(two.commandStreamHash.endsWith(":2"), true);
@@ -484,7 +600,19 @@ test("restore: a fresh engine replaying the journal reproduces state and digest"
   await e.command.addAnnotation(addAnnotationCommand({ text: "alpha" }));
   await e.clock.step(1_000);
   await e.command.setScenario(setScenarioCommand());
-  await e.command.submitOrder(submitOrderCommand()); // rejected — not journaled
+  await e.command.submitOrder(
+    // a genuinely rejected submit (off the tick grid) — never journaled
+    submitOrderCommand({
+      commandId: "cmd-bad-tick" as never,
+      submission: {
+        kind: "limit",
+        side: "buy",
+        quantity: "1" as never,
+        limitPrice: "4800.33" as never,
+        constraints: { timeInForce: "GTC" },
+      },
+    }),
+  );
 
   const restored = createHeadlessWorldEngine({
     definition: testDefinition(),
@@ -510,9 +638,35 @@ test("restore: a fresh engine replaying the journal reproduces state and digest"
   // duplicate law survives restore: the acked id is refused again
   const duplicate = await restored.command.addAnnotation(addAnnotationCommand());
   assert.equal(duplicate.status === "rejected" && duplicate.rejection.code, "duplicate-command");
-  // the previously-rejected stub command rejects identically
-  const stub = await restored.command.submitOrder(submitOrderCommand());
-  assert.equal(stub.status === "rejected" && stub.rejection.code, "not-implemented-in-skeleton");
+  // the seam law survives restore: the same invalid order rejects identically
+  const stillBad = await restored.command.submitOrder(
+    submitOrderCommand({
+      commandId: "cmd-bad-tick" as never,
+      submission: {
+        kind: "limit",
+        side: "buy",
+        quantity: "1" as never,
+        limitPrice: "4800.33" as never,
+        constraints: { timeInForce: "GTC" },
+      },
+    }),
+  );
+  assert.equal(
+    stillBad.status === "rejected" && stillBad.rejection.code,
+    "invalid-price",
+  );
+  // and a fresh valid order still acks on the restored engine
+  const fresh = await restored.command.submitOrder(
+    submitOrderCommand({ commandId: "cmd-fresh" as never }),
+  );
+  assert.equal(fresh.status, "acked");
+  assert.equal(
+    restored.worldState().matching.orders.some(
+      (order) => String(order.orderId) === "ord:world-w013-tests:1",
+    ),
+    true,
+    "the restored engine accepted a new order through the seam",
+  );
 });
 
 test("the reducer refuses unknown event types (corrupt/incompatible journals)", () => {

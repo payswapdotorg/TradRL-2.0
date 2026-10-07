@@ -25,6 +25,7 @@ import type {
   Participant,
   RegimeScheduleEntry,
   ScenarioDefinition,
+  Venue,
   WorldMeta,
   WorldMode,
   WorldScope,
@@ -43,7 +44,8 @@ export const CONTRACTS_DEPENDENCY_VERSION = "0.1.0";
 
 /** Skeleton limitations reported in WorldMeta.knownLimitations. */
 export const SKELETON_KNOWN_LIMITATIONS: readonly string[] = [
-  "W013 skeleton: no order book / matching — order commands are typed not-implemented-in-skeleton rejections (W014)",
+  "W014: matching is participant-to-participant — no synthetic market generator yet (W017), so books start empty and only participant liquidity rests on them",
+  "W014: reduce-only enforcement is structural — the typed position-check seam is permissive until the account engine wires it (W015)",
   "W013 skeleton: no account/portfolio/risk engine — financial projections are typed not-implemented-in-skeleton rejections (W015)",
   "W013 skeleton: no snapshot/branch engine — snapshot/branch commands are typed not-implemented-in-skeleton rejections (W016)",
   "W013 skeleton: no synthetic market generator — no market events are produced by clock advance (W017)",
@@ -75,6 +77,13 @@ export interface WorldDefinition {
   readonly regimeSchedule?: readonly RegimeScheduleEntry[];
   readonly clock: ClockGenesis;
   readonly instruments: readonly Instrument[];
+  /**
+   * Venue declarations (matching rules, allowed order kinds, fee schedule,
+   * latency, halt policy — W003 `Venue`). Optional W014 seam: instruments
+   * whose venue is not declared run on the documented default policy
+   * (zero fees, zero latency, all order kinds — matching/policy.ts).
+   */
+  readonly venues?: readonly Venue[];
   readonly accounts: readonly Account[];
   readonly participants: readonly Participant[];
   /** Information world subset: news artifacts behind the A7 firewall. */
@@ -84,6 +93,8 @@ export interface WorldDefinition {
 function isNonBlank(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
+
+const ORDER_KINDS_FOR_VENUES: readonly string[] = ["market", "limit", "stop", "stop-limit"];
 
 function isValidRegimeKind(kind: unknown): boolean {
   return (
@@ -132,11 +143,34 @@ export function validateWorldDefinition(definition: WorldDefinition): readonly s
   }
 
   const instrumentIds = new Set<string>();
+  const venueIds = new Set<string>();
+  for (const venue of definition.venues ?? []) {
+    if (venueIds.has(String(venue.venueId))) {
+      errors.push(`duplicate venueId ${String(venue.venueId)}`);
+    }
+    venueIds.add(String(venue.venueId));
+    if (venue.worldId !== scope.worldId) {
+      errors.push(`venue ${String(venue.venueId)}: worldId must match the world scope`);
+    }
+    if (venue.matchingModel !== "price-time-priority") {
+      errors.push(`venue ${String(venue.venueId)}: only price-time-priority is implemented`);
+    }
+    for (const kind of venue.allowedOrderKinds) {
+      if (!ORDER_KINDS_FOR_VENUES.includes(kind)) {
+        errors.push(`venue ${String(venue.venueId)}: '${String(kind)}' is not an OrderKind`);
+      }
+    }
+  }
   for (const instrument of instruments) {
     if (instrumentIds.has(String(instrument.instrumentId))) {
       errors.push(`duplicate instrumentId ${String(instrument.instrumentId)}`);
     }
     instrumentIds.add(String(instrument.instrumentId));
+    if (venueIds.size > 0 && !venueIds.has(String(instrument.venueId))) {
+      errors.push(
+        `instrument ${String(instrument.instrumentId)} references undeclared venue ${String(instrument.venueId)}`,
+      );
+    }
     if (!isNonBlank(instrument.symbol)) {
       errors.push(`instrument ${String(instrument.instrumentId)}: symbol must be non-blank`);
     }
