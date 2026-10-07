@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T13:58:00Z",
+  "updated_at": "2026-10-07T15:45:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -407,8 +407,10 @@
       "write_surface": [
         "packages/tradrl-adapters/crypto/"
       ],
-      "status": "ready",
-      "branch": "work/w026"
+      "status": "merged",
+      "branch": "work/w026",
+      "merged_sha": "f5eeca1",
+      "pr": 20
     },
     {
       "id": "W027",
@@ -420,8 +422,10 @@
       "write_surface": [
         "packages/tradrl-information/"
       ],
-      "status": "ready",
-      "branch": "work/w027"
+      "status": "merged",
+      "branch": "work/w027",
+      "merged_sha": "3db0ade",
+      "pr": 21
     },
     {
       "id": "W028",
@@ -433,7 +437,7 @@
       "write_surface": [
         "packages/tradrl-evidence/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w028"
     },
     {

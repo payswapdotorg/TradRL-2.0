@@ -1,5 +1,6 @@
 packages:
   - packages/*
+  - packages/tradrl-adapters/*
   - apps/zcode-cli
   - apps/zcode-cli/packages/*
   - apps/zcode-cli/tools/*
