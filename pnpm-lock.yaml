@@ -625,6 +625,19 @@ importers:
 
   apps/zcode-cli/tools/typescript: {}
 
+  packages/agent-body:
+    dependencies:
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../tradrl-world-contracts
+      tradrl-world-sim:
+        specifier: workspace:*
+        version: link:../tradrl-world-sim
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/client:
     dependencies:
       '@zcode/rpc':
@@ -1045,6 +1058,19 @@ importers:
         version: 6.0.2
 
   packages/tradrl-adapters/crypto:
+    dependencies:
+      tradrl-data:
+        specifier: workspace:*
+        version: link:../../tradrl-data
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../../tradrl-world-contracts
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  packages/tradrl-adapters/nautilus:
     dependencies:
       tradrl-data:
         specifier: workspace:*

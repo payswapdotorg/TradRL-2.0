@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T20:32:00Z",
+  "updated_at": "2026-10-07T20:45:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -344,8 +344,10 @@
       "write_surface": [
         "packages/tradrl-adapters/nautilus/"
       ],
-      "status": "ready",
-      "branch": "work/w021"
+      "status": "merged",
+      "branch": "work/w021",
+      "merged_sha": "fa017a2",
+      "pr": 25
     },
     {
       "id": "W022",
@@ -356,7 +358,7 @@
       "write_surface": [
         "packages/tradrl-evaluation/replay/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w022"
     },
     {
@@ -495,8 +497,10 @@
         "packages/agent-body/",
         "contracts/agent/"
       ],
-      "status": "ready",
-      "branch": "work/w032"
+      "status": "merged",
+      "branch": "work/w032",
+      "merged_sha": "1602889",
+      "pr": 26
     },
     {
       "id": "W033",
@@ -508,7 +512,7 @@
         "packages/cognitive-substrate/",
         "contracts/agent/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w033"
     },
     {
