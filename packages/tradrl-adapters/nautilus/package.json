@@ -1,0 +1,33 @@
+{
+  "name": "tradrl-adapters-nautilus",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./errors": "./errors.ts",
+    "./nanoseconds": "./nanoseconds.ts",
+    "./instruments": "./instruments.ts",
+    "./dtypes": "./dtypes.ts",
+    "./bar": "./bar.ts",
+    "./trade": "./trade.ts",
+    "./quote": "./quote.ts",
+    "./dataset": "./dataset.ts",
+    "./mapping": "./mapping.ts"
+  },
+  "description": "NautilusTrader historical-data adapter (W021): maps NautilusTrader-style historical dtype records (Bar, TradeTick, QuoteTick — ns timestamps, documented dtype field names, instrument_id conventions) into W020-importable HistoricalRecord sets + dataset descriptors with honest fidelity declarations (what is preserved, what is approximate — never claimed beyond the data). Fixture-based — NO parquet/nautilus_trader dependency (a TL action item per spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md); deterministic pure transforms only (A9).",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-data": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
