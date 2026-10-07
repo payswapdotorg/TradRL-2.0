@@ -20,7 +20,7 @@ live here), W017 (generator) and W018 (worker adapter).
 | Module | Files | Spec anchors |
 | --- | --- | --- |
 | `clock/` | `simulationClock.ts` — `createSimulationClock`, `asClockPort` | SIMULATION "Runtime topology", WORLD-PROTOCOL "ClockPort"/"Time", LOCK A7/A8, ACCEPTANCE E |
-| `journal/` | `eventJournal.ts` (append-only store, sequencing, laws, queries, digest, restore), `replay.ts` (deterministic fold) | WORLD-PROTOCOL "Event envelope", LOCK A6/A9, DOMAIN-MODEL "Ownership: Journal → authoritative history" |
+| `journal/` | `eventJournal.ts` (append-only store, sequencing, laws, queries, digest, restore, frozen records), `replay.ts` (deterministic fold) | WORLD-PROTOCOL "Event envelope", LOCK A6/A8/A9, DOMAIN-MODEL "Ownership: Journal → authoritative history" |
 | `world/` | `definition.ts`, `state.ts` (event reducer), `lifecycle.ts`, `engine.ts`, `projections.ts`, `manifest.ts`, `events.ts`, `hashing.ts`, `errors.ts` | WORLD-PROTOCOL "Command lifecycle" + "Ports", LOCK A5/A6/A13/A14, ACCEPTANCE E/L/K/I |
 | `orderbook/` | `book.ts` (price levels, FIFO queues, halts), `decimal.ts` (exact scaled decimals) | SIMULATION "Matching", WORLD-PROTOCOL "UI projection law" |
 | `matching/` | matcher, policies, fees, fills, the typed lifecycle seam (`seam.ts`) | SIMULATION "Matching", LOCK A6/A9 |
@@ -95,7 +95,28 @@ rescoped to the branch (matching entities re-stamped; opaque ids and causal
 references inherited verbatim), registries reset, `scenarioOverride` applied
 (counterfactual branches), the ancestry chain carried. The clock's
 `rewind-requires-branch` rejection now has a real path: snapshot before
-advancing, branch from that snapshot — the child starts at the earlier time.
+advancing, branch from that snapshot — the child starts at the earlier time
+(proved in `branch/test/branch.test.ts`).
+
+Immutability is ENFORCED structurally, not just practiced: sealed envelopes
+and stored records are frozen by the journal (the single writer), snapshot
+objects and their prefix arrays are frozen at capture, and lineage records
+plus their registries are frozen by the reducer — in-place tampering with
+history throws (asserted in the tests). ACCEPTANCE G (mutating a child never
+alters its parent snapshot/history) is proven behaviorally in
+`branch/test/branch.test.ts` (heavy child mutation — trades against the
+inherited book, cancel of an inherited order, own snapshots, nested
+branches — with the parent's records/digest/state/snapshot byte-compared)
+and across the whole divergence flow in `branch/test/determinism.golden.test.ts`.
+
+The branch determinism goldens (`branch/test/determinism.golden.test.ts`)
+extend the A9 claim to branch worlds: same inputs (definition + genesis
+snapshot + stream) ⇒ identical branch runs, wall time varied; different
+streams diverge (and the same stream on two siblings reproduces the same
+domain evolution — their journals differ exactly by world identity);
+`inputHashes.genesisSnapshot` is a first-class branch input (sensitivity
+proved across different origins); and a seeded 60-command stream keeps the
+claim honest under scale.
 
 `EvidencePort.getSnapshot` / `getBranchLineage` and `QueryPort.getSnapshot`
 are real; the determinism manifest records the lineage chain
