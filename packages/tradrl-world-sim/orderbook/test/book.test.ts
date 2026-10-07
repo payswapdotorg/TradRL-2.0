@@ -45,14 +45,14 @@ function place(
   book: ReturnType<typeof initialBookState>,
   orderId: string,
   side: OrderSide,
-  price: Price,
+  price: string,
   remaining: string,
   arrivalSequence: number,
 ) {
   return placeOrder(book, {
     orderId: orderId as OrderId,
     side,
-    price,
+    price: price as Price,
     remaining: quantityScaled(remaining as never),
     arrivalSequence: arrivalSequence as never,
   });

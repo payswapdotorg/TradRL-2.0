@@ -28,11 +28,8 @@ import type {
   Quantity,
   VenueId,
 } from "tradrl-world-contracts";
-import type {
-  BookDeltaOperation,
-  BookLevel,
-  OrderBookSnapshot,
-} from "tradrl-world-contracts";
+import type { BookLevel, OrderBookSnapshot } from "tradrl-world-contracts";
+import type { BookDeltaOperation } from "tradrl-world-contracts/time";
 import type { Instrument, InstrumentTradingState } from "tradrl-world-contracts";
 import type { SequenceNumber, TimestampMs } from "tradrl-world-contracts";
 import { formatScaled, parseScaled, type Scaled } from "./decimal.js";
