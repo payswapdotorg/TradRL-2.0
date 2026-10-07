@@ -1,0 +1,29 @@
+{
+  "name": "tradrl-information",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./errors": "./errors.ts",
+    "./records": "./records.ts",
+    "./validate": "./validate.ts",
+    "./adapters": "./adapters.ts",
+    "./loader": "./loader.ts"
+  },
+  "description": "Research/news/event information import (W027): typed information dataset descriptors with honest fidelity declarations, research-report/news/event/analyst-note record shapes whose publishedAt/availableAt come from the record (A7), source credibility/confidence declared by the importer (never fabricated), a deterministic pure import producing world information artifacts (definition-importable behind the A7 firewall) plus journal-ready info events with the stable typed identity the W028 evidence/provenance projection cites. No fetching — real feeds arrive through future provider adapters.",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-world-sim": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
