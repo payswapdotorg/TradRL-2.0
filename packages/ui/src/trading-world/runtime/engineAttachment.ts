@@ -7,15 +7,19 @@
  * and attaches the W018 in-process transport — the SAME typed surface the
  * worker topology uses (UI/headless parity, ACCEPTANCE I).
  *
- * Honest state today: the engine starts with EMPTY books (no generator until
- * W017; knownLimitations say so in WorldMeta) — the UI renders real
- * projections of an honestly-empty world, never fabricated data.
+ * TL wiring update (W017 follow-up): the alpha world now runs the W017
+ * generated market — `createGeneratedWorldEngine` behind the W018 transport's
+ * new `createEngine` seam, driven by the definition's `regimeSchedule`.
+ * The books fill with real generated liquidity as the clock advances; the
+ * UI renders real projections of that generated world, never fabricated
+ * data. Deterministic: same definition+seed+clock ⇒ same market.
  */
 
 import {
   createInProcessWorldTransport,
   type WorldTransport,
 } from "tradrl-world-sim/adapter";
+import { createGeneratedWorldEngine } from "tradrl-world-sim/generator";
 import type { WorldDefinition } from "tradrl-world-sim/world";
 
 export interface AlphaEngineAttachment {
@@ -27,6 +31,8 @@ const ALPHA_PROJECT = "project-tradrl" as WorldDefinition["scope"]["projectId"];
 
 /** Simulation clock origin: 2023-11-14T22:13:20Z (a fixed, boring epoch). */
 const SIM_START = 1_700_000_000_000;
+/** One minute in simulation ms (regime-schedule readability). */
+const MIN = 60_000;
 /** Wall origin deliberately later than sim start (recorded, never mixed). */
 const WALL_START = 1_700_000_500_000;
 
@@ -38,6 +44,37 @@ export function alphaWorldDefinition(worldId: string): WorldDefinition {
     seed: `alpha:${worldId}`,
     worldDefinitionVersion: "world-alpha@1",
     inputDataSource: "synthetic://world-alpha",
+    /**
+     * The W017 regime schedule (world metadata, SIMULATION.md "Synthetic
+     * regimes"): a gentle multi-regime trading day for the alpha world.
+     * Times are absolute simulation-ms offsets from SIM_START. Deterministic:
+     * the generator seeds from `seed`, so the same definition+clock produce
+     * the same market, regime by regime.
+     */
+    regimeSchedule: [
+      // Cold start: mean-reversion is anchor-mode — the first entry declares
+      // the anchor the makers open around (empty book, no tape yet). Without
+      // it the market cannot seed itself (W017 referencePriceOf law).
+      {
+        regime: "mean-reversion",
+        from: SIM_START as never,
+        to: (SIM_START + 30 * MIN) as never,
+        parameters: { anchorPrice: 4800, direction: 1 },
+      },
+      { regime: "trend", from: (SIM_START + 30 * MIN) as never, to: (SIM_START + 60 * MIN) as never },
+      {
+        regime: "high-volatility",
+        from: (SIM_START + 60 * MIN) as never,
+        to: (SIM_START + 90 * MIN) as never,
+      },
+      {
+        regime: "low-liquidity",
+        from: (SIM_START + 90 * MIN) as never,
+        to: (SIM_START + 120 * MIN) as never,
+      },
+      // Open-ended calm close: the day settles back into mean reversion.
+      { regime: "mean-reversion", from: (SIM_START + 120 * MIN) as never },
+    ],
     clock: {
       start: SIM_START as WorldDefinition["clock"]["start"],
       defaultStepMs: 1000,
@@ -85,13 +122,69 @@ export function alphaWorldDefinition(worldId: string): WorldDefinition {
         leverage: 1,
         permissions: { canTrade: true, canShort: true, liveExecutionAllowed: false },
       },
+      // The synthetic cast's accounts: the two passive market makers share
+      // one margin account; the aggressive side (taker/noise/momentum) shares
+      // another — same shape as the W017 test definitions' population.
+      {
+        accountId: `account-mm-${worldId}` as never,
+        worldId: id,
+        balances: { USD: { amount: "100000.00", currency: "USD" } } as never,
+        buyingPower: { amount: "100000.00" as never, currency: "USD" as never },
+        marginUsed: { amount: "0.00" as never, currency: "USD" as never },
+        marginAvailable: { amount: "100000.00" as never, currency: "USD" as never },
+        leverage: 1,
+        permissions: { canTrade: true, canShort: true, liveExecutionAllowed: false },
+      },
+      {
+        accountId: `account-synth-${worldId}` as never,
+        worldId: id,
+        balances: { USD: { amount: "100000.00", currency: "USD" } } as never,
+        buyingPower: { amount: "100000.00" as never, currency: "USD" as never },
+        marginUsed: { amount: "0.00" as never, currency: "USD" as never },
+        marginAvailable: { amount: "100000.00" as never, currency: "USD" as never },
+        leverage: 1,
+        permissions: { canTrade: true, canShort: true, liveExecutionAllowed: false },
+      },
     ],
     participants: [
+      // The human trader (the console's user) + the W017 synthetic cast:
+      // the makers quote around the reference, the aggressive side trades —
+      // everything through the REAL matching engine, never fabricated.
       {
         participantId: `participant-trader-${worldId}` as never,
         worldId: id,
         kind: "human",
         accountId: `account-trader-${worldId}` as never,
+      },
+      {
+        participantId: `participant-mm-1-${worldId}` as never,
+        worldId: id,
+        kind: "passive-market-maker",
+        accountId: `account-mm-${worldId}` as never,
+      },
+      {
+        participantId: `participant-mm-2-${worldId}` as never,
+        worldId: id,
+        kind: "passive-market-maker",
+        accountId: `account-mm-${worldId}` as never,
+      },
+      {
+        participantId: `participant-taker-${worldId}` as never,
+        worldId: id,
+        kind: "liquidity-taker",
+        accountId: `account-synth-${worldId}` as never,
+      },
+      {
+        participantId: `participant-noise-${worldId}` as never,
+        worldId: id,
+        kind: "noise-trader",
+        accountId: `account-synth-${worldId}` as never,
+      },
+      {
+        participantId: `participant-momentum-${worldId}` as never,
+        worldId: id,
+        kind: "momentum",
+        accountId: `account-synth-${worldId}` as never,
       },
     ],
   };
@@ -101,5 +194,14 @@ export function alphaWorldDefinition(worldId: string): WorldDefinition {
 export function createAlphaEngineTransport(worldId: string): WorldTransport {
   return createInProcessWorldTransport({
     definition: alphaWorldDefinition(worldId),
+    // TL wiring (W017 follow-up): host the GENERATED market, not the plain
+    // headless engine — the books fill with real generated liquidity as
+    // the clock advances (deterministic: same definition+seed+clock).
+    createEngine: (options) =>
+      createGeneratedWorldEngine({
+        definition: options.definition,
+        wallTimeSource: options.wallTimeSource,
+        onPublished: options.onPublished,
+      }),
   });
 }

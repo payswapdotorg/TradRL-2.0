@@ -190,10 +190,10 @@ test("commands ack through the wire with the engine's own cursor", async () => {
 
 test("command rejections are VALUES (the engine's typed outcome), not wire errors", async () => {
   const { client } = await attachReady();
-  // The W013 skeleton stub: submit-order is a domain-rules rejection.
+  // Real since W014: submit-order acks through the real matching engine (this
+  // limit order rests on the empty book — an acked VALUE, never a wire error).
   const submit = await client.command.submitOrder(submitOrderCommand());
-  assert.equal(submit.status, "rejected");
-  assert.equal(submit.rejection.code, "not-implemented-in-skeleton");
+  assert.equal(submit.status, "acked");
   // A structural rejection is likewise a value.
   const blank = await client.command.addAnnotation(addAnnotationCommand({ text: " " }));
   assert.equal(blank.status, "rejected");
@@ -201,13 +201,15 @@ test("command rejections are VALUES (the engine's typed outcome), not wire error
 
 test("thrown engine errors reconstruct as TradingWorldRemoteError with typed extras", async () => {
   const { client } = await attachReady();
-  // Projection stub (thrown by the engine, serialized over the wire).
+  // Real since W017: getQuote projects the real book. The typed-error path
+  // is exercised with an unknown-entity query — serialized with its typed
+  // extras over the wire.
   await assert.rejects(
-    client.query.getQuote("instrument-es-fut" as never),
+    client.query.getQuote("instrument-unknown" as never),
     (error: unknown) =>
       error instanceof TradingWorldRemoteError &&
-      error.remoteName === "NotImplementedInSkeletonError" &&
-      error.remoteData?.surface === "market-generator",
+      error.remoteName === "UnknownWorldEntityError" &&
+      error.remoteData?.kind === "instrument",
   );
   // Clock rejection keeps its typed code.
   await client.clock.step(5_000);

@@ -27,12 +27,20 @@ import { createWorldTransportClosedError } from "./transportError.js";
 import type { WorldAdapterWireOptions } from "./envelope.js";
 import type { WorldClientMessage, WorldHostMessage } from "./envelope.js";
 import { createEngineAdapterRuntime } from "./host.js";
+import type { EngineAdapterRuntimeInput } from "./host.js";
 import type { WorldTaskScheduler } from "./realtimeDriver.js";
 import type { WorldTransport } from "./transport.js";
 
 /** Options for {@link createInProcessWorldTransport}. */
 export interface InProcessWorldTransportOptions {
   readonly definition: WorldDefinition;
+  /**
+   * Engine factory seam (TL wiring, W017 follow-up): when provided, the
+   * transport hosts THIS engine (e.g. `createGeneratedWorldEngine` for a
+   * generated market) instead of the default headless engine. Additive;
+   * the default path is unchanged.
+   */
+  readonly createEngine?: EngineAdapterRuntimeInput["createEngine"];
   /** Injected wall-axis source (the engine-test pattern); default: host clock. */
   readonly wallTimeSource?: () => WallTimeMs;
   /** Realtime driver (transport-layer wall→simulation loop). Default: off. */
@@ -111,6 +119,9 @@ export function createInProcessWorldTransport(
 
   const runtime = createEngineAdapterRuntime({
     definition: options.definition,
+    ...(options.createEngine === undefined
+      ? {}
+      : { createEngine: options.createEngine }),
     ...(options.wallTimeSource === undefined
       ? {}
       : { wallTimeSource: options.wallTimeSource }),
