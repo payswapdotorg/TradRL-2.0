@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T00:00:00Z",
+  "updated_at": "2026-10-07T05:15:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -27,8 +27,10 @@
         "scripts",
         "CI."
       ],
-      "status": "in_review",
-      "branch": "work/w001"
+      "status": "merged",
+      "branch": "arch/tradrl-2.0-foundation",
+      "pr": 1,
+      "merged_sha": "9f0e10924cac319261f7689b40ebe11988f772e9"
     },
     {
       "id": "W002",
@@ -39,7 +41,7 @@
       "write_surface": [
         "spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md."
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w002"
     },
     {
@@ -52,7 +54,7 @@
         "packages/tradrl-world-contracts/",
         "contracts/world/."
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w003"
     },
     {
@@ -951,8 +953,10 @@
     }
   ],
   "notes": [
-    "Repo is sole source of truth.",
+    "Repository is sole source of truth.",
     "One Work Order = one worker = one branch = one PR.",
-    "Bootstrap work corresponds to W001 and is awaiting merge of the architecture foundation branch."
+    "Bootstrap W001 merged via PR #1 at 9f0e10924cac319261f7689b40ebe11988f772e9.",
+    "Current ready frontier after bootstrap: W002 and W003.",
+    "Maximum concurrent worker count is 3; do not fill unused capacity with speculative work."
   ]
 }
