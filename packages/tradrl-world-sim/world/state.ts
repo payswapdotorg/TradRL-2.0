@@ -8,17 +8,17 @@
  * live runs and journal replays advance state through the exact same code
  * path (bit-identical state — the core of deterministic replay).
  *
- * Skeleton state: annotations, the current scenario, the acked-command set
- * (duplicate-command detection, rebuilt during replay) and the order
- * registry (permanently empty in the skeleton: order commands are honest
- * W014 stubs; W014 owns the transitions that fill it).
+ * W014 seam: the order registry, fills, trades and per-instrument books
+ * live in the `matching` slice (matching/state.ts). Its reducer is the
+ * single reduction path — this module delegates matching/market event
+ * types to it (the W013 skeleton's permanently-empty `orders` registry is
+ * superseded; the matcher owns the transitions that fill it).
  */
 
 import type {
   AnnotationId,
   CommandId,
   InstrumentId,
-  Order,
   ParticipantId,
   RegimeScheduleEntry,
   ScenarioDefinition,
@@ -26,6 +26,8 @@ import type {
   WorldId,
 } from "tradrl-world-contracts";
 import type { JournalRecord } from "../journal/eventJournal.js";
+import { isMatchingStateEventType, initialMatchingState, reduceMatchingEvent } from "../matching/index.js";
+import type { MatchingState } from "../matching/index.js";
 import { ENGINE_ID, ENGINE_VERSION, type WorldDefinition } from "./definition.js";
 import { EngineInvariantError } from "./errors.js";
 import { isAnnotationAddedPayload, isScenarioSetPayload } from "./events.js";
@@ -42,15 +44,15 @@ export interface WorldAnnotation {
   readonly addedAt: TimestampMs;
 }
 
-/** The authoritative world state of the skeleton engine. */
+/** The authoritative world state of the engine. */
 export interface WorldState {
   readonly annotations: readonly WorldAnnotation[];
   /** The scenario in force; the initial scenario comes from the definition. */
   readonly currentScenario?: ScenarioDefinition;
   /** Command ids that produced journaled events (duplicate-command law). */
   readonly ackedCommandIds: ReadonlySet<CommandId>;
-  /** Order registry; empty until W014 owns the order-lifecycle transitions. */
-  readonly orders: readonly Order[];
+  /** The W014 matching slice: orders, fills, trades, books, armed stops. */
+  readonly matching: MatchingState;
 }
 
 /** The initial state derived from a world definition. */
@@ -61,7 +63,7 @@ export function initialWorldState(definition: WorldDefinition): WorldState {
       ? {}
       : { currentScenario: { entries: definition.regimeSchedule } as ScenarioDefinition }),
     ackedCommandIds: new Set<CommandId>(),
-    orders: [],
+    matching: initialMatchingState(definition),
   });
 }
 
@@ -74,8 +76,11 @@ function withAckedCommand(state: WorldState, commandId: CommandId): WorldState {
 /**
  * The state reducer: apply one journaled event. Pure; called by the live
  * engine (right after append) and by replay (in stored order) — the single
- * way state ever advances. Unknown event types or malformed payloads are
- * engine invariant violations (a journal this engine version cannot reduce).
+ * way state ever advances. Matching/market event types delegate to the
+ * matching reducer (the same function the live matcher advanced its working
+ * copy through — the single-path law). Unknown event types or malformed
+ * payloads are engine invariant violations (a journal this engine version
+ * cannot reduce).
  */
 export function reduceWorldEvent(state: WorldState, record: JournalRecord): WorldState {
   const envelope = record.envelope;
@@ -116,11 +121,18 @@ export function reduceWorldEvent(state: WorldState, record: JournalRecord): Worl
         envelope.causationId as unknown as CommandId,
       );
     }
-    default:
+    default: {
+      if (isMatchingStateEventType(envelope.eventType)) {
+        return withAckedCommand(
+          Object.freeze({ ...state, matching: reduceMatchingEvent(state.matching, envelope) }),
+          envelope.causationId as unknown as CommandId,
+        );
+      }
       throw new EngineInvariantError(
         `cannot reduce event type '${envelope.eventType}' ` +
           `(engine ${ENGINE_ID}@${ENGINE_VERSION}: this journal belongs to a later engine surface)`,
       );
+    }
   }
 }
 

@@ -27,6 +27,7 @@ import type {
   EventId,
   EvidencePort,
   QueryPort,
+  SequenceNumber,
   TimestampMs,
   WorldCommand,
   WorldEventEnvelope,
@@ -175,12 +176,15 @@ export function createHeadlessWorldEngine(
       definition,
       state,
       simulationTime: clock.state().simulationTime,
+      // W014 seam: the matcher reserves the journal's next dense sequences
+      // so its fill drafts can cite the trade events that generated them.
+      nextSequence: (journal.getCursor() + 1) as SequenceNumber,
     });
     if (outcome.kind === "rejected") {
       return { status: "rejected", rejection: outcome.rejection };
     }
     const occurredAt = clock.state().simulationTime as TimestampMs;
-    const sealed = journal.append([outcome.draft], { recordedAt: occurredAt });
+    const sealed = journal.append(outcome.drafts, { recordedAt: occurredAt });
     // Mutate authoritative state by reducing exactly what was journaled —
     // the same path replay uses.
     const records = journal.records();
