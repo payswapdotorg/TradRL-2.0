@@ -25,6 +25,13 @@
  *   express "no regime", so no announcement fires and the generator takes
  *   no participant actions until the next window opens (documented; the
  *   last announcement remains the journal's regime truth).
+ * - ORIGIN RULE: on the clock interval whose left edge IS the world origin
+ *   (`worldStart`, passed only by the generator engine), the regime in force
+ *   AT the origin is announced too (with no `from` — nothing precedes the
+ *   world). The journal's regime truth is then complete from the first
+ *   tick: the initial regime is not a silent definition-carried fact. The
+ *   rule is stateless (a pure function of schedule + interval + origin), so
+ *   stepping and seeking produce the same announcement exactly once.
  * - A `halt-reopen` window halts every instrument `haltAfterMs` (default 0)
  *   after its start and reopens `reopenAfterMs` (default 4000) after the
  *   halt, never later than the window's `to` — the halt ALWAYS reopens, so
@@ -104,16 +111,29 @@ export interface RegimeAnnouncement {
 
 /**
  * The regime announcements for a clock interval (A, B]: at every boundary in
- * the interval where the active entry changes, announcing the new entry.
- * Boundaries that fall into a gap announce nothing (no payload can express
- * "no regime" — see module semantics).
+ * the interval where the active entry changes, announcing the new entry —
+ * plus, when `worldStart` is given and equals `intervalFrom` (the world's
+ * FIRST clock advance), the regime in force at the origin (the ORIGIN RULE
+ * above), announced first. Boundaries that fall into a gap announce nothing
+ * (no payload can express "no regime" — see module semantics).
  */
 export function regimeAnnouncementsForInterval(
   entries: readonly RegimeScheduleEntry[],
   intervalFrom: number,
   intervalTo: number,
+  worldStart?: number,
 ): readonly RegimeAnnouncement[] {
   const announcements: RegimeAnnouncement[] = [];
+  if (worldStart !== undefined && intervalFrom === worldStart) {
+    const atOrigin = activeEntryAt(entries, worldStart);
+    if (atOrigin !== undefined) {
+      announcements.push({
+        at: worldStart as TimestampMs,
+        to: atOrigin.regime,
+        ...(atOrigin.parameters === undefined ? {} : { parameters: atOrigin.parameters }),
+      });
+    }
+  }
   for (const at of scheduleBoundaries(entries)) {
     if (at <= intervalFrom || at > intervalTo) {
       continue;

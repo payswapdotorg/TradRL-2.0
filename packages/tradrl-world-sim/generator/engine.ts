@@ -95,6 +95,7 @@ function buildTimeline(input: {
   readonly entries: readonly RegimeScheduleEntry[];
   readonly intervalFrom: number;
   readonly intervalTo: number;
+  readonly worldStart: number;
 }): readonly TimelinePass[] {
   const { definition, entries } = input;
   const passes = new Map<number, MutableTimelinePass>();
@@ -107,7 +108,12 @@ function buildTimeline(input: {
     passes.set(at, created);
     return created;
   };
-  for (const announcement of regimeAnnouncementsForInterval(entries, input.intervalFrom, input.intervalTo)) {
+  for (const announcement of regimeAnnouncementsForInterval(
+    entries,
+    input.intervalFrom,
+    input.intervalTo,
+    input.worldStart,
+  )) {
     const payload: RegimeChangePayload = {
       type: "market.regime.changed",
       ...(announcement.from === undefined ? {} : { from: announcement.from }),
@@ -127,7 +133,6 @@ function buildTimeline(input: {
     ),
   ];
   for (const scheduled of haltEvents) {
-    const instrumentId = String(scheduled.instrumentId);
     if (scheduled.kind === "halt") {
       const payload: MarketHaltPayload = {
         type: "market.halted",
@@ -242,7 +247,13 @@ export function createGeneratedWorldEngine(
     // The scenario in force as of this pass; a setScenario that lands mid-pass
     // takes effect at the next pass (documented, arrival-order deterministic).
     const entries = scheduleEntriesOf(engine.worldState().currentScenario);
-    const timeline = buildTimeline({ definition, entries, intervalFrom, intervalTo });
+    const timeline = buildTimeline({
+      definition,
+      entries,
+      intervalFrom,
+      intervalTo,
+      worldStart: definition.clock.start,
+    });
     for (const pass of timeline) {
       await seekInnerTo(pass.at);
       const drafts: PendingEventDraft[] = [];

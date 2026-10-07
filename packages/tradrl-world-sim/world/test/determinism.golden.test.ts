@@ -522,9 +522,12 @@ test("A9 golden: a different world definition changes the manifest input hash", 
     baseline.manifest.inputHashes["worldDefinition"],
   );
   assert.notEqual(otherDefinitionRun.manifest.seed, baseline.manifest.seed);
-  // The skeleton's events do not consume the seed (the market generator
-  // that will — W017 — is not built yet), so digests MAY match; the
-  // manifest is what distinguishes the runs today. Documented honestly.
+  // This W013/W014-era golden runs the PLAIN headless engine (no generator
+  // attached), so its own events do not consume the seed and the digests MAY
+  // match; the manifest is what distinguishes these runs here. The W017
+  // generator golden (generator/test/determinism.golden.test.ts) carries the
+  // full claim: with the generator attached, different seeds DO produce
+  // different journals. Documented honestly.
 });
 
 test("A9 golden order flow: trades, fills and stop cascades happen; every fill cites its trade", async () => {

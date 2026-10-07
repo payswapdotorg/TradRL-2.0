@@ -18,6 +18,7 @@ import type {
   Venue,
 } from "tradrl-world-contracts";
 import type { WorldDefinition } from "../../world/index.js";
+import type { WallTimeMs } from "tradrl-world-contracts/time";
 
 export const TENANT = "tenant-alpha" as WorldDefinition["scope"]["tenantId"];
 export const PROJECT = "project-one" as WorldDefinition["scope"]["projectId"];
@@ -160,15 +161,15 @@ export function humanOrder(
       quantity: "3" as never,
       limitPrice: "4800.25" as never,
       constraints: { timeInForce: "GTC" },
-      ...(submission ?? {}),
+      ...submission,
     },
     ...rest,
   };
 }
 
 /** A fixed wall-clock source (deterministic readouts). */
-export function fixedWallTimeSource(ms = WALL_START): () => number {
-  return () => ms;
+export function fixedWallTimeSource(ms = WALL_START): () => WallTimeMs {
+  return () => ms as WallTimeMs;
 }
 
 export function at(ms: number): TimestampMs {
