@@ -1,5 +1,5 @@
 /**
- * THE DETERMINISM GOLDEN TEST — the W013 package's flagship (A9).
+ * THE DETERMINISM GOLDEN TEST — the W013/W014 package's flagship (A9).
  *
  * Spec: spec/ARCHITECTURE-LOCK.md A9 — "A determinism claim requires fixed
  * world definition, engine version, seed and command stream."
@@ -8,7 +8,12 @@
  * Spec: spec/ACCEPTANCE-WORLD-ALPHA.md I (headless parity: the same command
  * stream produces the same deterministic result hash) and F (one golden
  * command sequence, matching assertions).
- * Spec: spec/SIMULATION.md "Headless report" (event count + event hash).
+ * Spec: spec/SIMULATION.md "Matching" + "Headless report" — the W014
+ * extension: the golden stream is now an ORDER FLOW (resting makers,
+ * aggressive sweeps, stop arms that trigger and fill, IOC/FOK/post-only
+ * outcomes, cancels, replacements) so the matching engine's whole batch
+ * journaling — trade prints, causal fills, book deltas — is under the A9
+ * claim too.
  *
  * Design: a fixed world definition (seed, versions, entities) and a SEEDED
  * command stream (mulberry32 PRNG choosing commands, rejections, duplicates
@@ -25,7 +30,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type {
   AddAnnotationCommand,
+  CancelOrderCommand,
+  OrderSide,
+  ReplaceOrderCommand,
   SetScenarioCommand,
+  SubmitOrderCommand,
 } from "tradrl-world-contracts";
 import type { DeterministicStreamVerification } from "tradrl-world-contracts/time";
 import { asWallTime } from "tradrl-world-contracts/time";
@@ -34,13 +43,14 @@ import { createEventJournalFromRecords } from "../../journal/index.js";
 import { createHeadlessWorldEngine } from "../index.js";
 import type { WorldDefinition } from "../index.js";
 import {
+  INSTRUMENT,
   START,
   TRADER,
+  TRADER_ACCOUNT,
   WALL_START,
   addAnnotationCommand,
   mulberry32,
   setScenarioCommand,
-  submitOrderCommand,
   testDefinition,
 } from "./helpers.js";
 
@@ -48,12 +58,29 @@ const GOLDEN_PRNG_SEED = 0x5eed_013;
 const ITERATIONS = 48;
 const REGIMES = ["trend", "mean-reversion", "high-volatility", "low-liquidity", "shock", "halt-reopen"] as const;
 
+/** A tick-aligned canonical price `4800 + 0.25 × ticksFromMid`. */
+function priceAt(ticksFromMid: number): string {
+  return String(4800 + 0.25 * ticksFromMid);
+}
+
+/** Only non-terminal orders can be canceled/replaced. */
+function liveOrderIds(engine: ReturnType<typeof createHeadlessWorldEngine>): string[] {
+  return engine
+    .worldState()
+    .matching.orders.filter((order) => order.status === "accepted" || order.status === "partially-filled")
+    .map((order) => String(order.orderId));
+}
+
 /**
  * The one golden scenario runner (the single source of truth — every test
- * derives from it): a deterministic interleaving of clock operations and a
- * seeded command mix (acked annotations, scenario sets, structural
- * rejections, stub rejections, duplicate re-issues). `wallBase` varies the
- * host-axis readings between runs; it must never affect the outcome.
+ * derives from it): a deterministic WARM-UP order flow (a resting maker, an
+ * armed stop that a printed trade then triggers and fills — so every golden
+ * journal carries trades, causal fills, partial fills and a stop cascade by
+ * construction), then a seeded interleaving of clock operations and a
+ * command mix (order submissions of every kind × TIF × policy, cancels,
+ * replacements, annotations, scenario sets, structural rejections, unknown
+ * participants, duplicate re-issues). `wallBase` varies the host-axis
+ * readings between runs; it must never affect the outcome.
  */
 async function runGoldenEngine(options: {
   prngSeed: number;
@@ -71,7 +98,28 @@ async function runGoldenEngine(options: {
 
   const annotate = (command: AddAnnotationCommand) => engine.command.addAnnotation(command);
   const scenario = (command: SetScenarioCommand) => engine.command.setScenario(command);
+  /** Submit one order command (explicit submission — no default leakage). */
+  const order = (submission: SubmitOrderCommand["submission"], commandId: string) =>
+    engine.command.submitOrder({
+      kind: "submit-order",
+      commandId: commandId as never,
+      worldId: definition.scope.worldId,
+      issuedBy: TRADER,
+      issuedAt: START as never,
+      accountId: TRADER_ACCOUNT,
+      instrumentId: INSTRUMENT,
+      submission,
+    });
 
+  // --- the W014 warm-up flow (deterministic, seed-independent) ---------------
+  // 1. a resting maker sell at 4800.25
+  await order({ kind: "limit", side: "sell", quantity: "10" as never, limitPrice: "4800.25" as never, constraints: { timeInForce: "GTC" } }, "cmd-flow-warm-1");
+  // 2. an armed stop buy at 4800
+  await order({ kind: "stop", side: "buy", quantity: "3" as never, stopPrice: "4800" as never, constraints: { timeInForce: "GTC" } }, "cmd-flow-warm-2");
+  // 3. a market buy that trades at 4800.25, triggering and filling the stop
+  await order({ kind: "market", side: "buy", quantity: "2" as never, constraints: { timeInForce: "IOC" } }, "cmd-flow-warm-3");
+
+  // --- the seeded command mix ------------------------------------------------
   for (let i = 0; i < ITERATIONS; i += 1) {
     const roll = rng();
     if (roll < 0.25) {
@@ -128,11 +176,94 @@ async function runGoldenEngine(options: {
           issuedBy: "participant-nope" as never,
         }),
       );
-    } else if (roll < 0.9) {
-      // domain-rules stub rejection (W014/W015)
-      await engine.command.submitOrder(
-        submitOrderCommand({ commandId: `cmd-order-${String(i)}` as never }),
-      );
+    } else if (roll < 0.94) {
+      // THE W014 SEEDED ORDER FLOW: kinds × TIF × policies, cancels, replaces
+      const pick = rng();
+      const commandId = `cmd-flow-${String(i)}`;
+      const side: OrderSide = rng() < 0.5 ? "buy" : "sell";
+      const quantity = String(1 + rngInt(9));
+      const live = liveOrderIds(engine);
+      if (pick < 0.24) {
+        // resting maker limit, 1–4 ticks away from mid
+        const drift = 1 + rngInt(4);
+        await order(
+          {
+            kind: "limit",
+            side,
+            quantity: quantity as never,
+            limitPrice: priceAt(side === "buy" ? -drift : drift) as never,
+            constraints: { timeInForce: "GTC" },
+          },
+          commandId,
+        );
+      } else if (pick < 0.44) {
+        // aggressive market order — sweeps what is there, remainder cancels
+        await order(
+          { kind: "market", side, quantity: quantity as never, constraints: { timeInForce: "IOC" } },
+          commandId,
+        );
+      } else if (pick < 0.56) {
+        // stop arm 2–5 ticks through mid (triggers when the flow trades there)
+        const far = 2 + rngInt(4);
+        await order(
+          {
+            kind: "stop",
+            side,
+            quantity: quantity as never,
+            stopPrice: priceAt(side === "buy" ? far : -far) as never,
+            constraints: { timeInForce: "GTC" },
+          },
+          commandId,
+        );
+      } else if (pick < 0.66) {
+        // FOK market — all-or-nothing at submission (mostly fok-unfillable)
+        await order(
+          { kind: "market", side, quantity: quantity as never, constraints: { timeInForce: "FOK" } },
+          commandId,
+        );
+      } else if (pick < 0.76) {
+        // post-only limit at/through mid — rejects whenever it would take
+        await order(
+          {
+            kind: "limit",
+            side,
+            quantity: quantity as never,
+            limitPrice: priceAt(side === "buy" ? rngInt(3) : -rngInt(3)) as never,
+            constraints: { timeInForce: "GTC", postOnly: true },
+          },
+          commandId,
+        );
+      } else if (pick < 0.88 && live.length > 0) {
+        // cancel a live order (deterministic pick from current state)
+        const cancel: CancelOrderCommand = {
+          kind: "cancel-order",
+          commandId: commandId as never,
+          worldId: definition.scope.worldId,
+          issuedBy: TRADER,
+          issuedAt: (START + i) as never,
+          orderId: live[rngInt(live.length)]! as never,
+        };
+        await engine.command.cancelOrder(cancel);
+      } else {
+        // replace a live order's quantity (cancel-and-replace through the seam)
+        if (live.length > 0) {
+          const replace: ReplaceOrderCommand = {
+            kind: "replace-order",
+            commandId: commandId as never,
+            worldId: definition.scope.worldId,
+            issuedBy: TRADER,
+            issuedAt: (START + i) as never,
+            orderId: live[rngInt(live.length)]! as never,
+            quantity: quantity as never,
+          };
+          await engine.command.replaceOrder(replace);
+        } else {
+          await order(
+            { kind: "market", side, quantity: quantity as never, constraints: { timeInForce: "IOC" } },
+            commandId,
+          );
+        }
+      }
     } else {
       // duplicate re-issue: an earlier acked command id, verbatim
       await annotate(
@@ -213,11 +344,31 @@ test("A9 golden: a fresh instance replaying the same journal reproduces everythi
     duplicate.status === "rejected" && duplicate.rejection.code,
     "duplicate-command",
   );
-  // and the stub boundary survives: the same order command still rejects
-  const stub = await restored.command.submitOrder(submitOrderCommand());
+  // and the W014 seam survives the replay: the restored engine keeps
+  // accepting orders through the same lifecycle, with the replayed order
+  // registry continuing from where the journal left off
+  const ordersBefore = restored.worldState().matching.orders.length;
+  const fresh = await restored.command.submitOrder({
+    kind: "submit-order",
+    commandId: "cmd-post-restore" as never,
+    worldId: definition.scope.worldId,
+    issuedBy: TRADER,
+    issuedAt: START as never,
+    accountId: TRADER_ACCOUNT,
+    instrumentId: INSTRUMENT,
+    submission: {
+      kind: "limit",
+      side: "buy",
+      quantity: "7" as never,
+      limitPrice: "4799.75" as never,
+      constraints: { timeInForce: "GTC" },
+    },
+  });
+  assert.equal(fresh.status, "acked");
   assert.equal(
-    stub.status === "rejected" && stub.rejection.code,
-    "not-implemented-in-skeleton",
+    restored.worldState().matching.orders.length,
+    ordersBefore + 1,
+    "the restored engine accepted a new order through the seam",
   );
 });
 
@@ -266,6 +417,57 @@ test("A9 golden: a different world definition changes the manifest input hash", 
   // The skeleton's events do not consume the seed (the market generator
   // that will — W017 — is not built yet), so digests MAY match; the
   // manifest is what distinguishes the runs today. Documented honestly.
+});
+
+test("A9 golden order flow: trades, fills and stop cascades happen; every fill cites its trade", async () => {
+  const engine = await runGoldenEngine({ prngSeed: GOLDEN_PRNG_SEED, wallBase: WALL_START });
+  const state = engine.worldState();
+  // the warm-up guarantees: ≥3 orders, ≥2 trades (the sweep + the triggered
+  // stop), ≥4 fills, a stop that armed→triggered→filled, a partially filled maker
+  assert.ok(state.matching.orders.length >= 3, "the flow built an order registry");
+  assert.ok(state.matching.trades.length >= 2, "the flow printed trades");
+  assert.ok(state.matching.fills.length >= 4, "the flow produced fills");
+  assert.ok(
+    state.matching.orders.some(
+      (order) => order.kind === "stop" && order.status === "filled",
+    ),
+    "a stop armed, triggered and filled",
+  );
+  // partial fills are evidenced on the fill tape (the maker's first fill
+  // left most of its quantity working) — robust to later cancels/replaces
+  const partialFillEvents = engine.journal
+    .read({ types: ["matching.order.filled"] })
+    .filter((envelope) => (envelope.payload as { status?: string }).status === "partially-filled");
+  assert.ok(partialFillEvents.length > 0, "partial fills happened");
+  // fill causality: every fill cites a journaled trade by id AND sequence
+  const tradeBySequence = new Map(
+    engine.journal.records().map((record) => [record.envelope.sequence, record.envelope]),
+  );
+  for (const fill of state.matching.fills) {
+    const trade = tradeBySequence.get(fill.marketRef.sequence);
+    if (trade === undefined) {
+      assert.fail(`fill ${String(fill.fillId)} cites a journaled trade`);
+    }
+    assert.equal(trade.eventType, "market.trade.printed");
+    assert.equal(
+      (trade.payload as { tradeId: string }).tradeId,
+      String(fill.marketRef.tradeId),
+    );
+    const own = engine.journal.getRecordByEventId(fill.eventId!);
+    assert.ok(own !== undefined && own.envelope.sequence > trade.sequence);
+  }
+  // the deterministic event-type mix is part of the golden evidence: the
+  // journal carries the full matching taxonomy the flow exercises
+  const eventTypes = new Set(engine.journal.records().map((record) => record.envelope.eventType));
+  for (const expected of [
+    "matching.order.accepted",
+    "matching.order.filled",
+    "matching.order.triggered",
+    "market.trade.printed",
+    "market.book.delta",
+  ]) {
+    assert.ok(eventTypes.has(expected), `the golden journal carries ${expected}`);
+  }
 });
 
 test("A9 golden: annotation ids are derived deterministically from the event-sourced state", async () => {
