@@ -17,6 +17,7 @@
     "./risk": "./src/risk.ts",
     "./participant": "./src/participant.ts",
     "./information": "./src/information.ts",
+    "./information-data": "./src/information-data.ts",
     "./market": "./src/market.ts",
     "./data": "./src/data.ts",
     "./world": "./src/world.ts",
