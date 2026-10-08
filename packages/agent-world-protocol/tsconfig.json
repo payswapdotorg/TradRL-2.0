@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This package is a source-exported import surface (mirrors the
+    // agent-body / cognitive-substrate / possession pattern):
+    // package.json "exports" point at TypeScript sources and nothing is
+    // emitted as a build artifact. Tests are included so the import laws
+    // are type-checked too.
+    // `rootDir` is deliberately NOT set: the program pulls in the consumed
+    // `tradrl-world-contracts` sources (through the registered subpath
+    // exports), the `tradrl-world-sim` sources, the W032 `agent-body`,
+    // W033 `cognitive-substrate` and W034 `possession` sources through the
+    // package specifiers, and the REAL alpha world binding
+    // (packages/ui/src/trading-world/runtime/) through the disclosed test
+    // seam — all of which live outside this package directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}
