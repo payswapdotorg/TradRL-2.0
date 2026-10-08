@@ -638,6 +638,28 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/agent-world-protocol:
+    dependencies:
+      agent-body:
+        specifier: workspace:*
+        version: link:../agent-body
+      cognitive-substrate:
+        specifier: workspace:*
+        version: link:../cognitive-substrate
+      possession:
+        specifier: workspace:*
+        version: link:../possession
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../tradrl-world-contracts
+      tradrl-world-sim:
+        specifier: workspace:*
+        version: link:../tradrl-world-sim
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/client:
     dependencies:
       '@zcode/rpc':

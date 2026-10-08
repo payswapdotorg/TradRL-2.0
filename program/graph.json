@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-07T22:13:20Z",
+  "updated_at": "2026-10-08T00:09:06Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -549,8 +549,10 @@
       "write_surface": [
         "packages/agent-world-protocol/"
       ],
-      "status": "ready",
-      "branch": "work/w035"
+      "status": "merged",
+      "branch": "work/w035",
+      "merged_sha": "dc36eaf",
+      "pr": 32
     },
     {
       "id": "W036",
@@ -562,7 +564,7 @@
       "write_surface": [
         "packages/learning-objectives/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w036"
     },
     {
