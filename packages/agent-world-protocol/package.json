@@ -1,0 +1,31 @@
+{
+  "name": "agent-world-protocol",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./action": "./action.ts",
+    "./contracts": "./contracts.ts",
+    "./observation": "./observation.ts",
+    "./session": "./session.ts"
+  },
+  "description": "Observation/action protocol runtime (W035, the agent-body/cognitive-substrate/possession structure pattern): the typed bridge between a possessed agent (W032 Body + W033 Substrate + W034 Possession) and a world (the W023 reactive participant seam). The observation grant protocol (the W032 view-grant machinery over the W034 effective-agent view, driven by the W023 settled-view discipline — coherence-guarded reads, future-dated artifacts withheld AND named); the action protocol (W033's validateDecisionStream as the admission gate via W034's decision-level check — commands outside the embodiment NEVER issue — then the CommandPort issuance with typed outcomes, FIFO); and the agent-world session (attach → observe → decide → act → detach; fail-closed at every seam, every state transition typed, telemetry as data, A9-deterministic).",
+  "dependencies": {
+    "agent-body": "workspace:*",
+    "cognitive-substrate": "workspace:*",
+    "possession": "workspace:*",
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-world-sim": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
