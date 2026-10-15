@@ -1,0 +1,29 @@
+{
+  "name": "evaluation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./summary": "./summary.ts",
+    "./walker": "./walker.ts"
+  },
+  "description": "Evaluation engine (W038, the W035/W036/W037 flat source-exported package pattern): the experiment WALKER — given an ExperimentManifest (W037), its member TrajectoryRecords (W037), and the experiment's EvaluationPolicy (W036), produce the typed, deterministic ExperimentEvaluation: per-trajectory results carried from the records' own outcome summaries, per-holdout-split aggregations (the manifest's declarative splits — periods/regimes/assets/venues — compared as DATA, never computed statistics), the policy reduction folded across trajectories in canonical order, and the compliance dimension (hard violations gate, soft penalties fold — never a bare P&L). A9 determinism: a canonical content-addressed evaluation id (same manifest + same records + same policy → identical results and id). Fail-closed: scope mismatches, unknown holdout kinds, malformed records, missing/mismatched policy → loud typed errors naming the law. NO execution, no model calls, no RL — this WALKS what exists.",
+  "dependencies": {
+    "trajectory": "workspace:*",
+    "experiments": "workspace:*",
+    "learning-objectives": "workspace:*",
+    "agent-world-protocol": "workspace:*",
+    "tradrl-world-contracts": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

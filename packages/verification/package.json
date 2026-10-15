@@ -1,0 +1,32 @@
+{
+  "name": "verification",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./claims": "./claims.ts",
+    "./findings": "./findings.ts",
+    "./checks": "./checks.ts",
+    "./harness": "./harness.ts"
+  },
+  "description": "Verification harness (W038, the W022 falsifiable-verification pattern): evaluation claims are DECLARED before they are checked — a typed claim registry (the W036 policy's integrity requirements — search-history, evidence-chain, deterministic-replay — plus the §13 holdout-coverage axes and the sole-P&L law) with declaration source and evidence needles; adversarial fixtures in, typed verdicts out ({ claim, verdict: PASS | FAIL | PARTIAL, evidence }). A FAIL is a valid outcome (the harness working, not failing); a PARTIAL means the claim held within its declared scope with the limitation disclosed. Checks: evidence-chain integrity (every capsule validates, citations resolve), deterministic-replay integrity (A9 metadata present + twin re-evaluation equality), search-history integrity (declared, carried), holdout-split coverage (the manifest's splits vs the policy's axes — undeclared axes surface as their own finding kind), the sole-P&L law carried forward. Findings are deterministic, ordered, evidence-linked; the assembled harness runs all checks over one experiment evaluation into the content-addressed findings report.",
+  "dependencies": {
+    "evaluation": "workspace:*",
+    "trajectory": "workspace:*",
+    "experiments": "workspace:*",
+    "learning-objectives": "workspace:*",
+    "agent-world-protocol": "workspace:*",
+    "tradrl-world-contracts": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
