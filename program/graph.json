@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-15T10:24:07Z",
+  "updated_at": "2026-10-15T10:51:50Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -389,8 +389,10 @@
       "write_surface": [
         "packages/tradrl-adapters/abides/"
       ],
-      "status": "ready",
-      "branch": "work/w024"
+      "status": "merged",
+      "branch": "work/w024",
+      "merged_sha": "c049db1",
+      "pr": 36
     },
     {
       "id": "W025",
@@ -584,8 +586,10 @@
         "packages/trajectory/",
         "packages/experiments/"
       ],
-      "status": "ready",
-      "branch": "work/w037"
+      "status": "merged",
+      "branch": "work/w037",
+      "merged_sha": "99f38b9",
+      "pr": 37
     },
     {
       "id": "W038",
@@ -600,7 +604,7 @@
         "packages/evaluation/",
         "packages/verification/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w038"
     },
     {
@@ -1025,6 +1029,6 @@
     "One Work Order = one worker = one branch = one PR.",
     "Bootstrap W001 merged via PR #1 at 9f0e10924cac319261f7689b40ebe11988f772e9.",
     "Maximum concurrent worker count is 3; do not fill unused capacity with speculative work.",
-    "Current ready frontier after W029+W036 merges (PRs #35/#34): W024, W037."
+    "Current ready frontier after W024+W037 merges (PRs #36/#37): W038."
   ]
 }
