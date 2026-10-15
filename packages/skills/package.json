@@ -1,0 +1,34 @@
+{
+  "name": "skills",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./identity": "./identity.ts",
+    "./record": "./record.ts",
+    "./extract": "./extract.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Skill extraction contract (W041, the W037/W039/W040 flat source-exported pattern): the empirical bridge from 'what happened' (W037 trajectories) to 'what is repeatable' (skills). A SkillRecord is typed DATA — an opaque canonical id, the competence statement carried from the W040 capability it was measured as (kind/domain from the registry's closed vocabularies, never re-declared), the evidence citations (the W037 trajectory canonical ids that demonstrated it + the capability's measured provenance carried verbatim), the bearer dimension (which substrate/body class demonstrated it), explicit scope, versioned immutable lineage, and deterministic extraction provenance. `extractSkills(trajectories, registry)` is the PURE extraction gate: every trajectory is re-validated through W037's own gate (errors carried verbatim), the registry through W040's (errors carried verbatim), scope agreement is proven by field equality, and the walk derives one candidate skill per REGISTERED measured capability that the batch actually demonstrates — R052 enforced structurally: no trajectory evidence ⇒ NO skill (a loud typed refusal naming the law, never a label), deprecated/revoked capabilities refused loudly with the W040 lifecycle carried verbatim. The measured summaries CARRY the records' own outcome data (the W038 precedent: carry, never re-score). A9: same trajectories + same registry ⇒ deep-equal run, same canonical ids, input order never leaks. NO execution, no model calls, no training — extraction is a pure walk.",
+  "dependencies": {
+    "trajectory": "workspace:*",
+    "capability-registry": "workspace:*",
+    "agent-world-protocol": "workspace:*",
+    "learning-objectives": "workspace:*",
+    "tradrl-world-contracts": "workspace:*",
+    "experiments": "workspace:*",
+    "evaluation": "workspace:*",
+    "verification": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

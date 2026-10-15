@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This service is a source-exported import surface (mirrors the
+    // packages/* pattern and the W039 organization-compiler service;
+    // note the services/ depth — two levels up to the repo root,
+    // exactly like packages/): the package.json "exports" map points at
+    // TypeScript sources and nothing is emitted as a build artifact.
+    // Tests are included so the import laws are type-checked too.
+    // `rootDir` is deliberately NOT set: the program pulls in the
+    // consumed `skills` (W041), `capability-registry` (W040),
+    // `agent-body` (W032), `cognitive-substrate` (W033) and `possession`
+    // (W034) sources — plus the fixture-side `trajectory`,
+    // `agent-world-protocol`, `learning-objectives`,
+    // `tradrl-world-contracts`, `experiments`, `evaluation` and
+    // `verification` sources — through the registered package
+    // specifiers, all of which live outside this service directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}
