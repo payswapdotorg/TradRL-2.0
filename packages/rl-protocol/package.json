@@ -1,0 +1,30 @@
+{
+  "name": "rl-protocol",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./episode": "./episode.ts",
+    "./trainer": "./trainer.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "RL protocol contract (W047, the W035–W044 flat source-exported package pattern): the typed interface an RL TRAINER consumes/implements. The Episode is typed DATA — an opaque content-addressed episode id over the provenance triple (trajectory canonical id + binding id + experiment-evaluation id), the observation→action→outcome steps CARRIED verbatim from the W037 trajectory's own §10 evidence stream, the reward signal TYPED through W036's PolicyEvaluation (components + constraints carried verbatim — the §13 sole-P&L law is enforced at construction as a loud typed refusal), explicit scope, and immutable lineage. The TrainerPort is the minimal PURE interface a trainer implements (R054: RL is ONE learning method among many — the protocol is method-neutral: no JAX, no gradients, no trainer execution, no world stepping; W048 owns distributed episode generation, W049 owns the training adapter). The deterministic episode-batch descriptor carries episode ids in canonical order + a content-addressed batch id + an optional declared selection policy as DATA (A9).",
+  "dependencies": {
+    "evaluation": "workspace:*",
+    "experiments": "workspace:*",
+    "learning-objectives": "workspace:*",
+    "trajectory": "workspace:*",
+    "world-agent-runtime": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
