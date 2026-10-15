@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "program": "TradRL-2.0",
- "updated_at": "2026-10-15T17:05:33Z",
+ "updated_at": "2026-10-15T17:39:04Z",
  "policies": {
   "max_concurrent_work_orders": 3,
   "merge_method": "squash",
@@ -783,8 +783,10 @@
    "write_surface": [
     "packages/tradrl-adapters/jax-lob/"
    ],
-   "status": "ready",
-   "branch": "work/w049"
+   "status": "merged",
+   "branch": "work/w049",
+   "pr": 51,
+   "merged_sha": "38c1c77e55f497928d2c3d07d959a42525bd39bc"
   },
   {
    "id": "W050",
@@ -799,8 +801,10 @@
     "packages/tradrl-time-machine/",
     "services/time-machine/"
    ],
-   "status": "ready",
-   "branch": "work/w050"
+   "status": "merged",
+   "branch": "work/w050",
+   "pr": 52,
+   "merged_sha": "a1cceadbb837f822b6ae344011f730d09b086ea8"
   },
   {
    "id": "W051",
@@ -813,7 +817,7 @@
    "write_surface": [
     "packages/search-integrity/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w051"
   },
   {
@@ -934,7 +938,7 @@
     "services/api/",
     "packages/sdk/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w059"
   },
   {

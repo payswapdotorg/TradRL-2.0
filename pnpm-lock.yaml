@@ -1341,6 +1341,25 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/tradrl-adapters/jax-lob:
+    dependencies:
+      learning-compute:
+        specifier: workspace:*
+        version: link:../../../services/learning/compute
+      learning-rl:
+        specifier: workspace:*
+        version: link:../../../services/learning/rl
+      rl-protocol:
+        specifier: workspace:*
+        version: link:../../rl-protocol
+      trajectory:
+        specifier: workspace:*
+        version: link:../../trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/tradrl-adapters/nautilus:
     dependencies:
       tradrl-data:
@@ -1430,6 +1449,19 @@ importers:
       tradrl-world-sim:
         specifier: workspace:*
         version: link:../tradrl-world-sim
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  packages/tradrl-time-machine:
+    dependencies:
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../tradrl-world-contracts
+      trajectory:
+        specifier: workspace:*
+        version: link:../trajectory
+    devDependencies:
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
@@ -2033,6 +2065,28 @@ importers:
       world-agent-runtime:
         specifier: workspace:*
         version: link:../world-agent-runtime
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/time-machine:
+    dependencies:
+      tradrl-evaluation-replay:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-evaluation/replay
+      tradrl-information:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-information
+      tradrl-time-machine:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-time-machine
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-world-contracts
+      trajectory:
+        specifier: workspace:*
+        version: link:../../packages/trajectory
     devDependencies:
       typescript:
         specifier: ^6.0.2
