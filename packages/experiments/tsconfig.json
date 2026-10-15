@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This package is a source-exported import surface (mirrors the W035
+    // agent-world-protocol / W036 learning-objectives pattern): package.json
+    // "exports" point at TypeScript sources and nothing is emitted as a
+    // build artifact. Tests are included so the experiment protocol laws
+    // are type-checked too.
+    // `rootDir` is deliberately NOT set: the program pulls in the consumed
+    // `trajectory` and `learning-objectives` sources (through the registered
+    // package exports) plus `tradrl-world-contracts` (the split-atom leaf
+    // types) — all of which live outside this package directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "experiments",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./descriptor": "./descriptor.ts",
+    "./manifest": "./manifest.ts"
+  },
+  "description": "Experiment protocol (W037, the W035/W036 flat source-exported package pattern): the DECLARATIVE experiment descriptor — world definition references, participant specs, the W036 §13 evaluation policy, the reward model, the constraint set — with deterministic identity (a canonical hash over the descriptor: same descriptor bytes → same experiment id, A9); and the experiment manifest — which trajectory records belong to the experiment, the holdout split assignments per the policy's holdout kinds (periods/regimes/assets/venues walk-forward splits as DATA — declarative split descriptors, never computed statistics), and the integrity requirements carried forward. Fail-closed: unknown holdout kinds, malformed descriptors, reward models that fail W036's construction laws, and trajectory/experiment scope mismatches are loud typed errors naming the law. A CONTRACT package: NO execution — the world runtime runs sessions (W035), W038 walks what this defines.",
+  "dependencies": {
+    "trajectory": "workspace:*",
+    "learning-objectives": "workspace:*",
+    "tradrl-world-contracts": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
