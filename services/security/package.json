@@ -1,0 +1,31 @@
+{
+  "name": "security-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./isolation": "./isolation.ts",
+    "./secrets": "./secrets.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The SECURITY SERVICE (W060) — the pure machinery over the security contract (packages/security): proveIsolation THE CROSS-RECORD PROOF (every record's explicit §14 scope checked against the canonical reference scope — a TENANT disagreement is the LOUD typed `cross-tenant` finding naming R056; project/world disagreements are typed `scope-mismatch` findings; implicit scopes, malformed entries, and duplicates are typed findings too — all in canonical order, sealed as the content-addressed iso-<digest> proof, A9: input order never leaks) and enforceSecretPolicy THE PURE CUSTODY CHECK (every secret handle's custody proven against the §14-scoped policy's requirements: rotation cadence compliance, access-scope agreement against W059's closed hierarchy, redaction-level sufficiency, scope agreement with R056 named loudly on cross-tenant, THE REDACTION LAW re-scanned over every checked byte — every violation typed, collected, never silently dropped; the enforcement sealed as enf-<digest>). Fail-closed at every seam; A14: composes typed proofs + policies — NEVER authenticates, NEVER decrypts, NEVER executes, NEVER deploys (W062).",
+  "dependencies": {
+    "security": "workspace:*",
+    "memory": "workspace:*",
+    "firm-brain": "workspace:*",
+    "entitlements": "workspace:*",
+    "api": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
