@@ -1,0 +1,35 @@
+{
+  "name": "tradrl-adapters-arena",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./identity": "./arena-identity.ts",
+    "./registration": "./arena-registration.ts",
+    "./provider": "./arena-provider.ts",
+    "./adjudication": "./arena-adjudication.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The Arena capability-provider adapter (W057) — the FIRST CONCRETE provider over the W056 provider-neutral interface (the W024 abides clean-room adapter precedent, the tradrl-adapters/* flat source-exported layout). Spec: REQUIREMENTS.md R055 — 'Arena is optional': the Arena is ONE optional provider, an equal member of the pluggable provider class, and this package is its venue-specific implementation — the arena vocabulary (venue kinds, round kinds, measurement regimes, leaderboard styles) is declared HERE and ONLY here, as closed sets with fail-closed validation. registerArenaProvider is the adapter's registration gate: the arena closed-set + structure laws first, then W056's registerProvider run VERBATIM over the projected provider-neutral declaration (R052 enforced at THAT gate — an unmeasured offer is refused there and carried here verbatim; never bypassed, never weakened). ArenaCapabilityProvider implements W056's CapabilityProviderPort deterministically in memory (listOffers in canonical offer-id order / describeOffer by exact id / the measured provenance accessor). adjudicateArenaOffers delegates to W056's matchProviderOffers VERBATIM (reasons carried), and projectArenaLeaderboard is the arena ranking projection — carried data ordered by CANONICAL IDS, never a re-scored statistic. validateArenaRegistration re-proves the whole registration from its recorded data, W056's validateProviderRegistration carried verbatim. A9 throughout; A14: the adapter COMPOSES typed data — it never executes an arena round, never calls a network, no marketplace or entitlements semantics (W058), no neutral-interface changes (frozen).",
+  "dependencies": {
+    "capability-provider": "workspace:*",
+    "capability-registry": "workspace:*",
+    "skills": "workspace:*",
+    "organization": "workspace:*",
+    "experiments": "workspace:*",
+    "evaluation": "workspace:*",
+    "verification": "workspace:*",
+    "cognitive-substrate": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
