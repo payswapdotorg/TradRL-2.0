@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "program": "TradRL-2.0",
- "updated_at": "2026-10-15T14:27:08Z",
+ "updated_at": "2026-10-15T15:01:43Z",
  "policies": {
   "max_concurrent_work_orders": 3,
   "merge_method": "squash",
@@ -687,8 +687,10 @@
    "write_surface": [
     "services/body-forge/commissioning/"
    ],
-   "status": "ready",
-   "branch": "work/w043"
+   "status": "merged",
+   "branch": "work/w043",
+   "pr": 44,
+   "merged_sha": "71a2bd53e1d82a4ffa8bec3468f34dbfea409799"
   },
   {
    "id": "W044",
@@ -701,7 +703,7 @@
    "write_surface": [
     "services/world-agent-runtime/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w044"
   },
   {
@@ -889,8 +891,10 @@
    "write_surface": [
     "packages/tradrl-adapters/arena/"
    ],
-   "status": "ready",
-   "branch": "work/w057"
+   "status": "merged",
+   "branch": "work/w057",
+   "pr": 45,
+   "merged_sha": "39bba1dd3f96a9a4b37a32e898ba8264202b77f1"
   },
   {
    "id": "W058",

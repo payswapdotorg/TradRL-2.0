@@ -1275,6 +1275,37 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/tradrl-adapters/arena:
+    dependencies:
+      capability-provider:
+        specifier: workspace:*
+        version: link:../../capability-provider
+      capability-registry:
+        specifier: workspace:*
+        version: link:../../capability-registry
+      cognitive-substrate:
+        specifier: workspace:*
+        version: link:../../cognitive-substrate
+      evaluation:
+        specifier: workspace:*
+        version: link:../../evaluation
+      experiments:
+        specifier: workspace:*
+        version: link:../../experiments
+      organization:
+        specifier: workspace:*
+        version: link:../../organization
+      skills:
+        specifier: workspace:*
+        version: link:../../skills
+      verification:
+        specifier: workspace:*
+        version: link:../../verification
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/tradrl-adapters/crypto:
     dependencies:
       tradrl-data:
