@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "program": "TradRL-2.0",
- "updated_at": "2026-10-15T20:35:42Z",
+ "updated_at": "2026-10-15T21:17:45Z",
  "policies": {
   "max_concurrent_work_orders": 3,
   "merge_method": "squash",
@@ -967,8 +967,10 @@
     "packages/security/",
     "services/security/"
    ],
-   "status": "ready",
-   "branch": "work/w060"
+   "status": "merged",
+   "branch": "work/w060",
+   "pr": 62,
+   "merged_sha": "1895e483bec500f27675e0b5f15c868915d513f5"
   },
   {
    "id": "W061",
@@ -1000,7 +1002,7 @@
     "ops/",
     "tests/performance/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w062"
   },
   {
@@ -1040,7 +1042,7 @@
     "examples/reference-trading/",
     "tests/e2e/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w064"
   },
   {
@@ -1056,7 +1058,7 @@
     "packages/tradrl-adapters/broker/",
     "services/shadow/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w065"
   },
   {

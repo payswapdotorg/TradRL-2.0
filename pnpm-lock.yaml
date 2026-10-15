@@ -1236,6 +1236,25 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/security:
+    dependencies:
+      api:
+        specifier: workspace:*
+        version: link:../../services/api
+      entitlements:
+        specifier: workspace:*
+        version: link:../entitlements
+      memory:
+        specifier: workspace:*
+        version: link:../memory
+      trajectory:
+        specifier: workspace:*
+        version: link:../trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/server:
     dependencies:
       '@hono/node-server':
@@ -2359,6 +2378,31 @@ importers:
       world-agent-runtime:
         specifier: workspace:*
         version: link:../world-agent-runtime
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/security:
+    dependencies:
+      api:
+        specifier: workspace:*
+        version: link:../api
+      entitlements:
+        specifier: workspace:*
+        version: link:../../packages/entitlements
+      firm-brain:
+        specifier: workspace:*
+        version: link:../firm-brain
+      memory:
+        specifier: workspace:*
+        version: link:../../packages/memory
+      security:
+        specifier: workspace:*
+        version: link:../../packages/security
+      trajectory:
+        specifier: workspace:*
+        version: link:../../packages/trajectory
     devDependencies:
       typescript:
         specifier: ^6.0.2
