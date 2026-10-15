@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    // Source-exported import surface (the tradrl-adapters-abides/arena pattern):
+    // package.json "exports" point at TypeScript sources, nothing is emitted
+    // as a build artifact. Tests are included so the adapter laws are
+    // type-checked too — and the test fixture lineage pulls the consumed
+    // `rl-protocol` (W047), `learning-compute` (W048), `trajectory` and
+    // `learning-rl` sources in through relative imports (the W048
+    // compute-fixture precedent). `rootDir` is deliberately NOT set: the
+    // program pulls in sources that live outside this package directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": [".", "test"]
+}
