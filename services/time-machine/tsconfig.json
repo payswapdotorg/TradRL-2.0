@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This service is a source-exported import surface (mirrors the W047
+    // learning-rl pattern): package.json "exports"
+    // point at TypeScript sources and nothing is emitted as a build
+    // artifact. Tests are included so the engine/fidelity/validation laws
+    // are type-checked too. `rootDir` is deliberately NOT set: the program
+    // pulls in the consumed tradrl-time-machine / tradrl-world-contracts /
+    // tradrl-information / tradrl-evaluation-replay / trajectory sources
+    // (through the registered package exports) — all of which live outside
+    // this service directory. The test fixtures additionally import the
+    // W027 tradrl-information test fixtures directly (the W041 fixture
+    // lineage, the W044 cross-package relative-import precedent).
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}
