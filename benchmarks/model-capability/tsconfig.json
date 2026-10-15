@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // benchmarks/model-capability is a pure declarative catalogue surface
+    // (the contracts/ui precedent): no emit, no package manifest, no
+    // dependencies, no workspace membership. The catalogue is type-only
+    // data; services/model-selection consumes it through structural typing
+    // and validates it at load (unique ids, closed vocabularies, scope
+    // agreement, axis-atom legality).
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "rootDir": ".",
+    "types": ["node"]
+  },
+  "include": ["."]
+}
