@@ -1,0 +1,33 @@
+{
+  "name": "capability-registry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./identity": "./identity.ts",
+    "./descriptor": "./descriptor.ts",
+    "./register": "./register.ts",
+    "./validate": "./validate.ts",
+    "./lifecycle": "./lifecycle.ts",
+    "./query": "./query.ts"
+  },
+  "description": "The empirical capability registry contract (W040, the W039 flat source-exported pattern). Spec: REQUIREMENTS.md R052 — 'Capability discovery is EMPIRICAL' — enforced STRUCTURALLY: a capability enters the registry only through a registration gate that demands MEASURED provenance (W037 experiment descriptors re-identified through experimentIdOf + W038 experiment evaluations + W038 findings reports whose digest is re-derived through findingsDigestOf and whose verdict must have PASSED); a label-only entry is a typed loud error naming the law, never silent acceptance. Capabilities are typed DATA: a closed kind/domain vocabulary, the bearer dimension (which W033 substrate or body class demonstrated it), explicit tenant/project/world scope, versioned immutable lineage, and evidence-linked citations of the canonical W037/W038 ids. Deterministic fail-closed queries — by id, by kind/domain, and the W039 demand-matching seam (does a registered capability satisfy a position's declared capability demand? typed yes/no with reasons) plus the organization-offering projection the W039 compiler's registry input is built from. Lifecycle states (registered/deprecated/revoked) transition immutably; a deprecated capability still resolves for lineage but fails demand-matching loudly. A9: same declarations + same citations ⇒ same canonical ids ⇒ deep-equal registry. NO measurement execution, no model calls, no I/O — the registry RECORDS measured provenance; the measuring happened in the W037/W038 artifacts.",
+  "dependencies": {
+    "cognitive-substrate": "workspace:*",
+    "evaluation": "workspace:*",
+    "verification": "workspace:*",
+    "experiments": "workspace:*",
+    "organization": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
