@@ -1,0 +1,30 @@
+{
+  "name": "organization",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./identity": "./identity.ts",
+    "./definition": "./definition.ts",
+    "./validate": "./validate.ts",
+    "./ablation": "./ablation.ts"
+  },
+  "description": "Organization model contracts (W039, the possession structure pattern): ARCHITECTURE.md §12 — 'Organization discovers capabilities and composes Bodies.' An Organization is DECLARATIVE DATA + LAWS, never execution: positions (each carrying typed body requirements, substrate requirements and capability demands), a typed composition tree (positions compose into units, units into the organization), possession bindings declared through W034's channel/grant vocabulary on the 'organization' channel, explicit tenant/project/world scope, a deterministic canonical identity (canonical JSON + FNV-1a over the whole definition — same bytes, same id, A9) and an immutable lineage (every derived organization cites its parent; genesis is the only root). Fail-closed validation names every law loudly (unknown capability reference, position without requirements, cyclic composition, duplicate ids, scope mismatch). Ablation-readiness (R053 + §13): typed PURE operations — remove a position/unit (the 'organization' ablation axis) or substitute a body/substrate requirement (the 'model-substitution' axis) — each producing a NEW valid definition with a derived identity; W036's ABLATION_KINDS is the closed origin-kind table. No execution, no runtime, no model calls.",
+  "dependencies": {
+    "agent-body": "workspace:*",
+    "cognitive-substrate": "workspace:*",
+    "possession": "workspace:*",
+    "learning-objectives": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

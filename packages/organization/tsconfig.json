@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This package is a source-exported import surface (mirrors the
+    // possession / agent-body / cognitive-substrate pattern): the
+    // package.json "exports" map points at TypeScript sources and nothing
+    // is emitted as a build artifact. Tests are included so the import
+    // laws are type-checked too.
+    // `rootDir` is deliberately NOT set: the program pulls in the consumed
+    // `agent-body` (W032), `cognitive-substrate` (W033), `possession` (W034)
+    // and `learning-objectives` (W036) sources through the registered
+    // package specifiers — all of which live outside this package
+    // directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}

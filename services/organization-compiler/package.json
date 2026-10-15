@@ -1,0 +1,28 @@
+{
+  "name": "organization-compiler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./registry": "./registry.ts",
+    "./compile": "./compile.ts"
+  },
+  "description": "Organization compile service (W039): the PURE compiler that turns a declarative organization model (the `organization` package) plus a typed component registry (registered bodies, substrates and their capability offerings) into a CompiledOrganization — the resolved binding plan (which concrete W032 body and W033 substrate fill each position), the possession declaration for every seat verified through W034's checkPossessionCompatibility seam with incompatibilities carried verbatim, the satisfied capability demands, the canonical A6-friendly execution-order plan, and a content-addressed compiled id (orgc-<digest>, A9: same definition + same registry, byte-identical plan and id — the twin law). Fail-closed at every seam: an invalid definition or registry, a registry scope mismatch, an unresolvable position, a missing capability or an incompatible binding is a loud typed error; the compile NEVER silently drops a position and never backtracks — the canonical first eligible component wins, deterministically. No execution, no runtime, no model calls: the compiled plan is data for the runtime (W035+).",
+  "dependencies": {
+    "organization": "workspace:*",
+    "agent-body": "workspace:*",
+    "cognitive-substrate": "workspace:*",
+    "possession": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
