@@ -1203,6 +1203,37 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/skills:
+    dependencies:
+      agent-world-protocol:
+        specifier: workspace:*
+        version: link:../agent-world-protocol
+      capability-registry:
+        specifier: workspace:*
+        version: link:../capability-registry
+      evaluation:
+        specifier: workspace:*
+        version: link:../evaluation
+      experiments:
+        specifier: workspace:*
+        version: link:../experiments
+      learning-objectives:
+        specifier: workspace:*
+        version: link:../learning-objectives
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../tradrl-world-contracts
+      trajectory:
+        specifier: workspace:*
+        version: link:../trajectory
+      verification:
+        specifier: workspace:*
+        version: link:../verification
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/tradrl-adapters/abides:
     dependencies:
       tradrl-market-participants:
@@ -1698,6 +1729,49 @@ importers:
       tsx:
         specifier: ^4.19.4
         version: 4.21.0
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/body-forge:
+    dependencies:
+      agent-body:
+        specifier: workspace:*
+        version: link:../../packages/agent-body
+      agent-world-protocol:
+        specifier: workspace:*
+        version: link:../../packages/agent-world-protocol
+      capability-registry:
+        specifier: workspace:*
+        version: link:../../packages/capability-registry
+      cognitive-substrate:
+        specifier: workspace:*
+        version: link:../../packages/cognitive-substrate
+      evaluation:
+        specifier: workspace:*
+        version: link:../../packages/evaluation
+      experiments:
+        specifier: workspace:*
+        version: link:../../packages/experiments
+      learning-objectives:
+        specifier: workspace:*
+        version: link:../../packages/learning-objectives
+      possession:
+        specifier: workspace:*
+        version: link:../../packages/possession
+      skills:
+        specifier: workspace:*
+        version: link:../../packages/skills
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-world-contracts
+      trajectory:
+        specifier: workspace:*
+        version: link:../../packages/trajectory
+      verification:
+        specifier: workspace:*
+        version: link:../../packages/verification
+    devDependencies:
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
