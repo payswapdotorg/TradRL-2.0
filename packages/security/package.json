@@ -1,0 +1,30 @@
+{
+  "name": "security",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./isolation": "./isolation.ts",
+    "./secrets": "./secrets.ts",
+    "./policy": "./policy.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The SECURITY CONTRACT (W060, the W035–W058 flat source-exported pattern): the typed contracts of the security layer AS DATA — the TENANT-ISOLATION proof vocabulary (the R056 generalization: cross-record isolation proofs over §14-scoped records, every mismatch a typed finding), the SECRET-REFERENCE contract (typed handles: opaque canonical sec-<digest> ids + custody policy — rotation, access scope, redaction requirements, ALL declared data; THE REDACTION LAW enforced structurally at construction: a secret-shaped VALUE anywhere in the input is the LOUD typed refusal — the push-protection lesson made law), and the security-policy vocabulary (closed sets, fail-closed validated, citing W058's grantee vocabulary + W059's §14 route-scope hierarchy). A9 throughout (content-addressed ids, canonical orders); A14: composes typed contracts — NEVER authenticates, NEVER decrypts, NEVER executes (W060's own machinery lives in services/security).",
+  "dependencies": {
+    "memory": "workspace:*",
+    "entitlements": "workspace:*",
+    "api": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
