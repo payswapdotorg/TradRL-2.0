@@ -1073,7 +1073,7 @@
    "write_surface": [
     "product identity metadata and identity surfaces only"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w066"
   }
  ],
