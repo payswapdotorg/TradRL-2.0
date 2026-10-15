@@ -1,0 +1,35 @@
+{
+  "name": "tradrl-adapters-abides",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./errors": "./errors.ts",
+    "./latency": "./latency.ts",
+    "./messaging": "./messaging.ts",
+    "./book": "./book.ts",
+    "./ledger": "./ledger.ts",
+    "./events": "./events.ts",
+    "./definition": "./definition.ts",
+    "./exchange": "./exchange.ts",
+    "./execution": "./execution.ts",
+    "./agents": "./agents.ts",
+    "./kernel": "./kernel.ts"
+  },
+  "description": "ABIDES-style reactive-market adapter (W024) — a CLEAN-ROOM reimplementation of the documented public semantics of an agent-based reactive market (per-agent latency over a deterministic message scheduler, event-woken agents on their own scheduled wakes, an exchange process over price-time-priority order books) as original TypeScript behind the typed World Protocol, driving participants through the W023 reactive participant seam (tradrl-market-participants). Zero upstream ABIDES code copied (spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md); reference-only.",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-market-participants": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
