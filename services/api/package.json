@@ -1,0 +1,32 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./routes": "./routes.ts",
+    "./point-in-time": "./point-in-time.ts",
+    "./errors": "./errors.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Typed API contract service (W059): the route table AS DATA — every public/private route (path pattern, closed method set, closed request/response field schemas, the explicit tenant/project/world scope each route requires as path parameters — §14, versioned immutable lineages) with fail-closed construction + whole-record re-validation (unique content-addressed route ids, unique method+path, W028 provenance citations on every data-carrying response — or the honest no-declared-source marker — and R016: every time-machine route carries an explicit required cutoff, an implicit-latest route is a loud typed violation). A14: CONTRACTS ONLY — no HTTP serving (W062), no authn/authz execution (W060), no observability (W061), no I/O.",
+  "dependencies": {
+    "tradrl-evidence": "workspace:*",
+    "tradrl-time-machine": "workspace:*",
+    "time-machine": "workspace:*",
+    "organization": "workspace:*",
+    "organization-compiler": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

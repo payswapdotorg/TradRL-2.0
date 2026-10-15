@@ -1,0 +1,28 @@
+{
+  "name": "sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./client": "./client.ts",
+    "./builders": "./builders.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Typed SDK client (W059): the deterministic projection of the api route table — one method per route (derived camelCase names over the stable lineage names, canonical order), compile-time drift-guarded against the route contracts (satisfies + Exclude over the default table's literal route names — a drifted table stops type-checking) and run-time drift-guarded over any table (assertSdkSurfaceCoversRouteTable). Request builders enforce the §14 scope law (the explicit tenant/project/world members each route demands, exactly those, none blank), the path law and the closed field schemas (W050's own isLegalCutoff + TIME_MACHINE_FAMILIES gates); response validators RE-VALIDATE every payload against the route's response schema including the W028 provenance citation match — the SDK never trusts the wire. Prepared requests are content-addressed (sdkreq-<digest>, A9). A14: no network I/O — the transport is W062's.",
+  "dependencies": {
+    "api": "workspace:*",
+    "tradrl-time-machine": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
