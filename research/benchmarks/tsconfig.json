@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // research/benchmarks is a plain publication-catalogue + gate surface
+    // (the benchmarks/model-capability + contracts/ui precedent): no emit,
+    // no package manifest, no workspace membership, no dependencies of its
+    // own. The publication vocabulary is typed DATA; the gate (validate.ts)
+    // re-proves every citation through the consumed packages' own
+    // validators via relative source imports. `rootDir` is deliberately
+    // NOT set: the program pulls in the consumed trajectory / evaluation /
+    // verification / evaluation-splits / search-integrity / observability /
+    // operations / tradrl-evaluation-replay sources, all of which live
+    // outside this directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["."]
+}
