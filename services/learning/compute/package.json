@@ -1,0 +1,29 @@
+{
+  "name": "learning-compute",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./plan": "./plan.ts",
+    "./port": "./port.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Learning compute orchestration service (W048): the COMPUTE ORCHESTRATION CONTRACT for generating episodes at scale. planGeneration is THE GATE: the population re-proven through W045's own whole-record validator (errors carried verbatim), the batch policy proven against W047's declared selection-policy vocabulary, the sharding policy validated as DECLARED closed-set data (axis vocabulary, shard count, per-unit episode quota; canonical member-order contiguous assignment — every shard non-empty), then the GenerationPlan sealed: content-addressed genplan-<digest> id, the work units as DATA (each: its shard assignment + its population slice + its declared batch descriptor + its declared world/scope), immutable population lineage, deterministic provenance. port.ts types the GenerationWorkerPort (claim unit → emit batch reference) — the surface a future distributed runtime executes. A14: this service COMPOSES typed plans — it never executes generation, never touches a network, never spawns processes, never reads clocks/env/node ids (distribution is DECLARED as data, never discovered). W049 (JAX-LOB training adapter) consumes these plans; W050 owns the Time Machine.",
+  "dependencies": {
+    "learning-rl": "workspace:*",
+    "populations": "workspace:*",
+    "rl-protocol": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
