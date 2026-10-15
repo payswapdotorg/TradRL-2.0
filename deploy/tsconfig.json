@@ -1,0 +1,20 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    // deploy/ is a plain contract directory (the research/benchmarks W063
+    // precedent): no emit, no package manifest, no workspace membership, no
+    // dependencies of its own. The deployment vocabulary is typed DATA; the
+    // gate + re-validator re-prove every citation through the consumed
+    // packages' own validators via relative source imports. `rootDir` is
+    // deliberately NOT set: the program pulls in the consumed api / sdk /
+    // security / security-service / observability / trajectory sources, all
+    // of which live outside this directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["."]
+}
