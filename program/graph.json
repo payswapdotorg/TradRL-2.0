@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "program": "TradRL-2.0",
- "updated_at": "2026-10-15T17:39:04Z",
+ "updated_at": "2026-10-15T18:16:13Z",
  "policies": {
   "max_concurrent_work_orders": 3,
   "merge_method": "squash",
@@ -817,8 +817,10 @@
    "write_surface": [
     "packages/search-integrity/"
    ],
-   "status": "ready",
-   "branch": "work/w051"
+   "status": "merged",
+   "branch": "work/w051",
+   "pr": 54,
+   "merged_sha": "5ee0ffc38468474ac3a1425c38e20717eb368b95"
   },
   {
    "id": "W052",
@@ -831,7 +833,7 @@
    "write_surface": [
     "packages/evaluation-splits/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w052"
   },
   {
@@ -938,8 +940,10 @@
     "services/api/",
     "packages/sdk/"
    ],
-   "status": "ready",
-   "branch": "work/w059"
+   "status": "merged",
+   "branch": "work/w059",
+   "pr": 53,
+   "merged_sha": "8966995c4f7e56889a36da841296ca41c14621fb"
   },
   {
    "id": "W060",
@@ -968,7 +972,7 @@
     "packages/observability/",
     "services/operations/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w061"
   },
   {

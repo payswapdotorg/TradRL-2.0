@@ -1082,6 +1082,44 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/sdk:
+    dependencies:
+      api:
+        specifier: workspace:*
+        version: link:../../services/api
+      tradrl-time-machine:
+        specifier: workspace:*
+        version: link:../tradrl-time-machine
+      trajectory:
+        specifier: workspace:*
+        version: link:../trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  packages/search-integrity:
+    dependencies:
+      evaluation:
+        specifier: workspace:*
+        version: link:../evaluation
+      rl-protocol:
+        specifier: workspace:*
+        version: link:../rl-protocol
+      tradrl-time-machine:
+        specifier: workspace:*
+        version: link:../tradrl-time-machine
+      trajectory:
+        specifier: workspace:*
+        version: link:../trajectory
+      verification:
+        specifier: workspace:*
+        version: link:../verification
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/server:
     dependencies:
       '@hono/node-server':
@@ -1842,6 +1880,31 @@ importers:
       tsx:
         specifier: ^4.19.4
         version: 4.21.0
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/api:
+    dependencies:
+      organization:
+        specifier: workspace:*
+        version: link:../../packages/organization
+      organization-compiler:
+        specifier: workspace:*
+        version: link:../organization-compiler
+      time-machine:
+        specifier: workspace:*
+        version: link:../time-machine
+      tradrl-evidence:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-evidence
+      tradrl-time-machine:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-time-machine
+      trajectory:
+        specifier: workspace:*
+        version: link:../../packages/trajectory
+    devDependencies:
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
