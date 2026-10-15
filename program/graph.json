@@ -1073,8 +1073,9 @@
    "write_surface": [
     "product identity metadata and identity surfaces only"
    ],
-   "status": "ready",
-   "branch": "work/w066"
+   "status": "merged",
+   "branch": "work/w066",
+   "merged_sha": "d2711c97410be629c1f145a8a32edeca66bbdf59"
   }
  ],
  "notes": [
