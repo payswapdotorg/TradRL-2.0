@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    // Source-exported import surface (the tradrl-adapters-arena pattern):
+    // package.json "exports" point at TypeScript sources, nothing is emitted
+    // as a build artifact. Tests are included so the adapter laws are
+    // type-checked too. `rootDir` is deliberately NOT set: the program pulls
+    // in the consumed `security` (W060) and `trajectory` (W037) sources
+    // through the registered package specifiers — all of which live outside
+    // this package directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": [".", "test"]
+}

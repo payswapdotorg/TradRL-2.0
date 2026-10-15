@@ -1,0 +1,33 @@
+{
+  "name": "shadow",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./session": "./session.ts",
+    "./projection": "./projection.ts",
+    "./audit": "./audit.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The LIVE-MIRROR SERVICE (W065): the mirror composition contract as typed DATA — real observations IN (carried verbatim, proven through the W065 broker adapter's own observation validation + composed through W050's own buildPointInTimeQuery/sealView gates), simulated positions/execution state as composed records (every position derived deterministically from the carried order+fill+observation chain — A6: no invented prices, the fill's price IS the observation's carried price), NEVER live execution (A13/A14: the service composes PROJECTION records — it does not transmit anything; there is no network code at all). The point-in-time law: every observation's availability respects W050's point-in-time firewall — an observation is invisible to a mirror session before its availableAt, and the session's cutoff IS the sealed view's cutoff (R016). Every auditable step emits W061 audit vocabulary events (typed, through packages/observability's own contracts) and the session trail is assembled + verifiable through services/operations' own trail laws. The isolation law: mirror sessions are tenant-scoped (R056 structural — session ids weigh the tenant FIRST; cross-tenant reads are loud typed refusals).",
+  "dependencies": {
+    "security": "workspace:*",
+    "observability": "workspace:*",
+    "operations": "workspace:*",
+    "trajectory": "workspace:*",
+    "tradrl-adapters-broker": "workspace:*",
+    "tradrl-time-machine": "workspace:*",
+    "tradrl-world-contracts": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
