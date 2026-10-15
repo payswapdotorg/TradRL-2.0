@@ -1,0 +1,33 @@
+{
+  "name": "populations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./population": "./population.ts",
+    "./transitions": "./transitions.ts",
+    "./view": "./view.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Multi-agent populations (W045): the typed record of MANY agents bound into one world. foundPopulation composes proven W044 bindings (each member re-proven through world-agent-runtime's own validators, errors carried verbatim; scope + declared-slot agreement with the world; duplicate member ids refused) into a content-addressed pop-<digest> Population record — membership in canonical binding-id order, the aggregate view AS CARRIED DATA (per-capability coverage over the members' own routing contracts, per-position fill over the W039 seats, the membership census — never re-scored), explicit scope, immutable generational lineage. Transitions (addMembers / retireMembers / ablateMembers citing the W039 ablation axis vocabulary) seal a NEW generation every time: the parent re-validated first (lineage breaks refused), the W040 registry re-proven through its own validator, dead endowment capabilities at transition time refused loudly with the W040 lifecycle carried verbatim, retirements cited by id with reasons as data. A14: a population COMPOSES records — it never executes, never steps a world, never trains (W046 owns curriculum/self-play, W048 owns episode generation). A9: same members + same world ⇒ deep-equal population, same canonical id; no clocks, no randomness, no env reads.",
+  "dependencies": {
+    "body-forge": "workspace:*",
+    "capability-registry": "workspace:*",
+    "learning-objectives": "workspace:*",
+    "skills": "workspace:*",
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-world-sim": "workspace:*",
+    "world-agent-runtime": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
