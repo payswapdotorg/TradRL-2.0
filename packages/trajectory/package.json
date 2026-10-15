@@ -1,0 +1,28 @@
+{
+  "name": "trajectory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./identity": "./identity.ts",
+    "./record": "./record.ts",
+    "./store": "./store.ts"
+  },
+  "description": "Trajectory capture protocol (W037, the W035/W036 flat source-exported package pattern): the typed, fail-closed record of ONE agent-world session's outcome. Explicit identity (the canonical id encoding over the tenant/project/world/experiment/session scope — opaque ids, canonical encoders, never parsed), the session binding, the evidence stream bound through the W036 `evidenceStreamOfSession` pairing law, the outcome summaries (the W036 reward + constraint evaluation results), the A9 determinism metadata (world definition digest, engine version, seed), and IMMUTABLE branch lineage. The append-only store CONTRACT is typed here; implementations (and all I/O) live elsewhere. A CONTRACT package: no storage engine, no persistence, no execution.",
+  "dependencies": {
+    "agent-world-protocol": "workspace:*",
+    "learning-objectives": "workspace:*",
+    "tradrl-world-contracts": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
