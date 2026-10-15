@@ -1,0 +1,13 @@
+{
+  "//": "W064 reference-journey tsconfig (example-side only, never built): the research/benchmarks plain-dir precedent — no emit, no package manifest, no workspace membership, no dependencies of its own. The journey composes every record through the consumed packages' own gates via relative source imports; `rootDir` is deliberately NOT set (the program pulls in the consumed packages'/services' sources, all of which live outside this directory).",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["."]
+}
