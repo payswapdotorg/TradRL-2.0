@@ -660,6 +660,34 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/capability-provider:
+    dependencies:
+      capability-registry:
+        specifier: workspace:*
+        version: link:../capability-registry
+      cognitive-substrate:
+        specifier: workspace:*
+        version: link:../cognitive-substrate
+      evaluation:
+        specifier: workspace:*
+        version: link:../evaluation
+      experiments:
+        specifier: workspace:*
+        version: link:../experiments
+      organization:
+        specifier: workspace:*
+        version: link:../organization
+      skills:
+        specifier: workspace:*
+        version: link:../skills
+      verification:
+        specifier: workspace:*
+        version: link:../verification
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/capability-registry:
     dependencies:
       cognitive-substrate:
@@ -1759,6 +1787,49 @@ importers:
       possession:
         specifier: workspace:*
         version: link:../../packages/possession
+      skills:
+        specifier: workspace:*
+        version: link:../../packages/skills
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-world-contracts
+      trajectory:
+        specifier: workspace:*
+        version: link:../../packages/trajectory
+      verification:
+        specifier: workspace:*
+        version: link:../../packages/verification
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/model-selection:
+    dependencies:
+      agent-world-protocol:
+        specifier: workspace:*
+        version: link:../../packages/agent-world-protocol
+      capability-registry:
+        specifier: workspace:*
+        version: link:../../packages/capability-registry
+      cognitive-substrate:
+        specifier: workspace:*
+        version: link:../../packages/cognitive-substrate
+      evaluation:
+        specifier: workspace:*
+        version: link:../../packages/evaluation
+      experiments:
+        specifier: workspace:*
+        version: link:../../packages/experiments
+      learning-objectives:
+        specifier: workspace:*
+        version: link:../../packages/learning-objectives
+      organization:
+        specifier: workspace:*
+        version: link:../../packages/organization
+      organization-compiler:
+        specifier: workspace:*
+        version: link:../organization-compiler
       skills:
         specifier: workspace:*
         version: link:../../packages/skills
