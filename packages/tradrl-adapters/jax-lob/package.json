@@ -1,0 +1,30 @@
+{
+  "name": "tradrl-adapters-jax-lob",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./vocabulary": "./lob-vocabulary.ts",
+    "./trainer": "./lob-trainer.ts",
+    "./generation": "./lob-generation.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The JAX-LOB training adapter (W049) — the LOB-venue TRAINING ADAPTER over the W047 TrainerPort/episode-batch contracts and the W048 GenerationPlan/GenerationWorkerPort contracts. CLEAN-ROOM, paper-based (spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md, the binding JAX-LOB ruling): zero code derived from KangOxford/jax-lob or KangOxford/AlphaTrade — only the publicly documented concepts of a limit-order-book training environment family, re-expressed as original TypeScript. lob-vocabulary.ts declares the closed LOB training vocabulary (book-state descriptors with sides/levels as data, order kinds, execution event kinds, episode-step shapes) — fail-closed at every seam. lob-trainer.ts projects a W047 episode/batch to LOB-style training steps as PURE typed data (deterministic projection, canonical order, content-addressed lobtrain- ids; W047's own validation errors carried verbatim). lob-generation.ts projects a W048 generation plan to LOB-style environment declarations (W048's whole-plan re-validation errors carried verbatim). A14: the adapter COMPOSES typed data — never trains, never executes simulation steps, never imports or forks third-party code. A9 throughout: no clocks, no randomness, no env reads.",
+  "dependencies": {
+    "rl-protocol": "workspace:*",
+    "learning-compute": "workspace:*",
+    "trajectory": "workspace:*",
+    "learning-rl": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
