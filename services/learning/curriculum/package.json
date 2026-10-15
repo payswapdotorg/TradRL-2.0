@@ -1,0 +1,29 @@
+{
+  "name": "learning-curriculum",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./curriculum": "./curriculum.ts",
+    "./progression": "./progression.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Staged curriculum (W046): the LEARNING-side population orchestration as typed DATA. foundCurriculum(population, stages) composes a W045 population (re-proven through W045's own whole-record validator, errors carried verbatim) with declared staged population schedules — each stage: the population generation it runs against, the declared difficulty atoms (DATA derived from measured evidence, each atom citing the W038 experiment evaluation it was measured from — R052: evidence-less atoms and thresholds refused loudly), and the evidence threshold CARRIED from W038 evaluations + findings (never re-scored). advanceStage(curriculum, evidence) is THE GATE: the active stage's threshold proven against the CARRIED evaluation summaries — constraint-aware (§13: a gate on raw P&L alone is the loud typed refusal bare-pnl-gate naming the sole-P&L law) — then the NEXT stage unsealed as a NEW curriculum generation (lineage extended, never rewritten). A14: a curriculum COMPOSES typed plans — never executes, never trains, never steps worlds (R054: method-neutral — W047/W048 own the methods). A9: same population + same stages + same evidence ⇒ deep-equal curricula, same canonical ids; no clocks, no randomness, no env reads.",
+  "dependencies": {
+    "evaluation": "workspace:*",
+    "populations": "workspace:*",
+    "skills": "workspace:*",
+    "verification": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
