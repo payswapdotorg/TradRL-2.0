@@ -902,6 +902,37 @@ importers:
         specifier: ^8.0.2
         version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.9.0)
 
+  packages/entitlements:
+    dependencies:
+      capability-provider:
+        specifier: workspace:*
+        version: link:../capability-provider
+      capability-registry:
+        specifier: workspace:*
+        version: link:../capability-registry
+      cognitive-substrate:
+        specifier: workspace:*
+        version: link:../cognitive-substrate
+      evaluation:
+        specifier: workspace:*
+        version: link:../evaluation
+      experiments:
+        specifier: workspace:*
+        version: link:../experiments
+      marketplace:
+        specifier: workspace:*
+        version: link:../marketplace
+      organization:
+        specifier: workspace:*
+        version: link:../organization
+      verification:
+        specifier: workspace:*
+        version: link:../verification
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/evaluation:
     dependencies:
       agent-world-protocol:
@@ -986,6 +1017,34 @@ importers:
       tradrl-world-contracts:
         specifier: workspace:*
         version: link:../tradrl-world-contracts
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  packages/marketplace:
+    dependencies:
+      capability-provider:
+        specifier: workspace:*
+        version: link:../capability-provider
+      capability-registry:
+        specifier: workspace:*
+        version: link:../capability-registry
+      cognitive-substrate:
+        specifier: workspace:*
+        version: link:../cognitive-substrate
+      evaluation:
+        specifier: workspace:*
+        version: link:../evaluation
+      experiments:
+        specifier: workspace:*
+        version: link:../experiments
+      organization:
+        specifier: workspace:*
+        version: link:../organization
+      verification:
+        specifier: workspace:*
+        version: link:../verification
     devDependencies:
       typescript:
         specifier: ^6.0.2
@@ -1961,6 +2020,58 @@ importers:
       trajectory:
         specifier: workspace:*
         version: link:../../packages/trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/autonomous-learning:
+    dependencies:
+      body-forge:
+        specifier: workspace:*
+        version: link:../body-forge
+      capability-registry:
+        specifier: workspace:*
+        version: link:../../packages/capability-registry
+      evaluation:
+        specifier: workspace:*
+        version: link:../../packages/evaluation
+      evaluation-splits:
+        specifier: workspace:*
+        version: link:../../packages/evaluation-splits
+      experiments:
+        specifier: workspace:*
+        version: link:../../packages/experiments
+      firm-brain:
+        specifier: workspace:*
+        version: link:../firm-brain
+      learning-curriculum:
+        specifier: workspace:*
+        version: link:../learning/curriculum
+      learning-populations:
+        specifier: workspace:*
+        version: link:../learning/populations
+      memory:
+        specifier: workspace:*
+        version: link:../../packages/memory
+      outcome-learning:
+        specifier: workspace:*
+        version: link:../outcome-learning
+      search-integrity:
+        specifier: workspace:*
+        version: link:../../packages/search-integrity
+      skills:
+        specifier: workspace:*
+        version: link:../../packages/skills
+      tradrl-time-machine:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-time-machine
+      trajectory:
+        specifier: workspace:*
+        version: link:../../packages/trajectory
+      verification:
+        specifier: workspace:*
+        version: link:../../packages/verification
     devDependencies:
       typescript:
         specifier: ^6.0.2

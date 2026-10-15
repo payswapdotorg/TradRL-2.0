@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "program": "TradRL-2.0",
- "updated_at": "2026-10-15T20:03:35Z",
+ "updated_at": "2026-10-15T20:35:42Z",
  "policies": {
   "max_concurrent_work_orders": 3,
   "merge_method": "squash",
@@ -884,8 +884,10 @@
    "write_surface": [
     "services/autonomous-learning/"
    ],
-   "status": "ready",
-   "branch": "work/w055"
+   "status": "merged",
+   "branch": "work/w055",
+   "pr": 61,
+   "merged_sha": "37262fb79e8e54f69899615580d5465d78a57326"
   },
   {
    "id": "W056",
@@ -930,8 +932,10 @@
     "packages/marketplace/",
     "packages/entitlements/"
    ],
-   "status": "ready",
-   "branch": "work/w058"
+   "status": "merged",
+   "branch": "work/w058",
+   "pr": 60,
+   "merged_sha": "ad07bf22ab9c80f58c8e7d6e42f832f45f6ec5a6"
   },
   {
    "id": "W059",
@@ -963,7 +967,7 @@
     "packages/security/",
     "services/security/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w060"
   },
   {
