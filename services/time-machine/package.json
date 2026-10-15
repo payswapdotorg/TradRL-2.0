@@ -1,0 +1,30 @@
+{
+  "name": "time-machine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./engine": "./engine.ts",
+    "./fidelity": "./fidelity.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Time Machine pure query engine (W050): assembling point-in-time VIEWS from recorded event/information streams. assembleView is THE GATE: every stream record re-proven through W004's own validateEventStream and W027's own loadInformationDataset validators (errors carried VERBATIM), every stream's declared families/world/time-range proven against the query, then the knowable-at-cutoff records selected through W004's/W027's own observation laws (isEventObservableAt / the publication-time mapping law) and sealed through the tradrl-time-machine contract's knowledge firewall (R016 — a view referencing anything after its cutoff is refused loudly). The deterministic view carries the records in canonical order plus the per-stream summaries as data (W004 EventStreamDigest / W027 InformationImportSummary). fidelity.ts proves the W022-style deterministic-replay laws: the A9 twin (the same view re-assembled twice deep-equals) + the view digest re-derivation. A14: the machine ASSEMBLES views — never executes, never forecasts, never re-scores. W051 (search integrity) and W052 (holdouts) build on it.",
+  "dependencies": {
+    "tradrl-time-machine": "workspace:*",
+    "tradrl-evaluation-replay": "workspace:*",
+    "tradrl-information": "workspace:*",
+    "tradrl-world-contracts": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

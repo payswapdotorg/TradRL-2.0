@@ -1,0 +1,27 @@
+{
+  "name": "tradrl-time-machine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./query": "./query.ts",
+    "./firewall": "./firewall.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Time Machine point-in-time contract (W050, the W035–W048 flat source-exported package pattern): the PointInTimeQuery as typed DATA — a declared cutoff in W004's own time vocabulary (SimulationTimeMs, the simulation axis), the explicit tenant/project/world scope, the closed record-family set the query may view (the W004 market-event family + W027's four information record kinds), and the content-addressed pitq-<digest> query id. firewall.ts is THE KNOWLEDGE FIREWALL LAW as a typed gate (R016): sealView(query, records) proves every record ≤ cutoff through the records' own timestamps (W004's eventObservationTime law / W027's publication-time mapping law) and REFUSES any post-cutoff record loudly naming R016 — a sealed PointInTimeView structurally cannot reference anything recorded after its cutoff (never a convention); the sealed view carries its proof (which records, which timestamps, the firewall digest). A9: pure, deterministic, no clocks, no randomness, no env reads. A14: the machine assembles views — it never executes, never forecasts.",
+  "dependencies": {
+    "tradrl-world-contracts": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
