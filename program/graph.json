@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "program": "TradRL-2.0",
- "updated_at": "2026-10-15T15:35:36Z",
+ "updated_at": "2026-10-15T16:31:02Z",
  "policies": {
   "max_concurrent_work_orders": 3,
   "merge_method": "squash",
@@ -719,8 +719,10 @@
    "write_surface": [
     "services/populations/"
    ],
-   "status": "ready",
-   "branch": "work/w045"
+   "status": "merged",
+   "branch": "work/w045",
+   "pr": 47,
+   "merged_sha": "a95fb593897e44d4ebd9f11202aa0c01ea4d052e"
   },
   {
    "id": "W046",
@@ -733,7 +735,7 @@
     "services/learning/curriculum/",
     "services/learning/populations/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w046"
   },
   {
@@ -748,8 +750,10 @@
     "packages/rl-protocol/",
     "services/learning/rl/"
    ],
-   "status": "ready",
-   "branch": "work/w047"
+   "status": "merged",
+   "branch": "work/w047",
+   "pr": 48,
+   "merged_sha": "c15364f1734d7101e07b65bd389b9b4a0c45c119"
   },
   {
    "id": "W048",
@@ -761,7 +765,7 @@
    "write_surface": [
     "services/learning/compute/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w048"
   },
   {
@@ -791,7 +795,7 @@
     "packages/tradrl-time-machine/",
     "services/time-machine/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w050"
   },
   {

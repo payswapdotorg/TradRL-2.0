@@ -1051,6 +1051,28 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/rl-protocol:
+    dependencies:
+      evaluation:
+        specifier: workspace:*
+        version: link:../evaluation
+      experiments:
+        specifier: workspace:*
+        version: link:../experiments
+      learning-objectives:
+        specifier: workspace:*
+        version: link:../learning-objectives
+      trajectory:
+        specifier: workspace:*
+        version: link:../trajectory
+      world-agent-runtime:
+        specifier: workspace:*
+        version: link:../../services/world-agent-runtime
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/rpc:
     devDependencies:
       ts-node:
@@ -1838,6 +1860,40 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  services/learning/rl:
+    dependencies:
+      agent-world-protocol:
+        specifier: workspace:*
+        version: link:../../../packages/agent-world-protocol
+      body-forge:
+        specifier: workspace:*
+        version: link:../../body-forge
+      evaluation:
+        specifier: workspace:*
+        version: link:../../../packages/evaluation
+      experiments:
+        specifier: workspace:*
+        version: link:../../../packages/experiments
+      learning-objectives:
+        specifier: workspace:*
+        version: link:../../../packages/learning-objectives
+      rl-protocol:
+        specifier: workspace:*
+        version: link:../../../packages/rl-protocol
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../../../packages/tradrl-world-contracts
+      trajectory:
+        specifier: workspace:*
+        version: link:../../../packages/trajectory
+      world-agent-runtime:
+        specifier: workspace:*
+        version: link:../../world-agent-runtime
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   services/model-selection:
     dependencies:
       agent-world-protocol:
@@ -1895,6 +1951,34 @@ importers:
       possession:
         specifier: workspace:*
         version: link:../../packages/possession
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/populations:
+    dependencies:
+      body-forge:
+        specifier: workspace:*
+        version: link:../body-forge
+      capability-registry:
+        specifier: workspace:*
+        version: link:../../packages/capability-registry
+      learning-objectives:
+        specifier: workspace:*
+        version: link:../../packages/learning-objectives
+      skills:
+        specifier: workspace:*
+        version: link:../../packages/skills
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-world-contracts
+      tradrl-world-sim:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-world-sim
+      world-agent-runtime:
+        specifier: workspace:*
+        version: link:../world-agent-runtime
     devDependencies:
       typescript:
         specifier: ^6.0.2
