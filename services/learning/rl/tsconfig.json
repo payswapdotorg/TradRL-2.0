@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    // This service is a source-exported import surface (mirrors the W044
+    // world-agent-runtime pattern): package.json "exports" point at
+    // TypeScript sources and nothing is emitted as a build artifact.
+    // Tests are included so the bridge laws are type-checked too.
+    // `rootDir` is deliberately NOT set: the program pulls in the consumed
+    // rl-protocol / trajectory / learning-objectives / evaluation /
+    // world-agent-runtime sources (through the registered package exports)
+    // — all of which live outside this package directory. The test
+    // fixtures additionally import the W037 trajectory test fixtures and
+    // the W044 world-agent-runtime test fixtures directly (the W041/W044
+    // fixture-lineage relative-import precedent), which in turn pull the
+    // body-forge / organization-compiler / capability-registry sources.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}

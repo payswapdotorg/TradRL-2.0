@@ -1,0 +1,34 @@
+{
+  "name": "learning-rl",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./assemble": "./assemble.ts",
+    "./batch": "./batch.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Learning RL bridge service (W047): the PURE bridge between the recorded empirical chain (W037 trajectories + W036 evaluations + W038 experiment evaluations + W044 world-agent bindings) and the RL trainer surface (rl-protocol). assembleEpisodes is THE GATE: every trajectory re-proven through W037's own validator (errors carried verbatim), every binding through W044's own, scope/world/session agreement proven pairwise (an episode's agent identity routes through a proven binding), every experiment-evaluation summary proven a faithful carry of the record's own W036 evaluation (carry never re-scores, but a carry mismatch is fail-closed), and every reward signal proven constraint-aware — a bare-P&L reward is the loud typed refusal naming the §13 sole-P&L law. assembleBatch builds the deterministic, content-addressed episode batch (canonical order, declared selection policy as DATA). NEVER executes a trainer, never steps a world, never trains anything (A14; R054: RL is ONE learning method — W048 owns distributed episode generation, W049 owns the JAX training adapter).",
+  "dependencies": {
+    "agent-world-protocol": "workspace:*",
+    "body-forge": "workspace:*",
+    "evaluation": "workspace:*",
+    "experiments": "workspace:*",
+    "learning-objectives": "workspace:*",
+    "rl-protocol": "workspace:*",
+    "trajectory": "workspace:*",
+    "tradrl-world-contracts": "workspace:*",
+    "world-agent-runtime": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
