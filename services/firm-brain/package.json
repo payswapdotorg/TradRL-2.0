@@ -1,0 +1,30 @@
+{
+  "name": "firm-brain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./brain": "./brain.ts",
+    "./recall": "./recall.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The FIRM BRAIN service (W054) — the pure composition service over the memory contract: foundBrain(scope) + ingest(brain, records) — THE INGESTION GATES: every knowledge record re-proven through its source package's own validators (W053 post-mortems/lessons, W040 capabilities, W051 search histories — errors carried VERBATIM), the record's scope proven ISOLATED to the brain's tenant (R056 named loudly on violation), then the new brain generation sealed (append-only lineage extended, never rewritten) — and the DETERMINISTIC RECALL surface (by-kind/by-source/by-citation queries over canonically ordered, carried results; cross-tenant query parameters refused loudly naming R056). A14: composes typed records — never reasons, never decides, never improves autonomously (W055), no security (W060).",
+  "dependencies": {
+    "capability-registry": "workspace:*",
+    "memory": "workspace:*",
+    "outcome-learning": "workspace:*",
+    "search-integrity": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
