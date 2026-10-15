@@ -47,7 +47,7 @@ import {
   cockpitLayoutStorageKey,
   getSharedCockpitLayoutStore,
 } from "../layout/cockpitLayoutPersistence.js";
-import { resolveTradingWorldLayoutProfile } from "../layout/layoutProfiles.js";
+import { resolveTradingWorldLayoutPreset } from "../presets/resolve.js";
 import {
   type TradingWorldToolId,
   type TradingWorldToolRegistry,
@@ -84,7 +84,7 @@ export function TradingWorldShell({
     [registryOverride],
   );
   const profile = useMemo(
-    () => resolveTradingWorldLayoutProfile(tab.layoutProfileId),
+    () => resolveTradingWorldLayoutPreset(tab.layoutProfileId).profile,
     [tab.layoutProfileId],
   );
   const knownToolIds = useMemo(

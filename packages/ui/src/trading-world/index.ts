@@ -88,6 +88,18 @@ export {
   resolveTradingWorldLayoutProfile,
 } from "./layout/layoutProfiles.js";
 export type { TradingWorldLayoutProfile } from "./layout/layoutProfiles.js";
+export {
+  TRADING_WORLD_LAYOUT_PRESETS,
+  TRADING_WORLD_PRESET_IDS,
+  type TradingWorldLayoutPreset,
+} from "./presets/catalogue.js";
+export {
+  isTradingWorldLayoutPresetId,
+  listTradingWorldLayoutProfileIds,
+  resolveTradingWorldLayoutPreset,
+  type TradingWorldLayoutPresetResolution,
+  type TradingWorldLayoutProfileSource,
+} from "./presets/resolve.js";
 
 export {
   createSimulatedNoopWorldClient,

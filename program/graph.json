@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-15T07:05:00Z",
+  "updated_at": "2026-10-15T10:24:07Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -462,8 +462,10 @@
       "write_surface": [
         "packages/ui/src/trading-world/presets/"
       ],
-      "status": "ready",
-      "branch": "work/w029"
+      "status": "merged",
+      "branch": "work/w029",
+      "merged_sha": "55ed80e",
+      "pr": 35
     },
     {
       "id": "W030",
@@ -566,8 +568,10 @@
       "write_surface": [
         "packages/learning-objectives/"
       ],
-      "status": "ready",
-      "branch": "work/w036"
+      "status": "merged",
+      "branch": "work/w036",
+      "merged_sha": "7ef01fe",
+      "pr": 34
     },
     {
       "id": "W037",
@@ -580,7 +584,7 @@
         "packages/trajectory/",
         "packages/experiments/"
       ],
-      "status": "blocked",
+      "status": "ready",
       "branch": "work/w037"
     },
     {
@@ -1020,7 +1024,7 @@
     "Repository is sole source of truth.",
     "One Work Order = one worker = one branch = one PR.",
     "Bootstrap W001 merged via PR #1 at 9f0e10924cac319261f7689b40ebe11988f772e9.",
-    "Current ready frontier after bootstrap: W002 and W003.",
-    "Maximum concurrent worker count is 3; do not fill unused capacity with speculative work."
+    "Maximum concurrent worker count is 3; do not fill unused capacity with speculative work.",
+    "Current ready frontier after W029+W036 merges (PRs #35/#34): W024, W037."
   ]
 }
