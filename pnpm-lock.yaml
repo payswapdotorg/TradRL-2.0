@@ -991,6 +991,25 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/memory:
+    dependencies:
+      capability-registry:
+        specifier: workspace:*
+        version: link:../capability-registry
+      outcome-learning:
+        specifier: workspace:*
+        version: link:../../services/outcome-learning
+      search-integrity:
+        specifier: workspace:*
+        version: link:../search-integrity
+      trajectory:
+        specifier: workspace:*
+        version: link:../trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/model-option-map:
     devDependencies:
       typescript:
@@ -1988,6 +2007,28 @@ importers:
       verification:
         specifier: workspace:*
         version: link:../../packages/verification
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/firm-brain:
+    dependencies:
+      capability-registry:
+        specifier: workspace:*
+        version: link:../../packages/capability-registry
+      memory:
+        specifier: workspace:*
+        version: link:../../packages/memory
+      outcome-learning:
+        specifier: workspace:*
+        version: link:../outcome-learning
+      search-integrity:
+        specifier: workspace:*
+        version: link:../../packages/search-integrity
+      trajectory:
+        specifier: workspace:*
+        version: link:../../packages/trajectory
     devDependencies:
       typescript:
         specifier: ^6.0.2
