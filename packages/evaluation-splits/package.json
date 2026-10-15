@@ -1,0 +1,30 @@
+{
+  "name": "evaluation-splits",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./families": "./families.ts",
+    "./generate": "./generate.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Evaluation split families (W052, the W035–W051 flat source-exported package pattern): the SPLIT FAMILY CONTRACT — the declarative catalogue + deterministic GENERATION of evaluation split families as typed DATA. families.ts is the SplitFamily record (content-addressed fam-<digest> id over the declaration, the family policy — the four §13 holdout kinds walk-forward/regime/asset/venue as a closed set, the input range in W004's time vocabulary, the declared atom universe in W037's own atom vocabulary, the explicit scope, the immutable lineage, deterministic provenance, and the search citation seam — a family used in a search is citable under W051's §13 law). generate.ts is THE GENERATORS (pure, deterministic): generateWalkForward rolls train/evaluation window sequences with every boundary an explicit W004 timestamp and a sealed W050 cutoff per fold (no-leakage, R016); generateRegimePartitions/generateAssetPartitions/generateVenuePartitions partition the declared atom universe (tail-holdout / round-robin / explicit) into disjoint non-empty sides in W037's own HoldoutSplitDescriptor shapes. validate.ts re-validates the whole family: identity re-derivations, disjointness/coverage proofs, the no-leakage law re-proven naming R016, duplicate/empty-side refusals. A9: no clocks, no randomness, no env reads. A14: GENERATES typed split descriptors as data — never evaluates, never scores (evaluation is W038, outcome learning W053, benchmark publication W063).",
+  "dependencies": {
+    "experiments": "workspace:*",
+    "tradrl-time-machine": "workspace:*",
+    "search-integrity": "workspace:*",
+    "evaluation": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
