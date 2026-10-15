@@ -1,0 +1,31 @@
+{
+  "name": "tradrl-adapters-broker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./identity": "./broker-identity.ts",
+    "./observation": "./broker-observation.ts",
+    "./order": "./broker-order.ts",
+    "./fill": "./broker-fill.ts",
+    "./execution": "./broker-execution.ts",
+    "./port": "./broker-port.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The broker execution adapter (W065) — the provider-neutral SHADOW broker vocabulary (the tradrl-adapters/* flat source-exported layout, the W057 arena precedent). Spec: REQUIREMENTS.md R063 — 'Shadow/live separation is mandatory' + R070 'Provider-neutral adapters': the broker vocabulary (venue kinds, order kinds, time-in-force, execution-report kinds, observation kinds) is declared HERE and ONLY HERE, as closed sets with fail-closed validation. THE SHADOW LAW is STRUCTURAL: every order routes to a SHADOW execution path — the typed record vocabulary has NO live-transmission field at all; any declaration carrying a live-transmission-shaped member or URL-shaped value is refused LOUDLY naming R063 (packages/tradrl-adapters/broker/broker-identity.ts liveTransmissionViolations). Credentials appear ONLY as W060 secret references — typed handles re-proven through packages/security's own validateSecretReference with errors carried verbatim (THE REDACTION LAW rides there, never bypassed). Shadow fills are content-addressed records composed from an order + a market observation BOTH carried verbatim (A6 — a fill's price IS the observation's carried price; no invented prices). A9 throughout; A14: the adapter COMPOSES typed data — never live execution, no network code.",
+  "dependencies": {
+    "security": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

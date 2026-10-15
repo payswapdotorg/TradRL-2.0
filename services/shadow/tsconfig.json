@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Source-exported import surface (the services/operations pattern):
+    // package.json "exports" point at TypeScript sources, nothing is emitted
+    // as a build artifact. Tests are included so the service laws are
+    // type-checked too. `rootDir` is deliberately NOT set: the program pulls
+    // in the consumed `security` (W060), `observability` + `operations`
+    // (W061), `tradrl-adapters-broker` (W065) and `tradrl-time-machine`
+    // (W050) sources through the registered package specifiers.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": [".", "test"]
+}
