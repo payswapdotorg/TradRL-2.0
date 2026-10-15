@@ -1,7 +1,9 @@
-# ZCode
+# TradRL
+
+TradRL is a trader operating environment built from the **ZCode workbench**. The product identity is TradRL's own; the workbench it extends stays visible — **TradRL extends the ZCode workbench rather than replacing it.** This README documents the TradRL product and the ZCode workbench it is composed on.
 
 <div align="center">
-  <img src="public/logo/icons/1024x1024.png" alt="ZCode" width="128" height="128" />
+  <img src="public/logo/icons/1024x1024.png" alt="ZCode workbench logo" width="128" height="128" />
 </div>
 <p align="center">
   <a href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=47ag983c-8fcb-4d6d-814b-5395193a712c&amp;qr_code=true">Feishu community</a> ·
@@ -11,7 +13,11 @@
   <a href="README.md">简体中文</a> | English
 </p>
 
-ZCode is an AI coding workspace with desktop, browser, and terminal interfaces. This repository contains the clients, backend services, shared UI, and Agent CLI and runtime source code.
+ZCode is the AI coding workspace with desktop, browser, and terminal interfaces that TradRL is built from: the clients, backend services, shared UI, and Agent CLI and runtime source code below are the workbench layers this product extends. The TradRL product identity — the market world, trading surfaces, and typed product contracts — is declared and proven in [`product/`](product/), the PRODUCT IDENTITY CONTRACT (W066).
+
+## Product identity
+
+The product identity is typed data: [`product/`](product/) carries the closed identity-scope vocabulary (`product-name-bearing` / `workbench-inherited` / `license-notice` / `deployment-contract`), the per-surface identity declarations, the migration laws (a TradRL-branded surface carries the product's own name; a workbench-inherited surface preserves the ZCode workbench identity), and the content-addressed `identity-<digest>` record over canonical data, with every citation re-proven against real repository surfaces at the gate. The workbench operational documentation below is inherited surface content, preserved as-is.
 
 ## Updates
 
@@ -204,6 +210,8 @@ Open `http://127.0.0.1:3030` to validate the complete flow, with one backend ser
 | `packages/shared`, `packages/rpc`, `packages/client` | Shared protocols and types, RPC framework, and Agent client SDK                         |
 | `packages/provider`, `packages/provider-node`        | Common provider capabilities and Node implementations                                   |
 | `apps/zcode-cli`                                     | Agent CLI, TUI, runtime, and tools                                                      |
+| `product`                                            | The typed PRODUCT IDENTITY CONTRACT (W066): identity scopes, migration laws, the content-addressed identity record |
+| `deploy`, `ops`, `tests/performance`                | The typed deployment/readiness contracts and performance evidence (W062)               |
 | `scripts`, `config`, `third-party`                   | Build and maintenance scripts, built-in configuration, and third-party notice materials |
 
 ## Project Notice

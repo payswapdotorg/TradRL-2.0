@@ -1,8 +1,12 @@
 # TradRL
 
-TradRL is a trader operating environment built from the ZCode workbench.
+TradRL is a trader operating environment built from the ZCode workbench. The product identity is TradRL's own; the workbench it extends stays visible — **TradRL extends the ZCode workbench rather than replacing it.**
 
 The repository is the **sole source of truth** for product architecture, implementation scope, work-order state, contracts, acceptance criteria, and engineering decisions. Chat history is non-authoritative.
+
+## Product identity
+
+The product identity is typed data: [`product/`](product/) carries the PRODUCT IDENTITY CONTRACT (W066) — the closed identity-scope vocabulary (`product-name-bearing` / `workbench-inherited` / `license-notice` / `deployment-contract`), the per-surface identity declarations, the migration laws (a TradRL-branded surface carries the product's own name; a workbench-inherited surface preserves the ZCode workbench identity), and the content-addressed `identity-<digest>` record over canonical data, with every citation re-proven against real repository surfaces at the gate.
 
 ## Product north star
 
