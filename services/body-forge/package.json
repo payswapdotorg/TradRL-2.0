@@ -1,0 +1,36 @@
+{
+  "name": "body-forge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./contracts": "./contracts.ts",
+    "./forge": "./forge.ts"
+  },
+  "description": "Body Forge service (W041): the PURE forge that composes Bodies endowed with skills. `forgeBody(components)` takes a typed component input (a W033 substrate reference, the W041 skill records to endow, the body requirements, and the W040 capability registry the endowment is proven against) and produces the ForgedBodyPlan: the composed W032 BodyDescriptor (validated through W032's own gate, errors carried verbatim), the skill endowment manifest (which skills, which evidence), the W034 possession declaration verified through checkPossessionCompatibility with incompatibilities carried verbatim (world-less, the W039 no-world precedent — the runtime owns the attach proof), the initial possession lineage + anchor (W034's initialPossessionLineage/lineageAnchorOf seams), the W032 initial body attachment, and the deterministic content-addressed plan id (forge-<digest>, A9: same components ⇒ byte-identical plan and id — the twin law). Fail-closed at every seam: an invalid body, an invalid registry, a registry/skill/body scope disagreement, an invalid or duplicate skill, an UNREGISTERED skill, a deprecated or revoked capability in the endowment (the W040 lifecycle carried loudly), a skill not demonstrated by the forging substrate, or an incompatible possession is a loud typed error naming the law — never a silent drop. The forge NEVER executes, never possesses, never runs: it COMPOSES the typed plan the runtime (W043+ commissioning, reserved at services/body-forge/commissioning/) will consume.",
+  "dependencies": {
+    "skills": "workspace:*",
+    "capability-registry": "workspace:*",
+    "agent-body": "workspace:*",
+    "cognitive-substrate": "workspace:*",
+    "possession": "workspace:*",
+    "trajectory": "workspace:*",
+    "agent-world-protocol": "workspace:*",
+    "learning-objectives": "workspace:*",
+    "tradrl-world-contracts": "workspace:*",
+    "experiments": "workspace:*",
+    "evaluation": "workspace:*",
+    "verification": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
