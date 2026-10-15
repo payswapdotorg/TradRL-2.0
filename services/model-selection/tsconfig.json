@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This service is a source-exported import surface (mirrors the
+    // packages/* pattern and the W039/W041 services/* precedent; note the
+    // services/ depth — two levels up to the repo root, exactly like
+    // packages/): the package.json "exports" map points at TypeScript
+    // sources and nothing is emitted as a build artifact.
+    // Tests are included so the import laws are type-checked too —
+    // including the relative import of the REAL dependency-free catalogue
+    // at benchmarks/model-capability (the no-shim law: the catalogue is
+    // validated + consumed as real data, never re-declared as a fixture).
+    // `rootDir` is deliberately NOT set: the program pulls in the consumed
+    // capability-registry (W040), skills (W041), organization (W039),
+    // organization-compiler (W039) and evaluation (W038) sources — plus
+    // the fixture-side trajectory/experiments/verification/
+    // agent-world-protocol/learning-objectives/tradrl-world-contracts/
+    // cognitive-substrate sources — through the registered package
+    // specifiers, all of which live outside this service directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}

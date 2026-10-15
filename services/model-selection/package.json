@@ -1,0 +1,38 @@
+{
+  "name": "model-selection",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./identity": "./identity.ts",
+    "./demand": "./demand.ts",
+    "./select": "./select.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Empirical substrate/model selection service (W042): given a typed SelectionDemand (the W039 position vocabulary — body/substrate requirements + capability demands — plus the scope, the benchmark policy, and the registered candidate substrates), the W040 capability registry, the W041 skill records, and the benchmark surface (the benchmarks/model-capability catalogue + the W038 experiment evaluations the cited evidence was measured through), `selectSubstrate(demand, registry, skills, benchmarks)` performs the PURE selection walk: for each registered+measured candidate it proves eligibility (the W039 requirement vocabulary, compared as data), proves capability coverage through W040's own `matchCapabilityDemand` seam (reasons carried verbatim), and proves benchmark coverage (the candidate's evidence citations cover the demanded benchmark's declared W037 holdout atoms — compared AS DATA, never re-scored), then ranks deterministically (carried evidence counts, canonical-id order tiebreaks — A9) and produces the SelectionPlan: the selected candidate, the full evidence chain (which capabilities, which skills, which experiments/evaluations, which benchmark coverage), the deterministic content-addressed selection id (selection-<digest>), the ablation/model-substitution variants (W039's substitution axis as data), and every rejected candidate's typed reasons (never a silent drop). Fail-closed at every seam: a selection citing no measured evidence is REJECTED with a loud typed error naming R052; a deprecated/revoked capability in the chain is refused with the W040 lifecycle carried verbatim; scope mismatch, an unknown benchmark in the policy, an invalid catalogue/registry/skill set, or a cited evaluation missing from the surface is a loud typed error. The selector COMPOSES typed plans — it never executes, never trains, never runs benchmarks.",
+  "dependencies": {
+    "capability-registry": "workspace:*",
+    "skills": "workspace:*",
+    "organization": "workspace:*",
+    "organization-compiler": "workspace:*",
+    "trajectory": "workspace:*",
+    "experiments": "workspace:*",
+    "evaluation": "workspace:*",
+    "verification": "workspace:*",
+    "agent-world-protocol": "workspace:*",
+    "learning-objectives": "workspace:*",
+    "tradrl-world-contracts": "workspace:*",
+    "cognitive-substrate": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
