@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    // product/ is a plain contract directory (the deploy/ W062 +
+    // research/benchmarks W063 precedent): no emit, no package manifest, no
+    // workspace membership, no dependencies of its own. The product
+    // identity vocabulary is typed DATA; the gate + re-validator re-prove
+    // every citation against the REAL repository surfaces via relative
+    // source imports (deploy/, services/api, packages/sdk,
+    // packages/security, packages/observability, packages/trajectory — all
+    // of which live outside this directory, so `rootDir` is deliberately
+    // NOT set).
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["."]
+}
