@@ -1,0 +1,31 @@
+{
+  "name": "outcome-learning",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./postmortem": "./postmortem.ts",
+    "./lessons": "./lessons.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Outcome/post-mortem learning (W053, the W035–W052 flat source-exported package pattern): the OUTCOME layer over completed evaluations. postmortem.ts is THE GATE derivePostMortem: the completed evaluation (W038's ExperimentEvaluation + its verification FindingsReport) re-proven through W038's own laws (the evaluation id re-derived from the record's own carried bytes, the findings digest re-derived through verification's own machinery), the split family re-proven through W052's own validateSplitFamily, the search history through W051's own validateSearchHistory (errors carried verbatim), scope agreement proven across all three — then the PostMortem sealed: content-addressed pm-<digest> id, the predicted-vs-happened comparison CARRIED from the evaluation's own holdout aggregations (never re-scored), the family + history citations, the explicit scope, immutable lineage, deterministic provenance. lessons.ts derives the typed LESSONS (failure-mode taxonomy as a closed set, capability deltas, held-out-vs-train divergence signals — ALL carried statistics of the evaluation's own data, canonical-id ordered); an uncited lesson is a loud typed refusal naming A6/R052. validate.ts re-validates whole records from recorded data. A14: composes typed records — never trains, never improves anything (W055), no firm brain (W054).",
+  "dependencies": {
+    "evaluation": "workspace:*",
+    "verification": "workspace:*",
+    "evaluation-splits": "workspace:*",
+    "search-integrity": "workspace:*",
+    "experiments": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
