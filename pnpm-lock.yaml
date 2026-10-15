@@ -924,6 +924,28 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/evaluation-splits:
+    dependencies:
+      evaluation:
+        specifier: workspace:*
+        version: link:../evaluation
+      experiments:
+        specifier: workspace:*
+        version: link:../experiments
+      search-integrity:
+        specifier: workspace:*
+        version: link:../search-integrity
+      tradrl-time-machine:
+        specifier: workspace:*
+        version: link:../tradrl-time-machine
+      trajectory:
+        specifier: workspace:*
+        version: link:../trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/experiments:
     dependencies:
       learning-objectives:

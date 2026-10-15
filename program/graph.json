@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "program": "TradRL-2.0",
- "updated_at": "2026-10-15T18:16:13Z",
+ "updated_at": "2026-10-15T18:55:39Z",
  "policies": {
   "max_concurrent_work_orders": 3,
   "merge_method": "squash",
@@ -833,8 +833,10 @@
    "write_surface": [
     "packages/evaluation-splits/"
    ],
-   "status": "ready",
-   "branch": "work/w052"
+   "status": "merged",
+   "branch": "work/w052",
+   "pr": 55,
+   "merged_sha": "579bbb10fb406afe57714a1a50a337a7798abcf1"
   },
   {
    "id": "W053",
@@ -847,7 +849,7 @@
    "write_surface": [
     "services/outcome-learning/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w053"
   },
   {
