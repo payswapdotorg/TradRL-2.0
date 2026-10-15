@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // tests/performance/ is a plain evidence directory (the deploy/ + ops/
+    // W062 precedent): no emit, no package manifest, no workspace membership,
+    // no dependencies of its own. The pinned-measurement module + the
+    // evidence suites exercise the REAL merged-dep surfaces through relative
+    // source imports. `rootDir` is deliberately NOT set: the program pulls in
+    // the consumed api / sdk / security / observability / operations /
+    // time-machine / world-contracts / trajectory sources, all of which live
+    // outside this directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["."]
+}
