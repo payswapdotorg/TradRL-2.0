@@ -1,0 +1,22 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    // Source-exported import surface (the tradrl-adapters-abides pattern):
+    // package.json "exports" point at TypeScript sources, nothing is emitted
+    // as a build artifact. Tests are included so the adapter laws are
+    // type-checked too — including the contracts/capability drift guard,
+    // which pulls the neutral contract sources in through a relative import
+    // (the contracts/ui precedent). `rootDir` is deliberately NOT set: the
+    // program pulls in the consumed `capability-provider` (W056),
+    // `capability-registry` (W040) and `skills` (W041) sources through the
+    // registered package specifiers, plus the contracts/capability sources —
+    // all of which live outside this package directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": [".", "test"]
+}
