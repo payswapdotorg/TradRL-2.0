@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This package is a source-exported import surface (mirrors the W035
+    // agent-world-protocol pattern): package.json "exports" point at
+    // TypeScript sources and nothing is emitted as a build artifact. Tests
+    // are included so the import laws are type-checked too.
+    // `rootDir` is deliberately NOT set: the program pulls in the consumed
+    // `agent-world-protocol` and `tradrl-world-contracts` sources (through
+    // the registered subpath/package exports), and the REAL hosting surfaces
+    // used by the test seams — the W017 generated engine and the W018
+    // in-process transport (`tradrl-world-sim`) plus the REAL alpha binding
+    // (packages/ui/src/trading-world/runtime/) — through the disclosed
+    // relative cross-package paths, all of which live outside this package
+    // directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}

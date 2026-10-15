@@ -1,0 +1,31 @@
+{
+  "name": "learning-objectives",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./components": "./components.ts",
+    "./constraints": "./constraints.ts",
+    "./constraintEvaluation": "./constraintEvaluation.ts",
+    "./decimal": "./decimal.ts",
+    "./evidence": "./evidence.ts",
+    "./policy": "./policy.ts",
+    "./reward": "./reward.ts"
+  },
+  "description": "Reward/constraint evaluation contract (W036, the W035 flat source-exported package pattern): the typed REWARD + CONSTRAINT evaluation vocabulary that W037 (trajectories/experiments) and W038 (evaluation/verification) build on. The §10 evidence capsule chain (observation → decision metadata → action → resulting state) as typed data over the W035 agent-world pass records; the reward model as a composition of typed components with the architecture law \"Raw P&L is never the sole objective\" (spec/ARCHITECTURE.md §13) enforced STRUCTURALLY at construction; hard/soft constraints as DATA, never prompt text (A13), with typed, ordered, evidence-linked violation records; the §13 evaluation-policy descriptor (holdout/stress/ablation/integrity axes) plus the deterministic reduction semantics (canonical order, explicit tie/overflow rules). A CONTRACT package: no RL algorithm, no training loop, no model calls. A9-deterministic and fail-closed at every seam.",
+  "dependencies": {
+    "agent-world-protocol": "workspace:*",
+    "tradrl-world-contracts": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
