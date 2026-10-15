@@ -1,0 +1,40 @@
+{
+  "name": "autonomous-learning",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./steps": "./steps.ts",
+    "./cycle": "./cycle.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Continuous autonomous improvement (W055, the W035–W061 flat source-exported package pattern): the IMPROVEMENT CYCLE CONTRACT — composeImprovementCycle(inputs) is THE GATE: every cited record re-proven through its source package's own validators (W053 post-mortems, W054 firm-brain generations, W046 curricula + pairing plans, W041 skill records — errors carried VERBATIM), the cited brain generation's tenant scope proven against the cycle's scope (R056 named loudly on violation), every step's evidence citations proven coherent with the records they cite (A6), then the cycle sealed: content-addressed impcycle-<digest> id, the closed step vocabulary (observe / post-mortem / brain-update / curriculum-adjustment / re-selection / re-commissioning) in canonical kind order, immutable lineage, deterministic provenance. A13/A14 BINDING: the cycle composes PROPOSAL records — it never executes, never trains, never moves authority; the runtime consumes the plan.",
+  "dependencies": {
+    "body-forge": "workspace:*",
+    "capability-registry": "workspace:*",
+    "evaluation": "workspace:*",
+    "evaluation-splits": "workspace:*",
+    "experiments": "workspace:*",
+    "firm-brain": "workspace:*",
+    "learning-curriculum": "workspace:*",
+    "learning-populations": "workspace:*",
+    "memory": "workspace:*",
+    "outcome-learning": "workspace:*",
+    "search-integrity": "workspace:*",
+    "skills": "workspace:*",
+    "tradrl-time-machine": "workspace:*",
+    "trajectory": "workspace:*",
+    "verification": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
