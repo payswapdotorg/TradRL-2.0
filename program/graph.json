@@ -1058,8 +1058,9 @@
     "packages/tradrl-adapters/broker/",
     "services/shadow/"
    ],
-   "status": "ready",
-   "branch": "work/w065"
+   "status": "merged",
+   "branch": "work/w065",
+   "merged_sha": "b0a941831cd4f7a0ed7e7f3cba505e007545ebf3"
   },
   {
    "id": "W066",

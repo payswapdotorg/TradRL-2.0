@@ -1501,6 +1501,19 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/tradrl-adapters/broker:
+    dependencies:
+      security:
+        specifier: workspace:*
+        version: link:../../security
+      trajectory:
+        specifier: workspace:*
+        version: link:../../trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/tradrl-adapters/crypto:
     dependencies:
       tradrl-data:
@@ -2400,6 +2413,34 @@ importers:
       security:
         specifier: workspace:*
         version: link:../../packages/security
+      trajectory:
+        specifier: workspace:*
+        version: link:../../packages/trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/shadow:
+    dependencies:
+      observability:
+        specifier: workspace:*
+        version: link:../../packages/observability
+      operations:
+        specifier: workspace:*
+        version: link:../operations
+      security:
+        specifier: workspace:*
+        version: link:../../packages/security
+      tradrl-adapters-broker:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-adapters/broker
+      tradrl-time-machine:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-time-machine
+      tradrl-world-contracts:
+        specifier: workspace:*
+        version: link:../../packages/tradrl-world-contracts
       trajectory:
         specifier: workspace:*
         version: link:../../packages/trajectory
