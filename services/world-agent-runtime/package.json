@@ -1,0 +1,38 @@
+{
+  "name": "world-agent-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./binding": "./binding.ts",
+    "./contracts": "./contracts.ts",
+    "./gates": "./gates.ts",
+    "./routing": "./routing.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "World-agent runtime binding service (W044): the typed wiring layer that BINDS commissioned agents (W043 CommissionedBody records) and whole organizations (W039 CompiledOrganization plans) to a World. bindAgent/bindOrganization re-prove the commissioned record through commissioning's own validation and the compiled plan through the compiler's own recorded output laws (errors carried verbatim), prove world-scope agreement across body/plan/grants, attach each agent to its W023 participant slot, and open every authority channel STRICTLY from live, compatibility-proven W034 possession grants re-proven WITH the world (A13: execution authority routes only through possession grants — a model output is never authority; R051: every channel proven). The binding records are typed DATA — content-addressed binding ids (A9: same commissioned body + same compiled plan + same world identity ⇒ deep-equal binding, same canonical id), immutable lineage, deterministic provenance — plus the pure routing wiring (routing.ts): inbound observation events route to the addressed substrate surface, outbound action intents derive their authority-proof chain, both fail-closed on unknown channels and NEVER execute anything (A14: no world stepping, no trades, no training; W045 owns populations, W047 owns the RL bridge).",
+  "dependencies": {
+    "agent-body": "workspace:*",
+    "agent-world-protocol": "workspace:*",
+    "body-forge": "workspace:*",
+    "capability-registry": "workspace:*",
+    "cognitive-substrate": "workspace:*",
+    "organization": "workspace:*",
+    "organization-compiler": "workspace:*",
+    "possession": "workspace:*",
+    "skills": "workspace:*",
+    "tradrl-world-contracts": "workspace:*",
+    "tradrl-world-sim": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

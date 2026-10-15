@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // This service is a source-exported import surface (mirrors the
+    // packages/* pattern and the W039/W041/W042/W043 services; note the
+    // services/ depth — two levels up to the repo root, exactly like
+    // packages/): the package.json "exports" map points at TypeScript
+    // sources and nothing is emitted as a build artifact. Tests are
+    // included so the import laws are type-checked too. `rootDir` is
+    // deliberately NOT set: the program pulls in the consumed
+    // `agent-world-protocol` (W035), `organization`/`organization-compiler`
+    // (W039), `body-forge` (W041/W043), `possession` (W034),
+    // `agent-body`/`cognitive-substrate` (W032/W033), `skills` (the
+    // identity seams), `capability-registry` (W040),
+    // `tradrl-world-contracts` and `tradrl-world-sim` sources — plus the
+    // fixture-side `model-selection`/benchmark sources reached through
+    // body-forge's commissioning test fixtures (relative imports, the
+    // W043 precedent) — all of which live outside this service directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}
