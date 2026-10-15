@@ -1,0 +1,32 @@
+{
+  "name": "marketplace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./listing": "./listing.ts",
+    "./catalogue": "./catalogue.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The MARKETPLACE CONTRACT (W058, the W035–W061 flat source-exported pattern): a provider's measured offers surfaced commercially, as typed DATA. A Listing cites the W056 ProviderRegistration VERBATIM (its offers ARE the listing's offers — never re-declared) and carries licensing terms as data over closed vocabularies declared HERE and only here. listOffer is THE GATE: the registration re-proven through W056's OWN validateProviderRegistration with the registry supplied (errors carried verbatim — R052 re-proven, never bypassed: an unmeasured offer surfaces as W056's own 'unmeasured-offer' carried inside provider-registration-invalid), every offered capability proven LIVE in the registry (the W040 lifecycle carried verbatim — deprecated/revoked refused loudly), the terms validated (closed vocabulary), then the Listing sealed: content-addressed mkt-<digest> id over the whole carried registration + terms + scope + lineage, immutable lineage, deterministic provenance. The catalogue is deterministic queries over listings (canonical order, carried data). A9 throughout: same inputs ⇒ deep-equal listing, same canonical id. A14: composes typed records — NO commerce execution, NO payment, NO metering, NO security (W060).",
+  "dependencies": {
+    "capability-provider": "workspace:*",
+    "capability-registry": "workspace:*",
+    "experiments": "workspace:*",
+    "evaluation": "workspace:*",
+    "verification": "workspace:*",
+    "cognitive-substrate": "workspace:*",
+    "organization": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

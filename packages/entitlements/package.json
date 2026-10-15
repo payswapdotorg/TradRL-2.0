@@ -1,0 +1,33 @@
+{
+  "name": "entitlements",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./grant": "./grant.ts",
+    "./verify": "./verify.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The ENTITLEMENT CONTRACT (W058, the W035–W061 flat source-exported pattern): who — tenant/principal scope — may use which listed capability, under which terms, for which declared period, as typed DATA. grantEntitlement is THE GATE: the cited marketplace Listing re-proven through the marketplace's OWN validateListing (errors carried verbatim — R052 rides there, never bypassed), the granted offer resolved from the listing (fail-closed unknown-offer), the terms proven in agreement with the listing's own (loud terms-mismatch — a grant is UNDER the listing's terms, never beside them), the principal scope typed (tenant explicit — §14), the period validated (the closed declared-time vocabulary), then the Entitlement sealed: content-addressed ent-<digest> id weighing the TENANT scope FIRST (R056 enforced STRUCTURALLY — the tenant is part of the entitlement's canonical identity; identical grants under different tenants are different entitlements), immutable versioned lineage, deterministic provenance. verifyEntitlement is the PURE grant-check: scope match (a cross-tenant use is the LOUD typed 'cross-tenant' refusal naming R056), capability match, period coverage, terms agreement — every mismatch a typed reason, never a silent denial. A9 throughout; A14: composes typed records — NO commerce execution, NO payment, NO metering, NO security (W060).",
+  "dependencies": {
+    "marketplace": "workspace:*",
+    "capability-provider": "workspace:*",
+    "capability-registry": "workspace:*",
+    "experiments": "workspace:*",
+    "evaluation": "workspace:*",
+    "verification": "workspace:*",
+    "cognitive-substrate": "workspace:*",
+    "organization": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
