@@ -1,0 +1,29 @@
+{
+  "name": "memory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./record": "./record.ts",
+    "./store": "./store.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The MEMORY CONTRACT (W054): the firm's accumulated knowledge as typed DATA — the KnowledgeRecord (content-addressed mem-<digest> id weighing the TENANT scope — R056 enforced structurally: the tenant is part of the record's canonical identity, a cross-tenant record is a loud typed violation naming R056), the typed source-citation union (post-mortem/lesson-set/capability/search-history — each record cites its evidence, A6), the carried payload (never re-scored, A14), the explicit tenant/project/world scope (§14), the immutable lineage, the deterministic provenance (A9), the whole-record re-validation, and the typed append-only store CONTRACT (laws only — NO engine, NO I/O, the W037 trajectory-store precedent).",
+  "dependencies": {
+    "capability-registry": "workspace:*",
+    "outcome-learning": "workspace:*",
+    "search-integrity": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
