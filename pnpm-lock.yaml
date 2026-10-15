@@ -997,6 +997,22 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  packages/observability:
+    dependencies:
+      api:
+        specifier: workspace:*
+        version: link:../../services/api
+      tradrl-evidence:
+        specifier: workspace:*
+        version: link:../tradrl-evidence
+      trajectory:
+        specifier: workspace:*
+        version: link:../trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   packages/organization:
     dependencies:
       agent-body:
@@ -2108,6 +2124,22 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  services/operations:
+    dependencies:
+      api:
+        specifier: workspace:*
+        version: link:../api
+      observability:
+        specifier: workspace:*
+        version: link:../../packages/observability
+      trajectory:
+        specifier: workspace:*
+        version: link:../../packages/trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   services/organization-compiler:
     dependencies:
       agent-body:
@@ -2122,6 +2154,31 @@ importers:
       possession:
         specifier: workspace:*
         version: link:../../packages/possession
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/outcome-learning:
+    dependencies:
+      evaluation:
+        specifier: workspace:*
+        version: link:../../packages/evaluation
+      evaluation-splits:
+        specifier: workspace:*
+        version: link:../../packages/evaluation-splits
+      experiments:
+        specifier: workspace:*
+        version: link:../../packages/experiments
+      search-integrity:
+        specifier: workspace:*
+        version: link:../../packages/search-integrity
+      trajectory:
+        specifier: workspace:*
+        version: link:../../packages/trajectory
+      verification:
+        specifier: workspace:*
+        version: link:../../packages/verification
     devDependencies:
       typescript:
         specifier: ^6.0.2
