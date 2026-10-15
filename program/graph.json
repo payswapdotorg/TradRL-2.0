@@ -1002,8 +1002,9 @@
     "ops/",
     "tests/performance/"
    ],
-   "status": "ready",
-   "branch": "work/w062"
+   "status": "merged",
+   "branch": "work/w062",
+   "merged_sha": "0bed0d95d910445fbf76f66433f928d32cd584d6"
   },
   {
    "id": "W063",
