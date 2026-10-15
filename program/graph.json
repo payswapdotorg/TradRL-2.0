@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-08T00:09:06Z",
+  "updated_at": "2026-10-15T07:05:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -475,8 +475,10 @@
         "packages/tradrl-world-sim/performance/",
         "packages/ui/src/trading-world/performance/"
       ],
-      "status": "ready",
-      "branch": "work/w030"
+      "status": "merged",
+      "branch": "work/w030",
+      "merged_sha": "c416a40",
+      "pr": 33
     },
     {
       "id": "W031",

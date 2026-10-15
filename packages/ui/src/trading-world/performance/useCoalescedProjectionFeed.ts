@@ -14,8 +14,8 @@ import { useEffect, useMemo, useSyncExternalStore } from "react";
 
 import type { TradingWorldClient } from "../runtime/worldClient.js";
 import type { ProjectionFeedFetchResult } from "../orderbook/projectionFeed.js";
-import type { CoalescedSurfaceName } from "../../../../tradrl-world-sim/performance/index.js";
-import type { ProjectionCoalescerConfig } from "../../../../tradrl-world-sim/performance/index.js";
+import type { CoalescedSurfaceName } from "tradrl-world-sim/performance";
+import type { ProjectionCoalescerConfig } from "tradrl-world-sim/performance";
 import {
   createCoalescedProjectionStream,
   type CoalescedProjectionStream,

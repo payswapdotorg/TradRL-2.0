@@ -20,15 +20,11 @@
 
 import type { WorldEventEnvelope } from "tradrl-world-contracts";
 import type { ClockView } from "tradrl-world-contracts";
-// NOTE(tradrl-world-sim): the W030 coalescer is imported by the relative
-// source path because the package's `exports` map registration
-// ("./performance") is a TL action item (the frozen write surface forbids
-// editing the sim manifest). Erased to a plain relative module reference.
 import {
   createProjectionCoalescer,
   type CoalescedSurfaceName,
   type ProjectionCoalescerConfig,
-} from "../../../../tradrl-world-sim/performance/index.js";
+} from "tradrl-world-sim/performance";
 import type { TradingWorldClient } from "../runtime/worldClient.js";
 import type { ProjectionFeedFetchResult } from "../orderbook/projectionFeed.js";
 import {
