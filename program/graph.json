@@ -1042,8 +1042,9 @@
     "examples/reference-trading/",
     "tests/e2e/"
    ],
-   "status": "ready",
-   "branch": "work/w064"
+   "status": "merged",
+   "branch": "work/w064",
+   "merged_sha": "4de6a05ea58c2f6909499bc449a28cb711fb801b"
   },
   {
    "id": "W065",
