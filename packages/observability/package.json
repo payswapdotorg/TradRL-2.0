@@ -1,0 +1,28 @@
+{
+  "name": "observability",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./events": "./events.ts",
+    "./audit": "./audit.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Observability/audit contracts (W061): the typed TELEMETRY + AUDIT vocabulary — closed operational event-kind sets with typed payloads and DECLARED timestamps (A9: no clocks, no randomness, no env reads), the immutable append-only AuditRecord contract citing W028 provenance (an audit record without provenance is refused), hash-chained trail digests as data, and the explicit tenant/project/world scope on every record (§14). Contracts only (A14): composes typed records — never scrapes, never serves, never alerts.",
+  "dependencies": {
+    "api": "workspace:*",
+    "tradrl-evidence": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

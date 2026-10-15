@@ -1,0 +1,28 @@
+{
+  "name": "operations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./trail": "./trail.ts",
+    "./reports": "./reports.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Operations record machinery (W061): the pure ops-record service — deterministic audit-trail assembly over the observability contracts (canonical sequence order, one scope, contiguous lineage) with end-to-end verification (ids re-derived, chain digests recomputed, provenance citations re-guarded — any tamper/rewrite refused loudly), and deterministic operational report composition over the trail + event stream (carried counts as data, canonical order, content-addressed report ids). Pure records only (A14): no scraping, no serving, no alerting, no I/O.",
+  "dependencies": {
+    "api": "workspace:*",
+    "observability": "workspace:*",
+    "trajectory": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
