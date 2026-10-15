@@ -1,0 +1,35 @@
+{
+  "name": "capability-provider",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./identity": "./identity.ts",
+    "./registration": "./registration.ts",
+    "./register": "./register.ts",
+    "./port": "./port.ts",
+    "./match": "./match.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "The provider-neutral capability-provider interface (W056, the W035–W041 flat source-exported pattern). Spec: REQUIREMENTS.md R055 — 'Arena is optional': external capability providers are a PLUGGABLE class, and this package defines the PROVIDER-NEUTRAL interface through which they plug into the empirical chain — ZERO concrete-provider specifics (the concrete adapters are later lanes' packages, built ON this interface). A ProviderRegistration is typed DATA: an opaque canonical provider id content-addressed over the display identity + scope + lineage + the offers (each offer typed VERBATIM through the W040 descriptor vocabulary — kind/domain/bearer — with MeasuredEvidence citations the W040 gate re-proves, optional W041 skill endowment citations, and per-offer lifecycle carried from W040). registerProvider is THE GATE: every offer's evidence is re-proved THE WAY W040 proves its own (W040's registerCapability carried verbatim — experimentIdOf binding, findings digest re-derivation, verdict law), scope agreement, duplicate provider/offer ids, fail-closed closed-set checks; R052 enforced STRUCTURALLY — an unmeasured offer is the typed loud 'unmeasured-offer' error naming the law. CapabilityProviderPort is the minimal neutral surface a CONCRETE provider implements (listOffers / describeOffer / the provenance accessor), satisfied here only by a deterministic in-memory reference adapter. matchProviderOffers(demand, registration, registry) adjudicates deterministically: W040's matchCapabilityDemand carried VERBATIM against each offer in canonical offer-id order (the tiebreak law), with a content-addressed adjudication id. validateProviderRegistration re-proves the whole registration from its recorded data. A9 throughout: same registration + same registry ⇒ deep-equal adjudication, same canonical ids. A14: the interface COMPOSES and ADJUDICATES typed data — it never executes a provider. NO entitlements, no marketplace semantics, no execution, no I/O.",
+  "dependencies": {
+    "capability-registry": "workspace:*",
+    "skills": "workspace:*",
+    "organization": "workspace:*",
+    "experiments": "workspace:*",
+    "evaluation": "workspace:*",
+    "verification": "workspace:*",
+    "cognitive-substrate": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

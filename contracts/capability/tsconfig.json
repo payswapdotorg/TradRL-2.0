@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // contracts/capability is a pure type-only contracts surface (the
+    // contracts/ui convention): no emit, no package manifest, no
+    // dependencies, no runtime, no framework imports. Tests are included
+    // so the compile-time law assertions are checked too.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "rootDir": ".",
+    "types": ["node"]
+  },
+  "include": ["src", "test"]
+}
