@@ -1860,6 +1860,60 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  services/learning/compute:
+    dependencies:
+      learning-rl:
+        specifier: workspace:*
+        version: link:../rl
+      populations:
+        specifier: workspace:*
+        version: link:../../populations
+      rl-protocol:
+        specifier: workspace:*
+        version: link:../../../packages/rl-protocol
+      trajectory:
+        specifier: workspace:*
+        version: link:../../../packages/trajectory
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/learning/curriculum:
+    dependencies:
+      evaluation:
+        specifier: workspace:*
+        version: link:../../../packages/evaluation
+      populations:
+        specifier: workspace:*
+        version: link:../../populations
+      skills:
+        specifier: workspace:*
+        version: link:../../../packages/skills
+      verification:
+        specifier: workspace:*
+        version: link:../../../packages/verification
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
+  services/learning/populations:
+    dependencies:
+      organization:
+        specifier: workspace:*
+        version: link:../../../packages/organization
+      populations:
+        specifier: workspace:*
+        version: link:../../populations
+      skills:
+        specifier: workspace:*
+        version: link:../../../packages/skills
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   services/learning/rl:
     dependencies:
       agent-world-protocol:

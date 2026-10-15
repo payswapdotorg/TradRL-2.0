@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "program": "TradRL-2.0",
- "updated_at": "2026-10-15T16:31:02Z",
+ "updated_at": "2026-10-15T17:05:33Z",
  "policies": {
   "max_concurrent_work_orders": 3,
   "merge_method": "squash",
@@ -735,8 +735,10 @@
     "services/learning/curriculum/",
     "services/learning/populations/"
    ],
-   "status": "ready",
-   "branch": "work/w046"
+   "status": "merged",
+   "branch": "work/w046",
+   "pr": 50,
+   "merged_sha": "064c25888879812ed83fb3d99236941cd51a86a1"
   },
   {
    "id": "W047",
@@ -765,8 +767,10 @@
    "write_surface": [
     "services/learning/compute/"
    ],
-   "status": "ready",
-   "branch": "work/w048"
+   "status": "merged",
+   "branch": "work/w048",
+   "pr": 49,
+   "merged_sha": "5bd63e59598a7ebf138c939832f4664b5fd1471c"
   },
   {
    "id": "W049",
@@ -779,7 +783,7 @@
    "write_surface": [
     "packages/tradrl-adapters/jax-lob/"
    ],
-   "status": "blocked",
+   "status": "ready",
    "branch": "work/w049"
   },
   {
