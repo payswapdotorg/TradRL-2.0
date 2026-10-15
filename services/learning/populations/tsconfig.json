@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    // This service is a source-exported import surface (mirrors the
+    // packages/* pattern and the W039/W041/W042/W043/W044/W045 services; note
+    // the services/learning/ depth — two levels up to the repo root, exactly
+    // like packages/): the package.json "exports" map points at TypeScript
+    // sources and nothing is emitted as a build artifact. Tests are included
+    // so the import laws are type-checked too. `rootDir` is deliberately NOT
+    // set: the program pulls in the consumed `populations` (W045),
+    // `organization` (W039 — the substitution vocabulary) and `skills` (the
+    // identity seams) sources — plus the fixture-side `body-forge` /
+    // `world-agent-runtime` / `tradrl-world-sim` sources reached through the
+    // populations test fixtures (relative imports, the W043/W044/W045
+    // precedent) — all of which live outside this service directory.
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  }
+}

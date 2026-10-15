@@ -1,0 +1,28 @@
+{
+  "name": "learning-populations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.ts",
+    "./selfplay": "./selfplay.ts",
+    "./adversarial": "./adversarial.ts",
+    "./validate": "./validate.ts"
+  },
+  "description": "Self-play/adversarial population composition ops (W046): PURE typed pairing plans over W045 populations. composeSelfPlay(population, cohortPolicy) splits one re-proven population (W045's own whole-record validator, errors carried verbatim) into cooperating/competing cohorts AS DATA — cohort splits in canonical member order, the declared cooperation/competition structure — and seals the content-addressed selfplay-<digest> plan. composeAdversarial(champion, challenger) pairs champion-vs-challenger GENERATIONS (the challenger must be the champion's direct next generation; scope/world disagreement fail-closed) citing the W039 ablation/model-substitution vocabulary where applicable (the substitution citation is W039's own derived-origin shape). A14: COMPOSE typed plans — never execute, never train, never step worlds. R054: method-neutral. A9: same populations + same policy ⇒ deep-equal pairings, same canonical ids; input order never leaks.",
+  "dependencies": {
+    "organization": "workspace:*",
+    "populations": "workspace:*",
+    "skills": "workspace:*"
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix --fix-suggestions",
+    "typecheck": "tsc -p .",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
