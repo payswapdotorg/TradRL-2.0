@@ -5,9 +5,20 @@
 import assert from "node:assert/strict";
 import type { TimestampMs } from "tradrl-world-contracts";
 import type { HeadlessWorldEngine } from "../../world/index.js";
-import { createProjectionCoalescer, type ProjectionCoalescer, type CoalescedDrain } from "../coalescer.js";
+import {
+  createProjectionCoalescer,
+  type CoalescedDrain,
+  type ProjectionCoalescer,
+  type ProjectionCoalescerConfig,
+  type SurfaceOverflow,
+} from "../coalescer.js";
 import { readCoalescedDrain, type CoalescedProjection } from "../reads.js";
-import { countingQueryPort, type ConsumerRun } from "./helpers.js";
+import {
+  countingQueryPort,
+  type ConsumerRun,
+  type LiveSignalConsumer,
+  type StreamSignal,
+} from "./helpers.js";
 
 interface Recorder {
   readonly counter: ReturnType<typeof countingQueryPort>;
@@ -88,7 +99,7 @@ export function createRawConsumer(
       // The attach fetch: the declared keys' initial refresh.
       await recordDrain(recorder, coalescer.drain());
       return {
-        async onSignal(signal) {
+        async onSignal(signal: StreamSignal) {
           ingestSignal(coalescer!, signal); // discovery bookkeeping (no reads)
           await recordDrain(recorder!, coalescer!.drain({ force: true }));
         },
@@ -133,7 +144,7 @@ export function createCoalescedConsumer(
       coalescer = createProjectionCoalescer(config);
       await recordDrain(recorder, coalescer.drain());
       return {
-        async onSignal(signal) {
+        async onSignal(signal: StreamSignal) {
           const overflow = ingestSignal(coalescer!, signal);
           signalIndex += 1;
           const scheduled = signalIndex % policy.drainEvery === 0;

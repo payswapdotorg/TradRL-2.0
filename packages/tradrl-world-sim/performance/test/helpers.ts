@@ -13,6 +13,7 @@ import type {
   Account,
   Instrument,
   Participant,
+  QueryPort,
   SubmitOrderCommand,
   Venue,
   WorldEventEnvelope,
@@ -22,6 +23,7 @@ import type { HeadlessWorldEngine } from "../../world/index.js";
 import { createGeneratedWorldEngine } from "../../generator/engine.js";
 import type { WorldDefinition } from "../../world/index.js";
 import { type ProjectionCoalescerConfig } from "../coalescer.js";
+import type { CoalescedProjection } from "../reads.js";
 
 export const WORLD = "world-w030-perf" as WorldDefinition["scope"]["worldId"];
 export const INSTRUMENT = "instrument-es-w030" as Instrument["instrumentId"];
