@@ -1,1107 +1,1109 @@
 {
-  "schema_version": 1,
-  "program": "TradRL-2.0",
-  "updated_at": "2026-10-16T06:30:00Z",
-  "policies": {
-    "max_concurrent_work_orders": 3,
-    "merge_method": "squash",
-    "branch_prefix": "work/",
-    "allowed_statuses": [
-      "blocked",
-      "ready",
-      "in_progress",
-      "in_review",
-      "merged"
-    ]
-  },
-  "items": [
-    {
-      "id": "W001",
-      "title": "Repository TradRL governance/source-of-truth setup",
-      "deps": [],
-      "write_surface": [
-        "root docs",
-        "program",
-        "spec",
-        "docs",
-        "scripts",
-        "CI"
-      ],
-      "status": "merged",
-      "branch": "arch/tradrl-2.0-foundation",
-      "pr": 1,
-      "merged_sha": "9f0e10924cac319261f7689b40ebe11988f772e9"
-    },
-    {
-      "id": "W002",
-      "title": "Third-party technology/license gate",
-      "deps": [
-        "W001"
-      ],
-      "write_surface": [
-        "spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md"
-      ],
-      "status": "merged",
-      "branch": "work/w002",
-      "merged_sha": "ae5b26c",
-      "pr": 2
-    },
-    {
-      "id": "W003",
-      "title": "Canonical trading/world domain contracts",
-      "deps": [
-        "W001"
-      ],
-      "write_surface": [
-        "packages/tradrl-world-contracts/",
-        "contracts/world/"
-      ],
-      "status": "merged",
-      "branch": "work/w003",
-      "merged_sha": "58ee342",
-      "pr": 3
-    },
-    {
-      "id": "W004",
-      "title": "Market event/time/information contracts",
-      "deps": [
-        "W003"
-      ],
-      "write_surface": [
-        "packages/tradrl-world-contracts/time/",
-        "contracts/world/time/"
-      ],
-      "status": "merged",
-      "branch": "work/w004",
-      "merged_sha": "1e0ba9a",
-      "pr": 4
-    },
-    {
-      "id": "W005",
-      "title": "Trading World side-pane lifecycle contract",
-      "deps": [
-        "W001",
-        "W003"
-      ],
-      "write_surface": [
-        "packages/ui/src/lib/workspaceSidePane*",
-        "packages/ui/src/app-shell/* integration seam",
-        "contracts/ui/"
-      ],
-      "status": "merged",
-      "branch": "work/w005",
-      "merged_sha": "a0163b3",
-      "pr": 5
-    },
-    {
-      "id": "W006",
-      "title": "Trading World shell/tool registry",
-      "deps": [
-        "W005"
-      ],
-      "write_surface": [
-        "packages/ui/src/trading-world/"
-      ],
-      "status": "merged",
-      "branch": "work/w006",
-      "merged_sha": "de4c91f",
-      "pr": 7
-    },
-    {
-      "id": "W007",
-      "title": "Chart surface",
-      "deps": [
-        "W003",
-        "W006"
-      ],
-      "write_surface": [
-        "packages/ui/src/trading-world/charts/"
-      ],
-      "status": "merged",
-      "branch": "work/w007",
-      "merged_sha": "ce97e6c",
-      "pr": 10
-    },
-    {
-      "id": "W008",
-      "title": "Watchlist/market overview",
-      "deps": [
-        "W003",
-        "W006"
-      ],
-      "write_surface": [
-        "packages/ui/src/trading-world/market/"
-      ],
-      "status": "merged",
-      "branch": "work/w008",
-      "merged_sha": "74a4b9c",
-      "pr": 14
-    },
-    {
-      "id": "W009",
-      "title": "DOM/order-book + Time & Sales",
-      "deps": [
-        "W003",
-        "W006"
-      ],
-      "write_surface": [
-        "packages/ui/src/trading-world/orderbook/"
-      ],
-      "status": "merged",
-      "branch": "work/w009",
-      "merged_sha": "18c36a9",
-      "pr": 15
-    },
-    {
-      "id": "W010",
-      "title": "Order ticket/order lifecycle UI",
-      "deps": [
-        "W003",
-        "W006"
-      ],
-      "write_surface": [
-        "packages/ui/src/trading-world/orders/"
-      ],
-      "status": "merged",
-      "branch": "work/w010",
-      "merged_sha": "ea2c4d7",
-      "pr": 16
-    },
-    {
-      "id": "W011",
-      "title": "Portfolio/positions/risk UI",
-      "deps": [
-        "W003",
-        "W006"
-      ],
-      "write_surface": [
-        "packages/ui/src/trading-world/portfolio/"
-      ],
-      "status": "merged",
-      "branch": "work/w011",
-      "merged_sha": "314c60f",
-      "pr": 17
-    },
-    {
-      "id": "W012",
-      "title": "Simulation clock/timeline UI",
-      "deps": [
-        "W004",
-        "W006"
-      ],
-      "write_surface": [
-        "packages/ui/src/trading-world/simulation/"
-      ],
-      "status": "merged",
-      "branch": "work/w012",
-      "merged_sha": "e8326c6",
-      "pr": 18
-    },
-    {
-      "id": "W013",
-      "title": "Headless deterministic World engine skeleton",
-      "deps": [
-        "W003",
-        "W004"
-      ],
-      "write_surface": [
-        "packages/tradrl-world-sim/clock",
-        "world",
-        "journal"
-      ],
-      "status": "merged",
-      "branch": "work/w013",
-      "merged_sha": "e3fa3ce",
-      "pr": 6
-    },
-    {
-      "id": "W014",
-      "title": "Order book + matching engine",
-      "deps": [
-        "W013"
-      ],
-      "write_surface": [
-        "packages/tradrl-world-sim/orderbook",
-        "matching"
-      ],
-      "status": "merged",
-      "branch": "work/w014",
-      "merged_sha": "d3c4d7e",
-      "pr": 9
-    },
-    {
-      "id": "W015",
-      "title": "Account/portfolio/risk engine",
-      "deps": [
-        "W013"
-      ],
-      "write_surface": [
-        "packages/tradrl-world-sim/account",
-        "portfolio",
-        "risk"
-      ],
-      "status": "merged",
-      "branch": "work/w015",
-      "merged_sha": "b5695ef",
-      "pr": 13
-    },
-    {
-      "id": "W016",
-      "title": "Journal/snapshot/branch engine",
-      "deps": [
-        "W013"
-      ],
-      "write_surface": [
-        "packages/tradrl-world-sim/journal",
-        "snapshot",
-        "branch"
-      ],
-      "status": "merged",
-      "branch": "work/w016",
-      "merged_sha": "c7676f0",
-      "pr": 11
-    },
-    {
-      "id": "W017",
-      "title": "Deterministic synthetic market generator",
-      "deps": [
-        "W013",
-        "W014"
-      ],
-      "write_surface": [
-        "packages/tradrl-world-sim/generator/"
-      ],
-      "status": "merged",
-      "branch": "work/w017",
-      "merged_sha": "137fb56",
-      "pr": 12
-    },
-    {
-      "id": "W018",
-      "title": "World Worker adapter + UI transport",
-      "deps": [
-        "W006",
-        "W013"
-      ],
-      "write_surface": [
-        "packages/tradrl-world-sim/adapter/",
-        "packages/ui/src/trading-world/runtime/"
-      ],
-      "status": "merged",
-      "branch": "work/w018",
-      "merged_sha": "759a329",
-      "pr": 8
-    },
-    {
-      "id": "W019",
-      "title": "World Alpha golden integration suite",
-      "deps": [
-        "W007",
-        "W008",
-        "W009",
-        "W010",
-        "W011",
-        "W012",
-        "W014",
-        "W015",
-        "W016",
-        "W017",
-        "W018"
-      ],
-      "write_surface": [
-        "tests/trading-world/",
-        "limited integration seams in packages/ui/src/trading-world/"
-      ],
-      "status": "merged",
-      "branch": "work/w019",
-      "merged_sha": "bd2b174",
-      "pr": 22
-    },
-    {
-      "id": "W020",
-      "title": "Historical dataset/event import",
-      "deps": [
-        "W004",
-        "W016"
-      ],
-      "write_surface": [
-        "packages/tradrl-data/",
-        "contracts/data/"
-      ],
-      "status": "merged",
-      "branch": "work/w020",
-      "merged_sha": "f0cab59",
-      "pr": 19
-    },
-    {
-      "id": "W021",
-      "title": "Nautilus high-fidelity replay adapter",
-      "deps": [
-        "W020",
-        "W019",
-        "W002"
-      ],
-      "write_surface": [
-        "packages/tradrl-adapters/nautilus/"
-      ],
-      "status": "merged",
-      "branch": "work/w021",
-      "merged_sha": "fa017a2",
-      "pr": 25
-    },
-    {
-      "id": "W022",
-      "title": "Replay fidelity verification",
-      "deps": [
-        "W021"
-      ],
-      "write_surface": [
-        "packages/tradrl-evaluation/replay/"
-      ],
-      "status": "merged",
-      "branch": "work/w022",
-      "merged_sha": "a86ce78",
-      "pr": 29
-    },
-    {
-      "id": "W023",
-      "title": "Reactive participant protocol",
-      "deps": [
-        "W004",
-        "W019"
-      ],
-      "write_surface": [
-        "packages/tradrl-market-participants/",
-        "contracts/participants/"
-      ],
-      "status": "merged",
-      "branch": "work/w023",
-      "merged_sha": "450a621",
-      "pr": 28
-    },
-    {
-      "id": "W024",
-      "title": "ABIDES reactive-market adapter",
-      "deps": [
-        "W023",
-        "W002"
-      ],
-      "write_surface": [
-        "packages/tradrl-adapters/abides/"
-      ],
-      "status": "merged",
-      "branch": "work/w024",
-      "merged_sha": "c049db1",
-      "pr": 36
-    },
-    {
-      "id": "W025",
-      "title": "Counterfactual world framework",
-      "deps": [
-        "W016",
-        "W023"
-      ],
-      "write_surface": [
-        "packages/tradrl-world-sim/counterfactual/"
-      ],
-      "status": "merged",
-      "branch": "work/w025",
-      "merged_sha": "4bb664a",
-      "pr": 31
-    },
-    {
-      "id": "W026",
-      "title": "Crypto provider adapter baseline",
-      "deps": [
-        "W002",
-        "W020"
-      ],
-      "write_surface": [
-        "packages/tradrl-adapters/crypto/"
-      ],
-      "status": "merged",
-      "branch": "work/w026",
-      "merged_sha": "f5eeca1",
-      "pr": 20
-    },
-    {
-      "id": "W027",
-      "title": "Research/news/event information world",
-      "deps": [
-        "W004",
-        "W020"
-      ],
-      "write_surface": [
-        "packages/tradrl-information/"
-      ],
-      "status": "merged",
-      "branch": "work/w027",
-      "merged_sha": "3db0ade",
-      "pr": 21
-    },
-    {
-      "id": "W028",
-      "title": "Evidence/provenance projection",
-      "deps": [
-        "W016",
-        "W027"
-      ],
-      "write_surface": [
-        "packages/tradrl-evidence/"
-      ],
-      "status": "merged",
-      "branch": "work/w028",
-      "merged_sha": "701c3e8",
-      "pr": 23
-    },
-    {
-      "id": "W029",
-      "title": "Layout presets/workspace profiles",
-      "deps": [
-        "W006",
-        "W019"
-      ],
-      "write_surface": [
-        "packages/ui/src/trading-world/presets/"
-      ],
-      "status": "merged",
-      "branch": "work/w029",
-      "merged_sha": "55ed80e",
-      "pr": 35
-    },
-    {
-      "id": "W030",
-      "title": "Streaming performance/projection coalescing",
-      "deps": [
-        "W019"
-      ],
-      "write_surface": [
-        "packages/tradrl-world-sim/performance/",
-        "packages/ui/src/trading-world/performance/"
-      ],
-      "status": "merged",
-      "branch": "work/w030",
-      "merged_sha": "c416a40",
-      "pr": 33
-    },
-    {
-      "id": "W031",
-      "title": "Headless World CLI/replay runner",
-      "deps": [
-        "W016",
-        "W020"
-      ],
-      "write_surface": [
-        "apps/tradrl-world-cli/"
-      ],
-      "status": "merged",
-      "branch": "work/w031",
-      "merged_sha": "2fd8ece",
-      "pr": 24
-    },
-    {
-      "id": "W032",
-      "title": "Agent Body contracts",
-      "deps": [
-        "W019"
-      ],
-      "write_surface": [
-        "packages/agent-body/",
-        "contracts/agent/"
-      ],
-      "status": "merged",
-      "branch": "work/w032",
-      "merged_sha": "1602889",
-      "pr": 26
-    },
-    {
-      "id": "W033",
-      "title": "Cognitive Substrate contract",
-      "deps": [
-        "W032"
-      ],
-      "write_surface": [
-        "packages/cognitive-substrate/",
-        "contracts/agent/"
-      ],
-      "status": "merged",
-      "branch": "work/w033",
-      "merged_sha": "7447acc",
-      "pr": 27
-    },
-    {
-      "id": "W034",
-      "title": "Possession/compatibility/lineage",
-      "deps": [
-        "W032",
-        "W033"
-      ],
-      "write_surface": [
-        "packages/possession/"
-      ],
-      "status": "merged",
-      "branch": "work/w034",
-      "merged_sha": "7f7deb7",
-      "pr": 30
-    },
-    {
-      "id": "W035",
-      "title": "Observation/action protocol",
-      "deps": [
-        "W019",
-        "W032",
-        "W034"
-      ],
-      "write_surface": [
-        "packages/agent-world-protocol/"
-      ],
-      "status": "merged",
-      "branch": "work/w035",
-      "merged_sha": "dc36eaf",
-      "pr": 32
-    },
-    {
-      "id": "W036",
-      "title": "Reward/constraint evaluation contract",
-      "deps": [
-        "W019",
-        "W035"
-      ],
-      "write_surface": [
-        "packages/learning-objectives/"
-      ],
-      "status": "merged",
-      "branch": "work/w036",
-      "merged_sha": "7ef01fe",
-      "pr": 34
-    },
-    {
-      "id": "W037",
-      "title": "Trajectory/experiment protocol",
-      "deps": [
-        "W035",
-        "W036"
-      ],
-      "write_surface": [
-        "packages/trajectory/",
-        "packages/experiments/"
-      ],
-      "status": "merged",
-      "branch": "work/w037",
-      "merged_sha": "99f38b9",
-      "pr": 37
-    },
-    {
-      "id": "W038",
-      "title": "Evaluation/verification",
-      "deps": [
-        "W022",
-        "W035",
-        "W036",
-        "W037"
-      ],
-      "write_surface": [
-        "packages/evaluation/",
-        "packages/verification/"
-      ],
-      "status": "merged",
-      "branch": "work/w038",
-      "merged_sha": "fe18ee4",
-      "pr": 38
-    },
-    {
-      "id": "W039",
-      "title": "Organization model/compiler",
-      "deps": [
-        "W034",
-        "W036",
-        "W038"
-      ],
-      "write_surface": [
-        "packages/organization/",
-        "services/organization-compiler/"
-      ],
-      "status": "merged",
-      "branch": "work/w039",
-      "merged_sha": "69f79e8",
-      "pr": 39
-    },
-    {
-      "id": "W040",
-      "title": "Capability registry",
-      "deps": [
-        "W033",
-        "W038",
-        "W039"
-      ],
-      "write_surface": [
-        "packages/capability-registry/"
-      ],
-      "status": "merged",
-      "branch": "work/w040",
-      "merged_sha": "7d8f742",
-      "pr": 40
-    },
-    {
-      "id": "W041",
-      "title": "Skill extraction/Body Forge",
-      "deps": [
-        "W034",
-        "W037",
-        "W039",
-        "W040"
-      ],
-      "write_surface": [
-        "packages/skills/",
-        "services/body-forge/"
-      ],
-      "status": "merged",
-      "branch": "work/w041",
-      "pr": 41,
-      "merged_sha": "8d55d090865c4f60f2215b977233b7136a6d72ae"
-    },
-    {
-      "id": "W042",
-      "title": "Empirical substrate/model selection",
-      "deps": [
-        "W040",
-        "W041"
-      ],
-      "write_surface": [
-        "services/model-selection/",
-        "benchmarks/model-capability/"
-      ],
-      "status": "merged",
-      "branch": "work/w042",
-      "pr": 42,
-      "merged_sha": "26fa1c00ca967e1cd29d338c11d614c40dc26f19"
-    },
-    {
-      "id": "W043",
-      "title": "Autonomous Body commissioning",
-      "deps": [
-        "W039",
-        "W041",
-        "W042"
-      ],
-      "write_surface": [
-        "services/body-forge/commissioning/"
-      ],
-      "status": "merged",
-      "branch": "work/w043",
-      "pr": 44,
-      "merged_sha": "71a2bd53e1d82a4ffa8bec3468f34dbfea409799"
-    },
-    {
-      "id": "W044",
-      "title": "Agent/organization binding to World",
-      "deps": [
-        "W035",
-        "W039",
-        "W043"
-      ],
-      "write_surface": [
-        "services/world-agent-runtime/"
-      ],
-      "status": "merged",
-      "branch": "work/w044",
-      "pr": 46,
-      "merged_sha": "4969de28f487f2072b929ea0f6f61d3b20411a94"
-    },
-    {
-      "id": "W045",
-      "title": "Multi-agent populations",
-      "deps": [
-        "W023",
-        "W039",
-        "W044"
-      ],
-      "write_surface": [
-        "services/populations/"
-      ],
-      "status": "merged",
-      "branch": "work/w045",
-      "pr": 47,
-      "merged_sha": "a95fb593897e44d4ebd9f11202aa0c01ea4d052e"
-    },
-    {
-      "id": "W046",
-      "title": "Curriculum/self-play/adversarial populations",
-      "deps": [
-        "W038",
-        "W045"
-      ],
-      "write_surface": [
-        "services/learning/curriculum/",
-        "services/learning/populations/"
-      ],
-      "status": "merged",
-      "branch": "work/w046",
-      "pr": 50,
-      "merged_sha": "064c25888879812ed83fb3d99236941cd51a86a1"
-    },
-    {
-      "id": "W047",
-      "title": "RL interface/trainer bridge",
-      "deps": [
-        "W037",
-        "W038",
-        "W044"
-      ],
-      "write_surface": [
-        "packages/rl-protocol/",
-        "services/learning/rl/"
-      ],
-      "status": "merged",
-      "branch": "work/w047",
-      "pr": 48,
-      "merged_sha": "c15364f1734d7101e07b65bd389b9b4a0c45c119"
-    },
-    {
-      "id": "W048",
-      "title": "Distributed episode generation",
-      "deps": [
-        "W047",
-        "W045"
-      ],
-      "write_surface": [
-        "services/learning/compute/"
-      ],
-      "status": "merged",
-      "branch": "work/w048",
-      "pr": 49,
-      "merged_sha": "5bd63e59598a7ebf138c939832f4664b5fd1471c"
-    },
-    {
-      "id": "W049",
-      "title": "JAX-LOB training adapter",
-      "deps": [
-        "W047",
-        "W048",
-        "W002"
-      ],
-      "write_surface": [
-        "packages/tradrl-adapters/jax-lob/"
-      ],
-      "status": "merged",
-      "branch": "work/w049",
-      "pr": 51,
-      "merged_sha": "38c1c77e55f497928d2c3d07d959a42525bd39bc"
-    },
-    {
-      "id": "W050",
-      "title": "Time Machine + point-in-time knowledge firewall",
-      "deps": [
-        "W004",
-        "W022",
-        "W027",
-        "W047"
-      ],
-      "write_surface": [
-        "packages/tradrl-time-machine/",
-        "services/time-machine/"
-      ],
-      "status": "merged",
-      "branch": "work/w050",
-      "pr": 52,
-      "merged_sha": "a1cceadbb837f822b6ae344011f730d09b086ea8"
-    },
-    {
-      "id": "W051",
-      "title": "Backtest-overfitting/search integrity",
-      "deps": [
-        "W038",
-        "W047",
-        "W050"
-      ],
-      "write_surface": [
-        "packages/search-integrity/"
-      ],
-      "status": "merged",
-      "branch": "work/w051",
-      "pr": 54,
-      "merged_sha": "5ee0ffc38468474ac3a1425c38e20717eb368b95"
-    },
-    {
-      "id": "W052",
-      "title": "Walk-forward/regime/asset/venue holdouts",
-      "deps": [
-        "W038",
-        "W050",
-        "W051"
-      ],
-      "write_surface": [
-        "packages/evaluation-splits/"
-      ],
-      "status": "merged",
-      "branch": "work/w052",
-      "pr": 55,
-      "merged_sha": "579bbb10fb406afe57714a1a50a337a7798abcf1"
-    },
-    {
-      "id": "W053",
-      "title": "Outcome/post-mortem learning",
-      "deps": [
-        "W038",
-        "W051",
-        "W052"
-      ],
-      "write_surface": [
-        "services/outcome-learning/"
-      ],
-      "status": "merged",
-      "branch": "work/w053",
-      "pr": 57,
-      "merged_sha": "7b3db5f4b546b239c7e19be56dc80005c862a9da"
-    },
-    {
-      "id": "W054",
-      "title": "Firm Brain",
-      "deps": [
-        "W028",
-        "W038",
-        "W053"
-      ],
-      "write_surface": [
-        "services/firm-brain/",
-        "packages/memory/"
-      ],
-      "status": "merged",
-      "branch": "work/w054",
-      "pr": 59,
-      "merged_sha": "56781b37f73b2176915e56e20d001314ff46a8e6"
-    },
-    {
-      "id": "W055",
-      "title": "Continuous autonomous improvement",
-      "deps": [
-        "W041",
-        "W046",
-        "W051",
-        "W053",
-        "W054"
-      ],
-      "write_surface": [
-        "services/autonomous-learning/"
-      ],
-      "status": "merged",
-      "branch": "work/w055",
-      "pr": 61,
-      "merged_sha": "37262fb79e8e54f69899615580d5465d78a57326"
-    },
-    {
-      "id": "W056",
-      "title": "Provider-neutral capability-provider interface",
-      "deps": [
-        "W040",
-        "W041"
-      ],
-      "write_surface": [
-        "packages/capability-provider/",
-        "contracts/capability/"
-      ],
-      "status": "merged",
-      "branch": "work/w056",
-      "pr": 43,
-      "merged_sha": "619598c36445de4cd3758d37e1dc6f4d0a6ea839"
-    },
-    {
-      "id": "W057",
-      "title": "Arena capability-provider adapter",
-      "deps": [
-        "W056",
-        "W002"
-      ],
-      "write_surface": [
-        "packages/tradrl-adapters/arena/"
-      ],
-      "status": "merged",
-      "branch": "work/w057",
-      "pr": 45,
-      "merged_sha": "39bba1dd3f96a9a4b37a32e898ba8264202b77f1"
-    },
-    {
-      "id": "W058",
-      "title": "Commercial capability marketplace/entitlements",
-      "deps": [
-        "W056",
-        "W057",
-        "W054"
-      ],
-      "write_surface": [
-        "packages/marketplace/",
-        "packages/entitlements/"
-      ],
-      "status": "merged",
-      "branch": "work/w058",
-      "pr": 60,
-      "merged_sha": "ad07bf22ab9c80f58c8e7d6e42f832f45f6ec5a6"
-    },
-    {
-      "id": "W059",
-      "title": "Public/private API + SDK",
-      "deps": [
-        "W019",
-        "W028",
-        "W039",
-        "W050"
-      ],
-      "write_surface": [
-        "services/api/",
-        "packages/sdk/"
-      ],
-      "status": "merged",
-      "branch": "work/w059",
-      "pr": 53,
-      "merged_sha": "8966995c4f7e56889a36da841296ca41c14621fb"
-    },
-    {
-      "id": "W060",
-      "title": "Security/tenancy/secrets/isolation",
-      "deps": [
-        "W059",
-        "W054",
-        "W058"
-      ],
-      "write_surface": [
-        "packages/security/",
-        "services/security/"
-      ],
-      "status": "merged",
-      "branch": "work/w060",
-      "pr": 62,
-      "merged_sha": "1895e483bec500f27675e0b5f15c868915d513f5"
-    },
-    {
-      "id": "W061",
-      "title": "Observability/audit/operations",
-      "deps": [
-        "W019",
-        "W028",
-        "W059"
-      ],
-      "write_surface": [
-        "packages/observability/",
-        "services/operations/"
-      ],
-      "status": "merged",
-      "branch": "work/w061",
-      "pr": 56,
-      "merged_sha": "cc0d844c0e37e2e167217745bd4562e45f901a08"
-    },
-    {
-      "id": "W062",
-      "title": "Production deployment/reliability/performance",
-      "deps": [
-        "W059",
-        "W060",
-        "W061"
-      ],
-      "write_surface": [
-        "deploy/",
-        "ops/",
-        "tests/performance/"
-      ],
-      "status": "merged",
-      "branch": "work/w062",
-      "merged_sha": "0bed0d95d910445fbf76f66433f928d32cd584d6"
-    },
-    {
-      "id": "W063",
-      "title": "Benchmark/evidence publication",
-      "deps": [
-        "W022",
-        "W038",
-        "W051",
-        "W052",
-        "W061"
-      ],
-      "write_surface": [
-        "research/benchmarks/",
-        "docs/benchmarks/"
-      ],
-      "status": "merged",
-      "branch": "work/w063",
-      "pr": 58,
-      "merged_sha": "acd3ad94cb47bf166de859fbcbf25cba5a8b382e"
-    },
-    {
-      "id": "W064",
-      "title": "Reference end-to-end trading journey",
-      "deps": [
-        "W043",
-        "W044",
-        "W047",
-        "W050",
-        "W054",
-        "W057",
-        "W059",
-        "W060",
-        "W061"
-      ],
-      "write_surface": [
-        "examples/reference-trading/",
-        "tests/e2e/"
-      ],
-      "status": "merged",
-      "branch": "work/w064",
-      "merged_sha": "4de6a05ea58c2f6909499bc449a28cb711fb801b"
-    },
-    {
-      "id": "W065",
-      "title": "Live-mirror/shadow execution adapter",
-      "deps": [
-        "W050",
-        "W059",
-        "W060",
-        "W061"
-      ],
-      "write_surface": [
-        "packages/tradrl-adapters/broker/",
-        "services/shadow/"
-      ],
-      "status": "merged",
-      "branch": "work/w065",
-      "merged_sha": "b0a941831cd4f7a0ed7e7f3cba505e007545ebf3"
-    },
-    {
-      "id": "W066",
-      "title": "Product identity/branding migration from ZCode",
-      "deps": [
-        "W062"
-      ],
-      "write_surface": [
-        "product identity metadata and identity surfaces only"
-      ],
-      "status": "merged",
-      "branch": "work/w066",
-      "merged_sha": "d2711c97410be629c1f145a8a32edeca66bbdf59"
-    },
-    {
-      "id": "W067",
-      "title": "Desktop application release packaging — downloadable installers from GitHub Releases",
-      "deps": [
-        "W066"
-      ],
-      "write_surface": [
-        ".github/workflows/",
-        "scripts/install-desktop.sh",
-        "scripts/install-desktop.ps1",
-        "docs/release/",
-        "README.md download-and-install section only",
-        "packages/desktop/scripts/build-metadata.mjs version-override seam only"
-      ],
-      "status": "in_progress",
-      "branch": "work/w067"
-    }
-  ],
-  "notes": [
-    "Repository is sole source of truth.",
-    "One Work Order = one worker = one branch = one PR.",
-    "Bootstrap W001 merged via PR #1 at 9f0e10924cac319261f7689b40ebe11988f772e9.",
-    "Maximum concurrent worker count is 3; do not fill unused capacity with speculative work.",
-    "Current ready frontier after the W040 merge (PR #40): W041.",
-    "2026-10-16: root typecheck gate repaired (PR #67, squash 1e315a5): the W006/W018 .d.ts seam shims flipped to package specifiers (relative re-exports pulled the contracts/sim source closure into the ui composite program \u2014 the TS6059/TS6307 storm) + 10 source-level fixes in the W030 performance surface. TL battery all-green: typecheck 12/12 EXIT 0, lint 0 errors, governance PASS, W019 golden suite green, pinned digests unchanged.",
-    "2026-10-16: W067 registered on operator directive ('make sure you have an application I can download and install from the github repo') — the first post-completion release-line work item: tag-triggered multi-platform desktop installer workflow + GitHub Release publication + quick-install scripts + README install section. Validator count law updated 66→67 in the same registration commit."
+ "schema_version": 1,
+ "program": "TradRL-2.0",
+ "updated_at": "2026-10-16T06:30:00Z",
+ "policies": {
+  "max_concurrent_work_orders": 3,
+  "merge_method": "squash",
+  "branch_prefix": "work/",
+  "allowed_statuses": [
+   "blocked",
+   "ready",
+   "in_progress",
+   "in_review",
+   "merged"
   ]
+ },
+ "items": [
+  {
+   "id": "W001",
+   "title": "Repository TradRL governance/source-of-truth setup",
+   "deps": [],
+   "write_surface": [
+    "root docs",
+    "program",
+    "spec",
+    "docs",
+    "scripts",
+    "CI"
+   ],
+   "status": "merged",
+   "branch": "arch/tradrl-2.0-foundation",
+   "pr": 1,
+   "merged_sha": "9f0e10924cac319261f7689b40ebe11988f772e9"
+  },
+  {
+   "id": "W002",
+   "title": "Third-party technology/license gate",
+   "deps": [
+    "W001"
+   ],
+   "write_surface": [
+    "spec/THIRD-PARTY-TECHNOLOGY-REGISTER.md"
+   ],
+   "status": "merged",
+   "branch": "work/w002",
+   "merged_sha": "ae5b26c",
+   "pr": 2
+  },
+  {
+   "id": "W003",
+   "title": "Canonical trading/world domain contracts",
+   "deps": [
+    "W001"
+   ],
+   "write_surface": [
+    "packages/tradrl-world-contracts/",
+    "contracts/world/"
+   ],
+   "status": "merged",
+   "branch": "work/w003",
+   "merged_sha": "58ee342",
+   "pr": 3
+  },
+  {
+   "id": "W004",
+   "title": "Market event/time/information contracts",
+   "deps": [
+    "W003"
+   ],
+   "write_surface": [
+    "packages/tradrl-world-contracts/time/",
+    "contracts/world/time/"
+   ],
+   "status": "merged",
+   "branch": "work/w004",
+   "merged_sha": "1e0ba9a",
+   "pr": 4
+  },
+  {
+   "id": "W005",
+   "title": "Trading World side-pane lifecycle contract",
+   "deps": [
+    "W001",
+    "W003"
+   ],
+   "write_surface": [
+    "packages/ui/src/lib/workspaceSidePane*",
+    "packages/ui/src/app-shell/* integration seam",
+    "contracts/ui/"
+   ],
+   "status": "merged",
+   "branch": "work/w005",
+   "merged_sha": "a0163b3",
+   "pr": 5
+  },
+  {
+   "id": "W006",
+   "title": "Trading World shell/tool registry",
+   "deps": [
+    "W005"
+   ],
+   "write_surface": [
+    "packages/ui/src/trading-world/"
+   ],
+   "status": "merged",
+   "branch": "work/w006",
+   "merged_sha": "de4c91f",
+   "pr": 7
+  },
+  {
+   "id": "W007",
+   "title": "Chart surface",
+   "deps": [
+    "W003",
+    "W006"
+   ],
+   "write_surface": [
+    "packages/ui/src/trading-world/charts/"
+   ],
+   "status": "merged",
+   "branch": "work/w007",
+   "merged_sha": "ce97e6c",
+   "pr": 10
+  },
+  {
+   "id": "W008",
+   "title": "Watchlist/market overview",
+   "deps": [
+    "W003",
+    "W006"
+   ],
+   "write_surface": [
+    "packages/ui/src/trading-world/market/"
+   ],
+   "status": "merged",
+   "branch": "work/w008",
+   "merged_sha": "74a4b9c",
+   "pr": 14
+  },
+  {
+   "id": "W009",
+   "title": "DOM/order-book + Time & Sales",
+   "deps": [
+    "W003",
+    "W006"
+   ],
+   "write_surface": [
+    "packages/ui/src/trading-world/orderbook/"
+   ],
+   "status": "merged",
+   "branch": "work/w009",
+   "merged_sha": "18c36a9",
+   "pr": 15
+  },
+  {
+   "id": "W010",
+   "title": "Order ticket/order lifecycle UI",
+   "deps": [
+    "W003",
+    "W006"
+   ],
+   "write_surface": [
+    "packages/ui/src/trading-world/orders/"
+   ],
+   "status": "merged",
+   "branch": "work/w010",
+   "merged_sha": "ea2c4d7",
+   "pr": 16
+  },
+  {
+   "id": "W011",
+   "title": "Portfolio/positions/risk UI",
+   "deps": [
+    "W003",
+    "W006"
+   ],
+   "write_surface": [
+    "packages/ui/src/trading-world/portfolio/"
+   ],
+   "status": "merged",
+   "branch": "work/w011",
+   "merged_sha": "314c60f",
+   "pr": 17
+  },
+  {
+   "id": "W012",
+   "title": "Simulation clock/timeline UI",
+   "deps": [
+    "W004",
+    "W006"
+   ],
+   "write_surface": [
+    "packages/ui/src/trading-world/simulation/"
+   ],
+   "status": "merged",
+   "branch": "work/w012",
+   "merged_sha": "e8326c6",
+   "pr": 18
+  },
+  {
+   "id": "W013",
+   "title": "Headless deterministic World engine skeleton",
+   "deps": [
+    "W003",
+    "W004"
+   ],
+   "write_surface": [
+    "packages/tradrl-world-sim/clock",
+    "world",
+    "journal"
+   ],
+   "status": "merged",
+   "branch": "work/w013",
+   "merged_sha": "e3fa3ce",
+   "pr": 6
+  },
+  {
+   "id": "W014",
+   "title": "Order book + matching engine",
+   "deps": [
+    "W013"
+   ],
+   "write_surface": [
+    "packages/tradrl-world-sim/orderbook",
+    "matching"
+   ],
+   "status": "merged",
+   "branch": "work/w014",
+   "merged_sha": "d3c4d7e",
+   "pr": 9
+  },
+  {
+   "id": "W015",
+   "title": "Account/portfolio/risk engine",
+   "deps": [
+    "W013"
+   ],
+   "write_surface": [
+    "packages/tradrl-world-sim/account",
+    "portfolio",
+    "risk"
+   ],
+   "status": "merged",
+   "branch": "work/w015",
+   "merged_sha": "b5695ef",
+   "pr": 13
+  },
+  {
+   "id": "W016",
+   "title": "Journal/snapshot/branch engine",
+   "deps": [
+    "W013"
+   ],
+   "write_surface": [
+    "packages/tradrl-world-sim/journal",
+    "snapshot",
+    "branch"
+   ],
+   "status": "merged",
+   "branch": "work/w016",
+   "merged_sha": "c7676f0",
+   "pr": 11
+  },
+  {
+   "id": "W017",
+   "title": "Deterministic synthetic market generator",
+   "deps": [
+    "W013",
+    "W014"
+   ],
+   "write_surface": [
+    "packages/tradrl-world-sim/generator/"
+   ],
+   "status": "merged",
+   "branch": "work/w017",
+   "merged_sha": "137fb56",
+   "pr": 12
+  },
+  {
+   "id": "W018",
+   "title": "World Worker adapter + UI transport",
+   "deps": [
+    "W006",
+    "W013"
+   ],
+   "write_surface": [
+    "packages/tradrl-world-sim/adapter/",
+    "packages/ui/src/trading-world/runtime/"
+   ],
+   "status": "merged",
+   "branch": "work/w018",
+   "merged_sha": "759a329",
+   "pr": 8
+  },
+  {
+   "id": "W019",
+   "title": "World Alpha golden integration suite",
+   "deps": [
+    "W007",
+    "W008",
+    "W009",
+    "W010",
+    "W011",
+    "W012",
+    "W014",
+    "W015",
+    "W016",
+    "W017",
+    "W018"
+   ],
+   "write_surface": [
+    "tests/trading-world/",
+    "limited integration seams in packages/ui/src/trading-world/"
+   ],
+   "status": "merged",
+   "branch": "work/w019",
+   "merged_sha": "bd2b174",
+   "pr": 22
+  },
+  {
+   "id": "W020",
+   "title": "Historical dataset/event import",
+   "deps": [
+    "W004",
+    "W016"
+   ],
+   "write_surface": [
+    "packages/tradrl-data/",
+    "contracts/data/"
+   ],
+   "status": "merged",
+   "branch": "work/w020",
+   "merged_sha": "f0cab59",
+   "pr": 19
+  },
+  {
+   "id": "W021",
+   "title": "Nautilus high-fidelity replay adapter",
+   "deps": [
+    "W020",
+    "W019",
+    "W002"
+   ],
+   "write_surface": [
+    "packages/tradrl-adapters/nautilus/"
+   ],
+   "status": "merged",
+   "branch": "work/w021",
+   "merged_sha": "fa017a2",
+   "pr": 25
+  },
+  {
+   "id": "W022",
+   "title": "Replay fidelity verification",
+   "deps": [
+    "W021"
+   ],
+   "write_surface": [
+    "packages/tradrl-evaluation/replay/"
+   ],
+   "status": "merged",
+   "branch": "work/w022",
+   "merged_sha": "a86ce78",
+   "pr": 29
+  },
+  {
+   "id": "W023",
+   "title": "Reactive participant protocol",
+   "deps": [
+    "W004",
+    "W019"
+   ],
+   "write_surface": [
+    "packages/tradrl-market-participants/",
+    "contracts/participants/"
+   ],
+   "status": "merged",
+   "branch": "work/w023",
+   "merged_sha": "450a621",
+   "pr": 28
+  },
+  {
+   "id": "W024",
+   "title": "ABIDES reactive-market adapter",
+   "deps": [
+    "W023",
+    "W002"
+   ],
+   "write_surface": [
+    "packages/tradrl-adapters/abides/"
+   ],
+   "status": "merged",
+   "branch": "work/w024",
+   "merged_sha": "c049db1",
+   "pr": 36
+  },
+  {
+   "id": "W025",
+   "title": "Counterfactual world framework",
+   "deps": [
+    "W016",
+    "W023"
+   ],
+   "write_surface": [
+    "packages/tradrl-world-sim/counterfactual/"
+   ],
+   "status": "merged",
+   "branch": "work/w025",
+   "merged_sha": "4bb664a",
+   "pr": 31
+  },
+  {
+   "id": "W026",
+   "title": "Crypto provider adapter baseline",
+   "deps": [
+    "W002",
+    "W020"
+   ],
+   "write_surface": [
+    "packages/tradrl-adapters/crypto/"
+   ],
+   "status": "merged",
+   "branch": "work/w026",
+   "merged_sha": "f5eeca1",
+   "pr": 20
+  },
+  {
+   "id": "W027",
+   "title": "Research/news/event information world",
+   "deps": [
+    "W004",
+    "W020"
+   ],
+   "write_surface": [
+    "packages/tradrl-information/"
+   ],
+   "status": "merged",
+   "branch": "work/w027",
+   "merged_sha": "3db0ade",
+   "pr": 21
+  },
+  {
+   "id": "W028",
+   "title": "Evidence/provenance projection",
+   "deps": [
+    "W016",
+    "W027"
+   ],
+   "write_surface": [
+    "packages/tradrl-evidence/"
+   ],
+   "status": "merged",
+   "branch": "work/w028",
+   "merged_sha": "701c3e8",
+   "pr": 23
+  },
+  {
+   "id": "W029",
+   "title": "Layout presets/workspace profiles",
+   "deps": [
+    "W006",
+    "W019"
+   ],
+   "write_surface": [
+    "packages/ui/src/trading-world/presets/"
+   ],
+   "status": "merged",
+   "branch": "work/w029",
+   "merged_sha": "55ed80e",
+   "pr": 35
+  },
+  {
+   "id": "W030",
+   "title": "Streaming performance/projection coalescing",
+   "deps": [
+    "W019"
+   ],
+   "write_surface": [
+    "packages/tradrl-world-sim/performance/",
+    "packages/ui/src/trading-world/performance/"
+   ],
+   "status": "merged",
+   "branch": "work/w030",
+   "merged_sha": "c416a40",
+   "pr": 33
+  },
+  {
+   "id": "W031",
+   "title": "Headless World CLI/replay runner",
+   "deps": [
+    "W016",
+    "W020"
+   ],
+   "write_surface": [
+    "apps/tradrl-world-cli/"
+   ],
+   "status": "merged",
+   "branch": "work/w031",
+   "merged_sha": "2fd8ece",
+   "pr": 24
+  },
+  {
+   "id": "W032",
+   "title": "Agent Body contracts",
+   "deps": [
+    "W019"
+   ],
+   "write_surface": [
+    "packages/agent-body/",
+    "contracts/agent/"
+   ],
+   "status": "merged",
+   "branch": "work/w032",
+   "merged_sha": "1602889",
+   "pr": 26
+  },
+  {
+   "id": "W033",
+   "title": "Cognitive Substrate contract",
+   "deps": [
+    "W032"
+   ],
+   "write_surface": [
+    "packages/cognitive-substrate/",
+    "contracts/agent/"
+   ],
+   "status": "merged",
+   "branch": "work/w033",
+   "merged_sha": "7447acc",
+   "pr": 27
+  },
+  {
+   "id": "W034",
+   "title": "Possession/compatibility/lineage",
+   "deps": [
+    "W032",
+    "W033"
+   ],
+   "write_surface": [
+    "packages/possession/"
+   ],
+   "status": "merged",
+   "branch": "work/w034",
+   "merged_sha": "7f7deb7",
+   "pr": 30
+  },
+  {
+   "id": "W035",
+   "title": "Observation/action protocol",
+   "deps": [
+    "W019",
+    "W032",
+    "W034"
+   ],
+   "write_surface": [
+    "packages/agent-world-protocol/"
+   ],
+   "status": "merged",
+   "branch": "work/w035",
+   "merged_sha": "dc36eaf",
+   "pr": 32
+  },
+  {
+   "id": "W036",
+   "title": "Reward/constraint evaluation contract",
+   "deps": [
+    "W019",
+    "W035"
+   ],
+   "write_surface": [
+    "packages/learning-objectives/"
+   ],
+   "status": "merged",
+   "branch": "work/w036",
+   "merged_sha": "7ef01fe",
+   "pr": 34
+  },
+  {
+   "id": "W037",
+   "title": "Trajectory/experiment protocol",
+   "deps": [
+    "W035",
+    "W036"
+   ],
+   "write_surface": [
+    "packages/trajectory/",
+    "packages/experiments/"
+   ],
+   "status": "merged",
+   "branch": "work/w037",
+   "merged_sha": "99f38b9",
+   "pr": 37
+  },
+  {
+   "id": "W038",
+   "title": "Evaluation/verification",
+   "deps": [
+    "W022",
+    "W035",
+    "W036",
+    "W037"
+   ],
+   "write_surface": [
+    "packages/evaluation/",
+    "packages/verification/"
+   ],
+   "status": "merged",
+   "branch": "work/w038",
+   "merged_sha": "fe18ee4",
+   "pr": 38
+  },
+  {
+   "id": "W039",
+   "title": "Organization model/compiler",
+   "deps": [
+    "W034",
+    "W036",
+    "W038"
+   ],
+   "write_surface": [
+    "packages/organization/",
+    "services/organization-compiler/"
+   ],
+   "status": "merged",
+   "branch": "work/w039",
+   "merged_sha": "69f79e8",
+   "pr": 39
+  },
+  {
+   "id": "W040",
+   "title": "Capability registry",
+   "deps": [
+    "W033",
+    "W038",
+    "W039"
+   ],
+   "write_surface": [
+    "packages/capability-registry/"
+   ],
+   "status": "merged",
+   "branch": "work/w040",
+   "merged_sha": "7d8f742",
+   "pr": 40
+  },
+  {
+   "id": "W041",
+   "title": "Skill extraction/Body Forge",
+   "deps": [
+    "W034",
+    "W037",
+    "W039",
+    "W040"
+   ],
+   "write_surface": [
+    "packages/skills/",
+    "services/body-forge/"
+   ],
+   "status": "merged",
+   "branch": "work/w041",
+   "pr": 41,
+   "merged_sha": "8d55d090865c4f60f2215b977233b7136a6d72ae"
+  },
+  {
+   "id": "W042",
+   "title": "Empirical substrate/model selection",
+   "deps": [
+    "W040",
+    "W041"
+   ],
+   "write_surface": [
+    "services/model-selection/",
+    "benchmarks/model-capability/"
+   ],
+   "status": "merged",
+   "branch": "work/w042",
+   "pr": 42,
+   "merged_sha": "26fa1c00ca967e1cd29d338c11d614c40dc26f19"
+  },
+  {
+   "id": "W043",
+   "title": "Autonomous Body commissioning",
+   "deps": [
+    "W039",
+    "W041",
+    "W042"
+   ],
+   "write_surface": [
+    "services/body-forge/commissioning/"
+   ],
+   "status": "merged",
+   "branch": "work/w043",
+   "pr": 44,
+   "merged_sha": "71a2bd53e1d82a4ffa8bec3468f34dbfea409799"
+  },
+  {
+   "id": "W044",
+   "title": "Agent/organization binding to World",
+   "deps": [
+    "W035",
+    "W039",
+    "W043"
+   ],
+   "write_surface": [
+    "services/world-agent-runtime/"
+   ],
+   "status": "merged",
+   "branch": "work/w044",
+   "pr": 46,
+   "merged_sha": "4969de28f487f2072b929ea0f6f61d3b20411a94"
+  },
+  {
+   "id": "W045",
+   "title": "Multi-agent populations",
+   "deps": [
+    "W023",
+    "W039",
+    "W044"
+   ],
+   "write_surface": [
+    "services/populations/"
+   ],
+   "status": "merged",
+   "branch": "work/w045",
+   "pr": 47,
+   "merged_sha": "a95fb593897e44d4ebd9f11202aa0c01ea4d052e"
+  },
+  {
+   "id": "W046",
+   "title": "Curriculum/self-play/adversarial populations",
+   "deps": [
+    "W038",
+    "W045"
+   ],
+   "write_surface": [
+    "services/learning/curriculum/",
+    "services/learning/populations/"
+   ],
+   "status": "merged",
+   "branch": "work/w046",
+   "pr": 50,
+   "merged_sha": "064c25888879812ed83fb3d99236941cd51a86a1"
+  },
+  {
+   "id": "W047",
+   "title": "RL interface/trainer bridge",
+   "deps": [
+    "W037",
+    "W038",
+    "W044"
+   ],
+   "write_surface": [
+    "packages/rl-protocol/",
+    "services/learning/rl/"
+   ],
+   "status": "merged",
+   "branch": "work/w047",
+   "pr": 48,
+   "merged_sha": "c15364f1734d7101e07b65bd389b9b4a0c45c119"
+  },
+  {
+   "id": "W048",
+   "title": "Distributed episode generation",
+   "deps": [
+    "W047",
+    "W045"
+   ],
+   "write_surface": [
+    "services/learning/compute/"
+   ],
+   "status": "merged",
+   "branch": "work/w048",
+   "pr": 49,
+   "merged_sha": "5bd63e59598a7ebf138c939832f4664b5fd1471c"
+  },
+  {
+   "id": "W049",
+   "title": "JAX-LOB training adapter",
+   "deps": [
+    "W047",
+    "W048",
+    "W002"
+   ],
+   "write_surface": [
+    "packages/tradrl-adapters/jax-lob/"
+   ],
+   "status": "merged",
+   "branch": "work/w049",
+   "pr": 51,
+   "merged_sha": "38c1c77e55f497928d2c3d07d959a42525bd39bc"
+  },
+  {
+   "id": "W050",
+   "title": "Time Machine + point-in-time knowledge firewall",
+   "deps": [
+    "W004",
+    "W022",
+    "W027",
+    "W047"
+   ],
+   "write_surface": [
+    "packages/tradrl-time-machine/",
+    "services/time-machine/"
+   ],
+   "status": "merged",
+   "branch": "work/w050",
+   "pr": 52,
+   "merged_sha": "a1cceadbb837f822b6ae344011f730d09b086ea8"
+  },
+  {
+   "id": "W051",
+   "title": "Backtest-overfitting/search integrity",
+   "deps": [
+    "W038",
+    "W047",
+    "W050"
+   ],
+   "write_surface": [
+    "packages/search-integrity/"
+   ],
+   "status": "merged",
+   "branch": "work/w051",
+   "pr": 54,
+   "merged_sha": "5ee0ffc38468474ac3a1425c38e20717eb368b95"
+  },
+  {
+   "id": "W052",
+   "title": "Walk-forward/regime/asset/venue holdouts",
+   "deps": [
+    "W038",
+    "W050",
+    "W051"
+   ],
+   "write_surface": [
+    "packages/evaluation-splits/"
+   ],
+   "status": "merged",
+   "branch": "work/w052",
+   "pr": 55,
+   "merged_sha": "579bbb10fb406afe57714a1a50a337a7798abcf1"
+  },
+  {
+   "id": "W053",
+   "title": "Outcome/post-mortem learning",
+   "deps": [
+    "W038",
+    "W051",
+    "W052"
+   ],
+   "write_surface": [
+    "services/outcome-learning/"
+   ],
+   "status": "merged",
+   "branch": "work/w053",
+   "pr": 57,
+   "merged_sha": "7b3db5f4b546b239c7e19be56dc80005c862a9da"
+  },
+  {
+   "id": "W054",
+   "title": "Firm Brain",
+   "deps": [
+    "W028",
+    "W038",
+    "W053"
+   ],
+   "write_surface": [
+    "services/firm-brain/",
+    "packages/memory/"
+   ],
+   "status": "merged",
+   "branch": "work/w054",
+   "pr": 59,
+   "merged_sha": "56781b37f73b2176915e56e20d001314ff46a8e6"
+  },
+  {
+   "id": "W055",
+   "title": "Continuous autonomous improvement",
+   "deps": [
+    "W041",
+    "W046",
+    "W051",
+    "W053",
+    "W054"
+   ],
+   "write_surface": [
+    "services/autonomous-learning/"
+   ],
+   "status": "merged",
+   "branch": "work/w055",
+   "pr": 61,
+   "merged_sha": "37262fb79e8e54f69899615580d5465d78a57326"
+  },
+  {
+   "id": "W056",
+   "title": "Provider-neutral capability-provider interface",
+   "deps": [
+    "W040",
+    "W041"
+   ],
+   "write_surface": [
+    "packages/capability-provider/",
+    "contracts/capability/"
+   ],
+   "status": "merged",
+   "branch": "work/w056",
+   "pr": 43,
+   "merged_sha": "619598c36445de4cd3758d37e1dc6f4d0a6ea839"
+  },
+  {
+   "id": "W057",
+   "title": "Arena capability-provider adapter",
+   "deps": [
+    "W056",
+    "W002"
+   ],
+   "write_surface": [
+    "packages/tradrl-adapters/arena/"
+   ],
+   "status": "merged",
+   "branch": "work/w057",
+   "pr": 45,
+   "merged_sha": "39bba1dd3f96a9a4b37a32e898ba8264202b77f1"
+  },
+  {
+   "id": "W058",
+   "title": "Commercial capability marketplace/entitlements",
+   "deps": [
+    "W056",
+    "W057",
+    "W054"
+   ],
+   "write_surface": [
+    "packages/marketplace/",
+    "packages/entitlements/"
+   ],
+   "status": "merged",
+   "branch": "work/w058",
+   "pr": 60,
+   "merged_sha": "ad07bf22ab9c80f58c8e7d6e42f832f45f6ec5a6"
+  },
+  {
+   "id": "W059",
+   "title": "Public/private API + SDK",
+   "deps": [
+    "W019",
+    "W028",
+    "W039",
+    "W050"
+   ],
+   "write_surface": [
+    "services/api/",
+    "packages/sdk/"
+   ],
+   "status": "merged",
+   "branch": "work/w059",
+   "pr": 53,
+   "merged_sha": "8966995c4f7e56889a36da841296ca41c14621fb"
+  },
+  {
+   "id": "W060",
+   "title": "Security/tenancy/secrets/isolation",
+   "deps": [
+    "W059",
+    "W054",
+    "W058"
+   ],
+   "write_surface": [
+    "packages/security/",
+    "services/security/"
+   ],
+   "status": "merged",
+   "branch": "work/w060",
+   "pr": 62,
+   "merged_sha": "1895e483bec500f27675e0b5f15c868915d513f5"
+  },
+  {
+   "id": "W061",
+   "title": "Observability/audit/operations",
+   "deps": [
+    "W019",
+    "W028",
+    "W059"
+   ],
+   "write_surface": [
+    "packages/observability/",
+    "services/operations/"
+   ],
+   "status": "merged",
+   "branch": "work/w061",
+   "pr": 56,
+   "merged_sha": "cc0d844c0e37e2e167217745bd4562e45f901a08"
+  },
+  {
+   "id": "W062",
+   "title": "Production deployment/reliability/performance",
+   "deps": [
+    "W059",
+    "W060",
+    "W061"
+   ],
+   "write_surface": [
+    "deploy/",
+    "ops/",
+    "tests/performance/"
+   ],
+   "status": "merged",
+   "branch": "work/w062",
+   "merged_sha": "0bed0d95d910445fbf76f66433f928d32cd584d6"
+  },
+  {
+   "id": "W063",
+   "title": "Benchmark/evidence publication",
+   "deps": [
+    "W022",
+    "W038",
+    "W051",
+    "W052",
+    "W061"
+   ],
+   "write_surface": [
+    "research/benchmarks/",
+    "docs/benchmarks/"
+   ],
+   "status": "merged",
+   "branch": "work/w063",
+   "pr": 58,
+   "merged_sha": "acd3ad94cb47bf166de859fbcbf25cba5a8b382e"
+  },
+  {
+   "id": "W064",
+   "title": "Reference end-to-end trading journey",
+   "deps": [
+    "W043",
+    "W044",
+    "W047",
+    "W050",
+    "W054",
+    "W057",
+    "W059",
+    "W060",
+    "W061"
+   ],
+   "write_surface": [
+    "examples/reference-trading/",
+    "tests/e2e/"
+   ],
+   "status": "merged",
+   "branch": "work/w064",
+   "merged_sha": "4de6a05ea58c2f6909499bc449a28cb711fb801b"
+  },
+  {
+   "id": "W065",
+   "title": "Live-mirror/shadow execution adapter",
+   "deps": [
+    "W050",
+    "W059",
+    "W060",
+    "W061"
+   ],
+   "write_surface": [
+    "packages/tradrl-adapters/broker/",
+    "services/shadow/"
+   ],
+   "status": "merged",
+   "branch": "work/w065",
+   "merged_sha": "b0a941831cd4f7a0ed7e7f3cba505e007545ebf3"
+  },
+  {
+   "id": "W066",
+   "title": "Product identity/branding migration from ZCode",
+   "deps": [
+    "W062"
+   ],
+   "write_surface": [
+    "product identity metadata and identity surfaces only"
+   ],
+   "status": "merged",
+   "branch": "work/w066",
+   "merged_sha": "d2711c97410be629c1f145a8a32edeca66bbdf59"
+  },
+  {
+   "id": "W067",
+   "title": "Desktop application release packaging — downloadable installers from GitHub Releases",
+   "deps": [
+    "W066"
+   ],
+   "write_surface": [
+    ".github/workflows/",
+    "scripts/install-desktop.sh",
+    "scripts/install-desktop.ps1",
+    "docs/release/",
+    "README.md download-and-install section only",
+    "packages/desktop/scripts/build-metadata.mjs version-override seam only"
+   ],
+   "status": "merged",
+   "branch": "work/w067",
+   "notes": "PR #68 squash-merged to main as 4cb42ba (TL local-merge path — merge API unavailable to this PAT class). Deliverables: release-desktop.yml (tag-triggered, 4-target matrix, GITHUB_TOKEN publish), install-desktop.sh/.ps1 (SHA256-refusing quick installers), README download section, docs/release/DESKTOP-RELEASE.md runbook, ZCODE_APP_VERSION build-metadata seam. Release line: TL pushes tag v3.14.3-tradrl.1 → workflow builds+publishes installers. Pre-existing tradrl-governance.yml CI breakage (corrupted trigger + setup-node cache:pnpm ordering, 198/198 runs red since W001) flagged by the worker, out of this write surface — follow-up work order.",
+   "merged_sha": "4cb42ba6c6143ae0872556fc075690896592a3df"
+  }
+ ],
+ "notes": [
+  "Repository is sole source of truth.",
+  "One Work Order = one worker = one branch = one PR.",
+  "Bootstrap W001 merged via PR #1 at 9f0e10924cac319261f7689b40ebe11988f772e9.",
+  "Maximum concurrent worker count is 3; do not fill unused capacity with speculative work.",
+  "Current ready frontier after the W040 merge (PR #40): W041.",
+  "2026-10-16: root typecheck gate repaired (PR #67, squash 1e315a5): the W006/W018 .d.ts seam shims flipped to package specifiers (relative re-exports pulled the contracts/sim source closure into the ui composite program — the TS6059/TS6307 storm) + 10 source-level fixes in the W030 performance surface. TL battery all-green: typecheck 12/12 EXIT 0, lint 0 errors, governance PASS, W019 golden suite green, pinned digests unchanged.",
+  "2026-10-16: W067 registered on operator directive ('make sure you have an application I can download and install from the github repo') — the first post-completion release-line work item: tag-triggered multi-platform desktop installer workflow + GitHub Release publication + quick-install scripts + README install section. Validator count law updated 66→67 in the same registration commit."
+ ]
 }
