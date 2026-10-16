@@ -1,0 +1,261 @@
+# W067 — Desktop application release packaging.
+#
+# Tag-triggered ONLY (this workflow never runs on ordinary branch pushes): the
+# TL pushes a release tag after merging to main, and every supported platform's
+# installer is built and published to a GitHub Release.
+#
+# Tag law (docs/release/DESKTOP-RELEASE.md): release tags are
+# v<workbench-version>-tradrl.N (e.g. v3.14.3-tradrl.1). The bare workbench tag
+# v3.14.3 already exists at the upstream fork point and must never be reused.
+name: Release Desktop
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# GITHUB_TOKEN only — it is enough to create the Release and upload assets.
+# No secrets, PATs or other tokens are used by this workflow.
+permissions:
+  contents: write
+
+# Re-pushing the same tag cancels the superseded run instead of racing a
+# second release pipeline against it.
+concurrency:
+  group: release-desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-desktop:
+    name: build-${{ matrix.target_os }}-${{ matrix.target_arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runs_on: ubuntu-latest
+            target_os: linux
+            target_arch: x64
+          - runs_on: windows-latest
+            target_os: win
+            target_arch: x64
+          - runs_on: macos-latest
+            target_os: mac
+            target_arch: arm64
+          - runs_on: macos-latest
+            target_os: mac
+            target_arch: x64
+    runs-on: ${{ matrix.runs_on }}
+    timeout-minutes: 90
+    env:
+      # Production identity (W066 identity law): productName stays "ZCode",
+      # appId stays dev.zcode.app. Without this the desktop build silently
+      # falls back to the "ZCode Preview" identity plus a _TEST artifact name
+      # suffix — both wrong for a release.
+      ZCODE_ENV: production
+      # Cross-packaging seam: target-platform.mjs reads these (falling back to
+      # the runner platform). They are set at job level so they are present
+      # BEFORE asset prep — prepare:agent-bundle and prepare:native-search must
+      # stage assets for the packaging target, not for the runner host (the
+      # macos-latest runner is arm64 and cross-packages the mac-x64 installer).
+      ZCODE_TARGET_OS: ${{ matrix.target_os }}
+      ZCODE_TARGET_ARCH: ${{ matrix.target_arch }}
+      # The desktop installer's critical runtime assets are all local: the
+      # agent JS bundle (local turbo build) and the in-repo
+      # ripgrep/ugrep/bfs archives (local unpack + SHA256 verify).
+      # prepare:remote-assets only fetches REMOTE SSH/WSL prebuilds from the
+      # zcode-internal intranet mirror (INTRANET_MACHINE_HOST:12345), which is
+      # unreachable from GitHub Actions and not needed by the installer — so it
+      # is skipped (prepare-runtime-assets.mjs honors this switch).
+      ZCODE_SKIP_REMOTE_ASSETS: "1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Derive app version from the release tag
+        # v3.14.3-tradrl.1 -> 3.14.3-tradrl.1. The version seam lives in
+        # packages/desktop/scripts/build-metadata.mjs (ZCODE_APP_VERSION takes
+        # precedence over the root package.json workbench version) and flows
+        # into build-meta.json and the electron-builder artifact names.
+        shell: bash
+        run: |
+          echo "ZCODE_APP_VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      - name: Set up pnpm
+        # Reads the packageManager pin (pnpm@10.33.2) from package.json.
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        shell: bash
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare local runtime assets
+        # Local-only asset prep (agent bundle + native-search archives +
+        # macOS window-bounds helper); remote assets are skipped via
+        # ZCODE_SKIP_REMOTE_ASSETS=1 from the job-level env above.
+        shell: bash
+        run: pnpm --filter @zcode/desktop run prepare:runtime-assets
+
+      - name: Build workspace
+        # Minimal correct sequence: build every workspace package, then the
+        # desktop production bundles. build:no-runtime-assets also runs
+        # prepare:build-meta, which bakes the tag-derived ZCODE_APP_VERSION
+        # into out/metadata/build-meta.json for electron-builder.
+        shell: bash
+        run: pnpm build:bootstrap
+
+      - name: Bundle desktop installer
+        # Assets were prepped and the workspace build already ran above, so
+        # --skip-prepare --skip-build takes bundle.mjs straight to
+        # electron-builder (plus its asar runtime-dependency verification and
+        # bundle-size audit) without redoing either step.
+        shell: bash
+        run: >-
+          pnpm --filter @zcode/desktop run bundle --
+          --os ${{ matrix.target_os }}
+          --arch ${{ matrix.target_arch }}
+          --skip-prepare --skip-build
+
+      - name: Show installer inventory
+        shell: bash
+        run: ls -la packages/desktop/dist
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-installers-${{ matrix.target_os }}-${{ matrix.target_arch }}
+          # Installers only. The macOS .zip (auto-update payload, duplicates
+          # the .dmg) and *.exe.blockmap (delta-update metadata) stay out of
+          # the Release; Linux additionally ships deb/rpm/pacman system
+          # packages alongside the AppImage.
+          path: |
+            packages/desktop/dist/*.dmg
+            packages/desktop/dist/*.exe
+            packages/desktop/dist/*.AppImage
+            packages/desktop/dist/*.deb
+            packages/desktop/dist/*.rpm
+            packages/desktop/dist/*.pkg.tar.zst
+          if-no-files-found: error
+          retention-days: 14
+
+  publish-release:
+    name: publish-github-release
+    needs: build-desktop
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Download installer artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: desktop-installers-*
+
+      - name: Stage installers and generate SHASUMS256.txt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p staging
+          find artifacts -type f \
+            \( -name '*.dmg' -o -name '*.exe' -o -name '*.AppImage' \
+               -o -name '*.deb' -o -name '*.rpm' -o -name '*.pkg.tar.zst' \) \
+            -exec cp -- {} staging/ \;
+          if [ -z "$(ls -A staging)" ]; then
+            echo "::error::no installer files were staged from the build artifacts"
+            exit 1
+          fi
+          (
+            cd staging
+            sha256sum -- * > SHASUMS256.txt
+            ls -la
+            echo "---- SHASUMS256.txt ----"
+            cat SHASUMS256.txt
+          )
+
+      - name: Render release notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          commit="${GITHUB_SHA}"
+          cat > release-notes.md <<'EOF'
+          ## ZCode Desktop {{VERSION}} — TradRL release
+
+          Workbench-inherited desktop build (productName `ZCode`, appId `dev.zcode.app`), packaged by the TradRL-2.0 release line.
+
+          - Version: **{{VERSION}}** (tag `{{TAG}}`)
+          - Commit: `{{COMMIT}}`
+
+          ### Downloads
+
+          | Platform | Installer |
+          | --- | --- |
+          | macOS (Apple Silicon) | `ZCode-{{VERSION}}-mac-arm64.dmg` |
+          | macOS (Intel) | `ZCode-{{VERSION}}-mac-x64.dmg` |
+          | Windows (x64) | `ZCode-{{VERSION}}-win-x64.exe` |
+          | Linux (x64) | `ZCode-{{VERSION}}-linux-x64.AppImage` |
+          | Linux (x64, deb) | `ZCode-{{VERSION}}-linux-x64.deb` |
+          | Linux (x64, rpm) | `ZCode-{{VERSION}}-linux-x64.rpm` |
+          | Linux (x64, pacman) | `ZCode-{{VERSION}}-linux-x64.pkg.tar.zst` |
+
+          ### Quick install
+
+          macOS / Linux (downloads, verifies the SHA256 and installs):
+
+              curl -fsSL https://raw.githubusercontent.com/payswapdotorg/tradrl-2.0/main/scripts/install-desktop.sh | bash
+
+          Windows (PowerShell):
+
+              irm https://raw.githubusercontent.com/payswapdotorg/tradrl-2.0/main/scripts/install-desktop.ps1 | iex
+
+          ### Integrity
+
+          Every asset is checksummed in `SHASUMS256.txt` (attached to this release). After downloading an installer plus `SHASUMS256.txt` into the same directory:
+
+              sha256sum -c --ignore-missing SHASUMS256.txt      # Linux
+              shasum -a 256 -c --ignore-missing SHASUMS256.txt  # macOS
+
+          ### Unsigned-build disclosure
+
+          These builds are **not code-signed** (no signing certificates exist for this project yet):
+
+          - **macOS**: Gatekeeper blocks the first launch of unsigned apps. Right-click `ZCode.app` and choose **Open** (or System Settings → Privacy & Security → **Open Anyway**).
+          - **Windows**: SmartScreen may show "Windows protected your PC". Choose **More info** → **Run anyway**.
+          - **Linux**: the AppImage needs the executable bit — the quick installer applies it; for manual downloads run `chmod +x` on the file.
+
+          Full release runbook: [`docs/release/DESKTOP-RELEASE.md`](https://github.com/payswapdotorg/tradrl-2.0/blob/main/docs/release/DESKTOP-RELEASE.md).
+          EOF
+          sed -i \
+            -e "s|{{VERSION}}|${version}|g" \
+            -e "s|{{TAG}}|${GITHUB_REF_NAME}|g" \
+            -e "s|{{COMMIT}}|${commit}|g" \
+            release-notes.md
+          {
+            printf '\n### Checksums\n\n```text\n'
+            cat staging/SHASUMS256.txt
+            printf '```\n'
+          } >> release-notes.md
+          cat release-notes.md
+
+      - name: Create GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release ${GITHUB_REF_NAME} already exists; refreshing its assets and notes."
+            gh release upload "$GITHUB_REF_NAME" staging/* --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$GITHUB_REF_NAME" --notes-file release-notes.md --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "ZCode Desktop ${GITHUB_REF_NAME#v}" \
+              --notes-file release-notes.md \
+              --verify-tag \
+              staging/*
+          fi
