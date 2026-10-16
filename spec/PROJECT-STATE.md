@@ -6,16 +6,19 @@ Program: TRADRL-2.0
 
 ## Current program state
 
-- W001: merged at 9f0e10924cac319261f7689b40ebe11988f772e9
-- Current ready frontier: W002, W003
-- World Alpha: not started
-- Agent/RL implementation: gated behind World Alpha
-- Arena: optional, non-blocking
+- All 66 work items (W001–W066) are merged; `program/graph.json` is authoritative for per-item status
+- Ready frontier: empty (last recompute after W066, PR #66)
+- 2026-10-16: the root typecheck gate was found RED on the completion commit (TL battery: the W006/W018 `.d.ts` seam shims re-exported through relative paths, pulling the contracts/sim source closure into the ui composite program — the TS6059/TS6307 storm — plus 10 source-level errors in the W030 performance surface) and REPAIRED: PR #67, squash-merged as 1e315a5 — shims flipped to package specifiers (the 8cc3d82 precedent) + the source fixes; all gates green (typecheck 12/12 EXIT 0, lint 0 errors, governance PASS, W019 golden suite)
+- World Alpha: complete (W013–W019, golden suite green)
+- Agent/RL implementation: complete through Phase 5 (W032–W058)
+- Arena: complete as the optional capability provider (W057)
 - Maximum workers: 3
 
 ## Immediate objective
 
-Build Trader World Alpha inside the existing ZCode workbench.
+The 66-item implementation program is complete and gate-verified. The pending
+human step is the operator's launch-gate sign-off. The live-data pilot
+decision (production deployment mode) remains open per W062/W065 deliverables.
 
 That means a first-class Trading World dockable surface backed by a real deterministic simulated market with order-book execution, portfolio/risk, clock, snapshots, branching, journal/evidence, headless parity and responsive UX.
 
