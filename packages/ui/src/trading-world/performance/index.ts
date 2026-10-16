@@ -17,7 +17,7 @@ export {
   createCoalescedProjectionStream,
   macrotaskScheduler,
   manualScheduler,
-  type CoalescedDrainScheduler,
+  type CoalescingDrainScheduler,
   type CoalescedProjectionStream,
   type CoalescedProjectionStreamInput,
   type CoalescedStreamMetrics,

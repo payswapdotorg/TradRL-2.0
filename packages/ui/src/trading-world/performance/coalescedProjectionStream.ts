@@ -98,6 +98,16 @@ export interface CoalescedStreamMetrics {
   readonly feedDrives: number;
 }
 
+/**
+ * The mutable accumulator behind {@link CoalescedStreamMetrics}: the stream
+ * counts into this object as signals and drains happen, and the public
+ * `metrics()` projection hands out a fresh readonly snapshot of it — the
+ * public contract stays readonly, the internal bookkeeping stays writable.
+ */
+type MutableStreamMetrics = {
+  -readonly [K in keyof CoalescedStreamMetrics]: CoalescedStreamMetrics[K];
+};
+
 /** Input for {@link createCoalescedProjectionStream}. */
 export interface CoalescedProjectionStreamInput {
   /** An ATTACHED engine client (the W018 `EngineWorldClient`). */
@@ -160,7 +170,7 @@ export function createCoalescedProjectionStream(
   /** drainNow() callers waiting on the in-flight drain (they run the
    * follow-up inline, so the scheduler path must not double-schedule). */
   let drainNowWaiters = 0;
-  const metrics: CoalescedStreamMetrics = {
+  const metrics: MutableStreamMetrics = {
     publications: 0,
     clockSignals: 0,
     eventsIngested: 0,
@@ -301,11 +311,8 @@ export function createCoalescedProjectionStream(
             `keys of surface '${feedInput.surface}' — it would never refresh`,
         );
       }
-      const registered: RegisteredFeed = {
-        surface: feedInput.surface,
-        key: feedInput.key,
-        controller: undefined as unknown as CoalescedSurfaceFeedController<unknown>,
-      };
+      // The controller first: its onStop closure captures `registered`
+      // below (called only AFTER registration, so the closure is safe).
       const controller = createCoalescedSurfaceFeed<T>({
         surface: feedInput.surface,
         key: feedInput.key,
@@ -320,7 +327,11 @@ export function createCoalescedProjectionStream(
           void runDrain(false);
         },
       });
-      registered.controller = controller as unknown as CoalescedSurfaceFeedController<unknown>;
+      const registered: RegisteredFeed = {
+        surface: feedInput.surface,
+        key: feedInput.key,
+        controller: controller as unknown as CoalescedSurfaceFeedController<unknown>,
+      };
       feeds.push(registered);
       // The attach fetch: declared keys start dirty, so the next drain
       // refreshes the feed immediately (the W009 first-fetch law).

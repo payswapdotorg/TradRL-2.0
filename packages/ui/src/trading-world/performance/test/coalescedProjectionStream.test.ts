@@ -70,7 +70,15 @@ function scriptedClient() {
       jumpToEvent: () => Promise.resolve(),
       setSpeed: () => Promise.resolve(),
       followRealtime: () => Promise.resolve(),
-      getClock: () => Promise.resolve({ simulationTime: 0, status: "paused", speed: 1, followingRealtime: false }),
+      getClock: () =>
+        Promise.resolve({
+          // The branded TimestampMs literal (the engineAttachment idiom:
+          // a branded number can only be constructed through a cast).
+          simulationTime: 0 as ClockView["simulationTime"],
+          status: "paused",
+          speed: 1,
+          followingRealtime: false,
+        }),
     },
     evidence: {
       getEvent: () => Promise.resolve(undefined),
@@ -257,7 +265,9 @@ test("loud registration validation: unconfigured surfaces never refresh", () => 
   assert.throws(
     () =>
       stream.registerFeed({
-        // @ts-expect-error — unconfigured surface on purpose
+        // "orderbook" is a type-valid surface deliberately left UNCONFIGURED
+        // in STREAM_CONFIG — the loud registration validation under test is
+        // the stream's runtime rejection, not a type error.
         surface: "orderbook",
         key: "instrument-es-x",
         fetch: quoteFetch,
