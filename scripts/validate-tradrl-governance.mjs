@@ -39,7 +39,7 @@ if (graph.policies?.max_concurrent_work_orders !== 3) {
 }
 
 const items = graph.items ?? [];
-if (items.length !== 66) throw new Error(`expected 66 work items, got ${items.length}`);
+if (items.length !== 67) throw new Error(`expected 67 work items, got ${items.length}`);
 
 const ids = new Set(items.map((x) => x.id));
 const byId = new Map(items.map((x) => [x.id, x]));

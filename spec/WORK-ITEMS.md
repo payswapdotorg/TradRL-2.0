@@ -85,6 +85,7 @@ The full architecture is specified before implementation so a fresh TL can execu
 - W064 Reference end-to-end trading journey. deps: W043,W044,W047,W050,W054,W057,W059,W060,W061. surface: examples/reference-trading/, tests/e2e/.
 - W065 Live-mirror/shadow execution adapter. deps: W050,W059,W060,W061. surface: packages/tradrl-adapters/broker/, services/shadow/.
 - W066 Product identity/branding migration from ZCode. deps: W062. surface: product identity metadata and identity surfaces only.
+- W067 Desktop application release packaging — downloadable installers from GitHub Releases. deps: W066. surface: .github/workflows/, scripts/install-desktop.sh, scripts/install-desktop.ps1, docs/release/, README.md download-and-install section only, packages/desktop/scripts/build-metadata.mjs version-override seam only.
 
 ## Phase gates
 Phase 1 — Trader World Alpha: W001–W019 plus W029–W031 where required by acceptance.
@@ -93,5 +94,6 @@ Phase 3 — Agent intelligence: W032–W046.
 Phase 4 — Learning/Time Machine: W047–W055.
 Phase 5 — Human capability: W056–W058.
 Phase 6 — production/productization: W059–W066.
+Release line (post-completion, operator-directed): W067+.
 
 No later phase may claim the whole platform complete while an earlier phase gate is red.
