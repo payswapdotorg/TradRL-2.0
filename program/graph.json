@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "program": "TradRL-2.0",
-  "updated_at": "2026-10-16T05:57:33Z",
+  "updated_at": "2026-10-16T06:30:00Z",
   "policies": {
     "max_concurrent_work_orders": 3,
     "merge_method": "squash",
@@ -1091,7 +1091,7 @@
         "README.md download-and-install section only",
         "packages/desktop/scripts/build-metadata.mjs version-override seam only"
       ],
-      "status": "ready",
+      "status": "in_progress",
       "branch": "work/w067"
     }
   ],
