@@ -28,8 +28,11 @@ export interface CoalescedSurfaceFeedController<T> {
   getServerState(): TradingWorldProjectionFeedState<T>;
   /** Stop the feed (fail-closes; the stream no longer drives it). */
   stop(): void;
-  /** Force a refresh now (the error-state Retry action; a direct drain). */
-  refresh(): () => void;
+  /**
+   * Force a refresh now (the error-state Retry action; a direct drain) —
+   * `void`, exactly like the W009 controller's Retry (projectionFeed.ts).
+   */
+  refresh(): void;
   /** The stream's observation-point drive: run the fetch once, now. */
   drive(drive: FeedDriveInput): Promise<void>;
 }
