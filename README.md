@@ -4,6 +4,33 @@ TradRL is a trader operating environment built from the ZCode workbench. The pro
 
 The repository is the **sole source of truth** for product architecture, implementation scope, work-order state, contracts, acceptance criteria, and engineering decisions. Chat history is non-authoritative.
 
+## Download & install
+
+Prebuilt desktop installers are published on the [GitHub Releases](https://github.com/payswapdotorg/tradrl-2.0/releases) page (built by the tag-triggered [Release Desktop](.github/workflows/release-desktop.yml) workflow):
+
+| Platform | Installer |
+| --- | --- |
+| macOS 12+ (Apple Silicon) | `ZCode-<version>-mac-arm64.dmg` |
+| macOS 12+ (Intel) | `ZCode-<version>-mac-x64.dmg` |
+| Windows 10/11 (x64) | `ZCode-<version>-win-x64.exe` (NSIS) |
+| Linux (x64) | `ZCode-<version>-linux-x64.AppImage` (+ `.deb` / `.rpm` / `.pkg.tar.zst`) |
+
+Quick install — macOS / Linux (downloads the latest release, verifies its SHA256 against `SHASUMS256.txt`, installs, and prints launch instructions):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/payswapdotorg/tradrl-2.0/main/scripts/install-desktop.sh | bash
+```
+
+Quick install — Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/payswapdotorg/tradrl-2.0/main/scripts/install-desktop.ps1 | iex
+```
+
+Manual download: grab the asset for your platform from the [latest release](https://github.com/payswapdotorg/tradrl-2.0/releases/latest) plus `SHASUMS256.txt`, verify it (`sha256sum -c --ignore-missing SHASUMS256.txt` on Linux, `shasum -a 256 -c --ignore-missing SHASUMS256.txt` on macOS), then mount the `.dmg` and drag **ZCode** to `/Applications`, run the `.exe`, or `chmod +x` the `.AppImage`.
+
+> **Unsigned builds:** no code-signing certificates exist for this project yet, so macOS Gatekeeper and Windows SmartScreen will warn on first launch. On macOS, right-click the app → **Open** (or System Settings → Privacy & Security → **Open Anyway**). On Windows, choose **More info** → **Run anyway**. The full release runbook — tag law, asset matrix, checksums, cut procedure — lives in [`docs/release/DESKTOP-RELEASE.md`](docs/release/DESKTOP-RELEASE.md).
+
 ## Product identity
 
 The product identity is typed data: [`product/`](product/) carries the PRODUCT IDENTITY CONTRACT (W066) — the closed identity-scope vocabulary (`product-name-bearing` / `workbench-inherited` / `license-notice` / `deployment-contract`), the per-surface identity declarations, the migration laws (a TradRL-branded surface carries the product's own name; a workbench-inherited surface preserves the ZCode workbench identity), and the content-addressed `identity-<digest>` record over canonical data, with every citation re-proven against real repository surfaces at the gate.

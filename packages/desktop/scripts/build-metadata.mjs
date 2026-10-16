@@ -84,7 +84,12 @@ export function collectBuildMetadata() {
   const desktopPackageJson = readJson(resolve(desktopDir, "package.json"));
 
   return {
-    appVersion: normalizeVersion(rootPackageJson.version),
+    // W067 release seam: the release workflow derives ZCODE_APP_VERSION from the
+    // pushed release tag (v3.14.3-tradrl.1 -> "3.14.3-tradrl.1"); without the
+    // env override, local builds keep the workbench version from the root
+    // package.json (see .github/workflows/release-desktop.yml and
+    // docs/release/DESKTOP-RELEASE.md for the tag law).
+    appVersion: normalizeVersion(process.env.ZCODE_APP_VERSION ?? rootPackageJson.version),
     buildCommitId: resolveCommitId(),
     buildTime: new Date().toISOString(),
     electronBuilderVersion: resolveInstalledPackageVersion(
