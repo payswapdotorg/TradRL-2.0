@@ -210,6 +210,9 @@ installer output) discloses this, with the per-OS bypass:
 - **Linux**: no OS-level warning; ensure the AppImage is executable
   (`chmod +x`).
 
+Per-platform signing pre-research — certificate paths, costs, CI wiring points,
+and the operator checklist — lives in [`CODE-SIGNING.md`](CODE-SIGNING.md).
+
 ## Signed builds — future work (out of scope)
 
 Signing requires credentials that do not exist yet:
