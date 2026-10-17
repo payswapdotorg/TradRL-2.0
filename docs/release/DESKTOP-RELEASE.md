@@ -70,12 +70,16 @@ counter (`-tradrl.2`). Never rewrite a tag whose release was already public.
 
 | Job (runner) | Bundle target | Installers published |
 | --- | --- | --- |
-| `ubuntu-latest` | `--os linux --arch x64` | `ZCode-<v>-linux-x64.AppImage`, `.deb`, `.rpm`, `.pkg.tar.zst` |
+| `ubuntu-latest` | `--os linux --arch x64` | `ZCode-<v>-linux-x86_64.AppImage`, `-linux-amd64.deb`, `-linux-x86_64.rpm`, `-linux-x64.pkg.tar.zst` |
 | `windows-latest` | `--os win --arch x64` | `ZCode-<v>-win-x64.exe` (NSIS) |
 | `macos-latest` (arm64) | `--os mac --arch arm64` | `ZCode-<v>-mac-arm64.dmg` |
 | `macos-latest` (arm64, cross) | `--os mac --arch x64` | `ZCode-<v>-mac-x64.dmg` |
 
 Also attached: `SHASUMS256.txt` — SHA256 of every published installer.
+
+Naming law: electron-builder's arch token differs per Linux target — AppImage
+and rpm publish as `x86_64`, deb as `amd64`, pacman as `x64`. Docs name
+artifacts as published, not as configured.
 
 Deliberately **not** published: the macOS `.zip` (the auto-update payload that
 duplicates the `.dmg`) and the `.exe.blockmap` files (delta-update metadata

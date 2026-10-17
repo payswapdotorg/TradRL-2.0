@@ -13,7 +13,7 @@ Prebuilt desktop installers are published on the [GitHub Releases](https://githu
 | macOS 12+ (Apple Silicon) | `ZCode-<version>-mac-arm64.dmg` |
 | macOS 12+ (Intel) | `ZCode-<version>-mac-x64.dmg` |
 | Windows 10/11 (x64) | `ZCode-<version>-win-x64.exe` (NSIS) |
-| Linux (x64) | `ZCode-<version>-linux-x64.AppImage` (+ `.deb` / `.rpm` / `.pkg.tar.zst`) |
+| Linux (x64) | `ZCode-<version>-linux-x86_64.AppImage` (+ `-linux-amd64.deb` / `-linux-x86_64.rpm` / `-linux-x64.pkg.tar.zst`) |
 
 Quick install — macOS / Linux (downloads the latest release, verifies its SHA256 against `SHASUMS256.txt`, installs, and prints launch instructions):
 

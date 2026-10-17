@@ -92,7 +92,8 @@ fetch() {
 
 case "${plat}" in
   mac) asset_regex="ZCode-.*-mac-${arch}\.dmg$" ;;
-  linux) asset_regex="ZCode-.*-linux-${arch}\.AppImage$" ;;
+  # electron-builder's AppImage arch token is x86_64, not x64 (real published name: ZCode-3.14.3-tradrl.2-linux-x86_64.AppImage) — accept both so a rename in either direction cannot re-break installs.
+  linux) asset_regex="ZCode-.*-linux-(x64|x86_64)\.AppImage$" ;;
 esac
 
 extract_asset_urls() {
