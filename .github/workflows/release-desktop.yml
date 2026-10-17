@@ -109,6 +109,23 @@ jobs:
         shell: bash
         run: pnpm build:bootstrap
 
+      - name: Install linux packaging prerequisites
+        # WHY this linux-only step exists — do not delete it: fpm builds the
+        # pacman target (.pkg.tar.zst) by shelling out to bsdtar to generate
+        # the package's .MTREE manifest, and ubuntu-latest does not ship
+        # bsdtar (the libarchive-tools package provides it). Without this
+        # step the linux bundle dies at the pacman target with
+        # "/bin/bash failed (exit code 127)" — after AppImage/deb/rpm have
+        # already succeeded (run 38930784173, tag v3.14.3-tradrl.1). The
+        # other three targets never invoke bsdtar, so the step is skipped
+        # everywhere except the linux matrix leg.
+        if: matrix.target_os == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libarchive-tools
+
       - name: Bundle desktop installer
         # Assets were prepped and the workspace build already ran above, so
         # --skip-prepare --skip-build takes bundle.mjs straight to

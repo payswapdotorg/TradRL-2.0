@@ -14,7 +14,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: pnpm
+          # Deliberately NO `cache: pnpm` here: this job installs no
+          # dependencies — scripts/validate-tradrl-governance.mjs uses only
+          # node built-ins (node:fs, node:path) — so there is no pnpm store
+          # to cache. Re-adding `cache: pnpm` would also reintroduce the
+          # ordering defect: setup-node must resolve the pnpm executable to
+          # locate the store path, but it runs BEFORE the "Enable pnpm"
+          # (corepack enable) step below, so the job failed with "Unable to
+          # locate executable file: pnpm" (run 38930762869).
       - name: Enable pnpm
         run: corepack enable
       - name: Validate TradRL program governance
