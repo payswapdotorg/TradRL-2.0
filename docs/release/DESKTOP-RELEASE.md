@@ -114,6 +114,12 @@ Per build job, the minimal correct sequence traced from
    would otherwise repeat.
 6. Installers are uploaded as workflow artifacts.
 
+The linux job installs one extra runner prerequisite right before step 5:
+`libarchive-tools` (bsdtar). fpm's pacman target shells out to `bsdtar` to
+generate the `.MTREE` manifest inside the `.pkg.tar.zst`, and `ubuntu-latest`
+does not ship it; the other three targets never invoke bsdtar, so the
+apt-get step is skipped on every non-linux matrix leg.
+
 The publish job then stages all installers, generates `SHASUMS256.txt`,
 renders the release notes from a template, and creates the GitHub Release via
 the `gh` CLI (if the Release already exists — e.g. after a re-run — it
