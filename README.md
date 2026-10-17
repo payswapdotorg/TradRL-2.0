@@ -27,7 +27,7 @@ Quick install — Windows (PowerShell):
 irm https://raw.githubusercontent.com/payswapdotorg/tradrl-2.0/main/scripts/install-desktop.ps1 | iex
 ```
 
-Manual download: grab the asset for your platform from the [latest release](https://github.com/payswapdotorg/tradrl-2.0/releases/latest) plus `SHASUMS256.txt`, verify it (`sha256sum -c --ignore-missing SHASUMS256.txt` on Linux, `shasum -a 256 -c --ignore-missing SHASUMS256.txt` on macOS), then mount the `.dmg` and drag **ZCode** to `/Applications`, run the `.exe`, or `chmod +x` the `.AppImage`.
+Manual download: grab the asset for your platform from the [latest release](https://github.com/payswapdotorg/tradrl-2.0/releases/latest) plus `SHASUMS256.txt`, verify it (`sha256sum -c --ignore-missing SHASUMS256.txt` on Linux, `shasum -a 256 -c --ignore-missing SHASUMS256.txt` on macOS), then mount the `.dmg` and drag **ZCode** to `/Applications`, run the `.exe`, or `chmod +x` the `.AppImage`. Behind a shared IP (NAT/VPN/cloud shell/CI) and rate-limited by GitHub? Set `GITHUB_TOKEN` and re-run — see the shared-IP note in [`docs/release/DESKTOP-RELEASE.md`](docs/release/DESKTOP-RELEASE.md).
 
 > **Unsigned builds:** no code-signing certificates exist for this project yet, so macOS Gatekeeper and Windows SmartScreen will warn on first launch. On macOS, right-click the app → **Open** (or System Settings → Privacy & Security → **Open Anyway**). On Windows, choose **More info** → **Run anyway**. The full release runbook — tag law, asset matrix, checksums, cut procedure — lives in [`docs/release/DESKTOP-RELEASE.md`](docs/release/DESKTOP-RELEASE.md).
 

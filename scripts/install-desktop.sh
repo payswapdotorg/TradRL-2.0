@@ -105,8 +105,78 @@ extract_asset_urls() {
     || true
 }
 
+# --- GitHub API auth + rate-limit diagnosis (W067-R3) -------------------------
+# WHY: live E2E 2026-10-17 (TL run, linux-x64) — api.github.com answered HTTP
+# 403 with x-ratelimit-limit: 60 / x-ratelimit-remaining: 0, body "API rate
+# limit exceeded for 47.57.242.119": that machine's egress IP sits in a shared
+# VPN/NAT pool, and the unauthenticated core-API quota is 60 requests/hour per
+# IP — so any user behind corporate NAT, a VPN, a cloud shell, or a shared CI
+# runner hits the same wall. The old `curl -fsSL ... || true` swallowed that
+# body and the fallback died blaming "network error?" (the network was fine;
+# the API was rate-limited). Hence: (1) GITHUB_TOKEN / GH_TOKEN, when set and
+# non-empty, authenticates BOTH release-API lookups below — Authorization
+# header only, the token is never echoed or logged; release-asset downloads
+# (browser_download_url) and the SHASUMS fetch stay token-free (not API
+# calls). (2) a failed lookup's response body is captured (api_err_body) so a
+# rate-limit 403 dies with the actual cause and cure, not the generic guess.
+
+gh_token="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+api_err_body=""
+api_response_body=""
+
+github_api() {
+  # github_api <url> — on HTTP 2xx set api_response_body to the response
+  # body and return 0 (the success semantics of the old `curl -fsSL` call);
+  # otherwise return 1 with the response body kept in api_err_body (empty on
+  # transport-level failures) for rate-limit diagnosis. No -f: the body must
+  # survive a 403.
+  #
+  # NOTE: call DIRECTLY (never as "$(github_api ...)") — a command
+  # substitution runs this function in a subshell and would silently
+  # discard both api_* globals on exit; the body must reach the caller's
+  # shell through these variables, not stdout.
+  local resp
+  if [ -n "${gh_token}" ]; then
+    resp="$(curl -sSL -H 'Accept: application/vnd.github+json' \
+      -H "Authorization: Bearer ${gh_token}" \
+      -w '\n%{http_code}' "$1")" || resp=''
+  else
+    resp="$(curl -sSL -H 'Accept: application/vnd.github+json' \
+      -w '\n%{http_code}' "$1")" || resp=''
+  fi
+  api_err_body="${resp%$'\n'*}"
+  case "${resp##*$'\n'}" in
+    2*) api_response_body="${api_err_body}"; return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+die_if_rate_limited() {
+  # Die with the shared-IP diagnosis only when GitHub's own error body says
+  # "rate limit" (case-insensitive); any other failure returns silently and
+  # keeps its original handling (fall through to the list scan / generic
+  # die). The token never appears in any message.
+  if printf '%s' "${api_err_body}" | grep -qi 'rate limit'; then
+    die "GitHub API rate limit exceeded — this IP's unauthenticated quota
+(60 requests/hour) is exhausted; typical behind shared NAT/VPN/cloud-shell
+or CI egress IPs. Wait for the hourly window to reset, or re-run with
+GITHUB_TOKEN (or GH_TOKEN) set to authenticate and lift the limit — see
+https://docs.github.com/rest/overview/resources-in-the-rest-api"
+  fi
+  return 0
+}
+
 say "Looking up the latest ${APP_NAME} desktop release ..."
-release_json="$(curl -fsSL -H 'Accept: application/vnd.github+json' "${API_BASE}/releases/latest" 2>/dev/null || true)"
+if github_api "${API_BASE}/releases/latest"; then
+  release_json="${api_response_body}"
+else
+  # A failure here is expected flow when only pre-releases are published
+  # (404 — the fallback below scans the release list) — but a rate-limit 403
+  # dooms BOTH lookups, so diagnose it now instead of falling through to a
+  # second doomed request and a misleading "network error?".
+  die_if_rate_limited
+  release_json=""
+fi
 asset_urls="$(extract_asset_urls "${release_json:-}")"
 if [ -z "${asset_urls}" ] \
   || ! printf '%s\n' "${asset_urls}" | grep -Eq -- "${asset_regex}"; then
@@ -114,10 +184,13 @@ if [ -z "${asset_urls}" ] \
   # (v<workbench>-tradrl.N) is a semver pre-release — or the latest release
   # may not carry this platform's asset yet. Fall back to scanning the
   # newest releases for one that actually has a matching installer.
-  release_json="$(curl -fsSL -H 'Accept: application/vnd.github+json' \
-    "${API_BASE}/releases?per_page=20" \
-    || die "could not query GitHub for releases (network error?).
-Check ${REPO_URL}/releases and download manually.")"
+  if github_api "${API_BASE}/releases?per_page=20"; then
+    release_json="${api_response_body}"
+  else
+    die_if_rate_limited
+    die "could not query GitHub for releases (network error?).
+Check ${REPO_URL}/releases and download manually."
+  fi
   asset_urls="$(extract_asset_urls "${release_json}")"
 fi
 

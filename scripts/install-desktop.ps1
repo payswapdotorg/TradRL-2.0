@@ -25,10 +25,69 @@ $Repo = 'payswapdotorg/tradrl-2.0'
 $RepoUrl = "https://github.com/$Repo"
 $ApiBase = "https://api.github.com/repos/$Repo"
 $RequestHeaders = @{ 'User-Agent' = 'tradrl-install-desktop' }
+# W067-R3 — WHY (live evidence 2026-10-17): api.github.com answered HTTP 403
+# with x-ratelimit-limit: 60 / x-ratelimit-remaining: 0, body "API rate limit
+# exceeded for 47.57.242.119" — that machine's egress IP sits in a shared
+# VPN/NAT pool, and unauthenticated core-API quota is 60 requests/hour per IP.
+# When GITHUB_TOKEN / GH_TOKEN is set and non-empty, authenticate BOTH release
+# API lookups below (the /releases/latest call and the /releases?per_page=20
+# fallback both use -Headers $RequestHeaders): Authorization header only —
+# the token is never echoed or logged. The Invoke-WebRequest download calls
+# (browser_download_url) deliberately do NOT use these headers — they are
+# release-asset URLs, not API calls, and must stay token-free.
+$ghToken = $env:GITHUB_TOKEN
+if (-not $ghToken) { $ghToken = $env:GH_TOKEN }
+if ($ghToken) { $RequestHeaders['Authorization'] = "Bearer $ghToken" }
 
 function Write-Info { param($Message) Write-Host "==> $Message" -ForegroundColor Cyan }
 function Write-Warn { param($Message) Write-Host "warning: $Message" -ForegroundColor Yellow }
 function Die { param($Message) Write-Host "error: $Message" -ForegroundColor Red; exit 1 }
+
+function Get-ApiErrorBody {
+  # W067-R3 helper: best-effort extraction of the HTTP error body from a
+  # caught Invoke-RestMethod exception, across the PowerShell 5.1
+  # (WebException) and PowerShell 7+ (HttpResponseException) shapes.
+  # '' when unavailable (the diagnosis then simply stays generic).
+  param($ErrorRecord)
+  try {
+    if ($ErrorRecord.ErrorDetails -and $ErrorRecord.ErrorDetails.Message) {
+      return $ErrorRecord.ErrorDetails.Message
+    }
+    $response = $ErrorRecord.Exception.Response
+    if ($response) {
+      $stream = $null
+      try { $stream = $response.GetResponseStream() } catch { }
+      if ($stream) {
+        $reader = New-Object System.IO.StreamReader($stream)
+        return $reader.ReadToEnd()
+      }
+    }
+  } catch { }
+  return ''
+}
+
+function Die-IfRateLimited {
+  # W067-R3: when the failed API response is a rate-limit 403 — GitHub's
+  # answer to an exhausted unauthenticated per-IP quota (60/hour; live
+  # evidence 2026-10-17: "API rate limit exceeded for 47.57.242.119" with
+  # x-ratelimit-remaining: 0 on a shared VPN/NAT egress IP) — die with the
+  # actual cause and cure instead of the generic "network error?" guess.
+  # Inspects both the status code and the body; the body is authoritative
+  # (-match is case-insensitive), status 0 means "could not extract".
+  # Any other failure returns silently and keeps its original handling.
+  # The token never appears in any message.
+  param($ErrorRecord)
+  $body = Get-ApiErrorBody $ErrorRecord
+  $status = 0
+  try {
+    if ($ErrorRecord.Exception.Response) {
+      $status = [int]$ErrorRecord.Exception.Response.StatusCode
+    }
+  } catch { }
+  if ($body -match 'rate limit' -and ($status -eq 0 -or $status -eq 403 -or $status -eq 429)) {
+    Die "GitHub API rate limit exceeded - this IP's unauthenticated quota (60 requests/hour) is exhausted; typical behind shared NAT/VPN/cloud-shell or CI egress IPs. Wait for the hourly window to reset, or re-run with GITHUB_TOKEN (or GH_TOKEN) set to authenticate and lift the limit - see https://docs.github.com/rest/overview/resources-in-the-rest-api."
+  }
+}
 
 # Windows PowerShell 5.1 can default to TLS 1.0/1.1; GitHub requires TLS 1.2+.
 # (PowerShell 7+ ignores this setting safely.)
@@ -61,6 +120,11 @@ $release = $null
 try {
   $release = Invoke-RestMethod -Uri "$ApiBase/releases/latest" -Headers $RequestHeaders
 } catch {
+  # 404 is expected flow here (only pre-releases published — the fallback
+  # below scans the release list); a rate-limit 403 dooms BOTH lookups, so
+  # die with the specific diagnosis now instead of letting the fallback
+  # re-die with the misleading "network error?".
+  Die-IfRateLimited $_
   $release = $null
 }
 if (-not (Find-InstallerAsset $release)) {
@@ -70,6 +134,7 @@ if (-not (Find-InstallerAsset $release)) {
   try {
     $releases = Invoke-RestMethod -Uri "$ApiBase/releases?per_page=20" -Headers $RequestHeaders
   } catch {
+    Die-IfRateLimited $_
     Die "could not query GitHub for releases (network error?). Check $RepoUrl/releases and download manually."
   }
   $release = $releases | Where-Object { Find-InstallerAsset $_ } | Select-Object -First 1

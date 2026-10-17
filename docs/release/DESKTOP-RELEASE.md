@@ -236,3 +236,19 @@ the signing seam — not in this runbook's tag law.
 - `scripts/install-desktop.ps1` — Windows (PowerShell 5.1+). Same flow for the
   NSIS installer; supports silent install via `ZCODE_INSTALL_DESKTOP_SILENT=1`
   (passes `/S` to NSIS) and discloses the SmartScreen bypass.
+
+### Shared-IP / rate-limited environments (W067-R3)
+
+The one-liner installers query `api.github.com` **unauthenticated** by
+default, and GitHub's unauthenticated core-API quota is only 60 requests per
+hour **per egress IP**. Behind a shared NAT, corporate VPN, cloud shell, or
+CI runner pool that quota is routinely exhausted by other tenants — live
+evidence, 2026-10-17: HTTP 403 with `x-ratelimit-limit: 60`,
+`x-ratelimit-remaining: 0` (`API rate limit exceeded for 47.57.242.119`) on
+a VPN pool IP, which the installer used to misreport as a "network error".
+Set `GITHUB_TOKEN` (or `GH_TOKEN`) — any read-only token (fine-grained
+public-repo read-only, or a classic token with `read:public`) — before
+running the installer to authenticate its two release lookups and lift the
+limit; the token is sent as an `Authorization` header only and is never
+logged. On a rate-limit 403 the installers now die naming this cure (see
+<https://docs.github.com/rest/overview/resources-in-the-rest-api>).
